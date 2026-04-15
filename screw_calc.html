@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JMS Screw Conveyor Design Calculator</title>
+<style>
+:root {
+  --navy: #1a2744;
+  --navy-light: #2c3e6b;
+  --pass-bg: #e8f5e9;
+  --pass-text: #2e7d32;
+  --fail-bg: #ffebee;
+  --fail-text: #c62828;
+  --border: #dee2e6;
+  --label: #495057;
+}
+* { box-sizing: border-box; }
+body { font-family: system-ui, sans-serif; font-size: 13px; margin: 0; }
+.app { display: flex; height: 100vh; }
+.form-panel { width: 38%; min-width: 320px; overflow-y: auto; padding: 12px; border-right: 2px solid var(--navy); background: #f8f9fa; }
+.output-panel { flex: 1; overflow-y: auto; padding: 16px; }
+.section-title { background: var(--navy); color: white; padding: 6px 10px; font-weight: 600; margin: 12px 0 6px; font-size: 12px; letter-spacing: 0.5px; }
+table { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 12px; }
+th { background: var(--navy); color: white; padding: 5px 8px; text-align: left; }
+td { padding: 4px 8px; border-bottom: 1px solid var(--border); }
+tr:nth-child(even) td { background: #f8f9fa; }
+.pass { background: var(--pass-bg) !important; color: var(--pass-text); font-weight: 600; }
+.fail { background: var(--fail-bg) !important; color: var(--fail-text); font-weight: 600; }
+.na { color: #888; font-style: italic; }
+.project-header { background: var(--navy); color: white; padding: 10px 14px; margin-bottom: 12px; }
+.project-header h2 { margin: 0; font-size: 15px; }
+.project-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 20px; font-size: 11px; margin-top: 6px; }
+.btn { padding: 7px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; }
+.btn-primary { background: var(--navy); color: white; }
+.btn-secondary { background: #6c757d; color: white; }
+.btn-bar { display: flex; gap: 8px; margin-bottom: 12px; }
+input[type="text"], input[type="number"], select { width: 100%; padding: 4px 6px; border: 1px solid #ced4da; border-radius: 3px; font-size: 12px; }
+input[type="checkbox"] { width: auto; margin-right: 6px; }
+.checkbox-row { display: flex; align-items: center; margin-top: 6px; }
+.checkbox-row label { margin: 0; font-size: 11px; color: var(--label); font-weight: 500; }
+label { display: block; font-size: 11px; color: var(--label); margin-bottom: 2px; margin-top: 6px; font-weight: 500; }
+details summary { cursor: pointer; padding: 6px 8px; background: #e9ecef; border-radius: 3px; font-weight: 600; font-size: 12px; margin-bottom: 4px; list-style: none; }
+details summary::-webkit-details-marker { display: none; }
+details summary::before { content: "▶ "; font-size: 10px; }
+details[open] summary::before { content: "▼ "; font-size: 10px; }
+details[open] summary { background: var(--navy-light); color: white; }
+details { margin-bottom: 6px; }
+.form-panel h1 { font-size: 14px; color: var(--navy); margin: 0 0 10px; font-weight: 700; border-bottom: 2px solid var(--navy); padding-bottom: 6px; }
+.footer-bar { background: var(--navy); color: white; padding: 6px 14px; font-size: 11px; font-weight: 600; text-align: center; margin-top: 12px; letter-spacing: 0.5px; }
+.warn { color: #856404; font-size: 11px; }
+@media print {
+  .form-panel, .btn-bar { display: none !important; }
+  .output-panel { width: 100%; padding: 8px; overflow: visible; }
+  .app { display: block; height: auto; }
+  body { font-size: 11px; }
+  table { page-break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ===== LEFT PANEL: INPUT FORM ===== -->
+<div class="form-panel">
+  <h1>JMS Screw Conveyor Design</h1>
+  <div class="btn-bar">
+    <button class="btn btn-primary" onclick="window.print()">Print / Save as PDF</button>
+    <button class="btn btn-secondary" onclick="resetToDefaults()">Reset to Defaults</button>
+  </div>
+
+  <!-- 1. Project Info -->
+  <details open>
+    <summary>1. Project Info</summary>
+    <label>Project No.<input type="text" id="project_no"></label>
+    <label>Location<input type="text" id="location"></label>
+    <label>Customer<input type="text" id="customer"></label>
+    <label>Engineer<input type="text" id="engineer"></label>
+    <label>Description<input type="text" id="description"></label>
+    <label>By<input type="text" id="by"></label>
+    <label>Date<input type="text" id="date"></label>
+    <label>Revision<input type="text" id="revision"></label>
+  </details>
+
+  <!-- 2. Conveyor Parameters -->
+  <details open>
+    <summary>2. Conveyor Parameters</summary>
+    <label>Length (ft)<input type="number" id="length_ft" step="0.5" min="1"></label>
+    <label>Incline (deg)<input type="number" id="incline_deg" step="0.5" min="0" max="45"></label>
+    <label>Flow Direction
+      <select id="flow_direction">
+        <option>Push</option><option>Pull</option><option>Reversing</option>
+      </select>
+    </label>
+    <label>Service Duty
+      <select id="service_duty">
+        <option>Light</option><option>Standard</option><option>Heavy</option>
+      </select>
+    </label>
+    <div class="checkbox-row">
+      <input type="checkbox" id="live_bottom">
+      <label for="live_bottom">Live Bottom</label>
+    </div>
+    <label>Area Classification
+      <select id="area_classification">
+        <option>NO</option><option>Class I Div 1</option><option>Class I Div 2</option>
+        <option>Class II Div 1</option><option>Class II Div 2</option><option>Zone 1</option><option>Zone 2</option>
+      </select>
+    </label>
+  </details>
+
+  <!-- 3. Material Properties -->
+  <details open>
+    <summary>3. Material Properties</summary>
+    <label>Material
+      <select id="material">
+        <option>Wet Sludge</option>
+        <option>Wet Sludge + Lime</option>
+        <option>Partially Dried Sludge/Paste</option>
+        <option>Dry Biosolids</option>
+        <option>Raw Screenings</option>
+        <option>Compacted Screenings</option>
+        <option>Submerged Grit</option>
+        <option>Dewatered Grit</option>
+        <option>Lime Pebble</option>
+        <option>Lime Powder/Hydrated</option>
+        <option>Other</option>
+      </select>
+    </label>
+    <label>Density (lb/ft³)<input type="number" id="density_lb_ft3" step="0.5" min="1"></label>
+    <label>Solids (%)<input type="number" id="solids_pct" step="0.5" min="0" max="100"></label>
+    <label>Size Class
+      <select id="size_class">
+        <option>Fine</option><option>Medium</option><option>Coarse</option><option>Lumpy</option>
+      </select>
+    </label>
+    <label>Flowability
+      <select id="flowability">
+        <option>Free Flowing</option><option>Average</option><option>Sluggish</option>
+      </select>
+    </label>
+    <label>Abrasiveness
+      <select id="abrasiveness">
+        <option>Mild</option><option>Moderate</option><option>Extreme</option>
+      </select>
+    </label>
+    <label>Temp Min (°F)<input type="number" id="temp_min_f" step="1"></label>
+    <label>Temp Max (°F)<input type="number" id="temp_max_f" step="1"></label>
+  </details>
+
+  <!-- 4. Screw Design -->
+  <details open>
+    <summary>4. Screw Design</summary>
+    <label>Screw Diameter (in)
+      <select id="screw_dia_in">
+        <option value="6">6"</option>
+        <option value="9">9"</option>
+        <option value="10">10"</option>
+        <option value="12">12"</option>
+        <option value="14">14"</option>
+        <option value="16">16"</option>
+        <option value="18">18"</option>
+        <option value="20">20"</option>
+        <option value="24">24"</option>
+      </select>
+    </label>
+    <label>Screw Type
+      <select id="screw_type">
+        <option>Shafted</option>
+        <option>Single Shaftless</option>
+        <option>Dual Shaftless</option>
+      </select>
+    </label>
+    <label>Pitch Type
+      <select id="pitch_type">
+        <option>Full</option><option>Short</option><option>Half</option><option>Long</option>
+      </select>
+    </label>
+    <label>Flight Type
+      <select id="flight_type">
+        <option>Shafted</option>
+        <option>Single Shaftless</option>
+        <option>Dual Shaftless</option>
+        <option>Cut</option>
+        <option>Cut &amp; Folded</option>
+        <option>Ribbon</option>
+        <option>Paddle 1x</option>
+        <option>Paddle 2x</option>
+        <option>Paddle 3x</option>
+        <option>Paddle 4x</option>
+      </select>
+    </label>
+    <label>Trough Fill (%)<input type="number" id="trough_fill_pct" step="1" min="1" max="100"></label>
+    <label>Design Capacity (ft³/hr)<input type="number" id="design_capacity_ft3hr" step="10" min="1"></label>
+  </details>
+
+  <!-- 5. Drive -->
+  <details>
+    <summary>5. Drive</summary>
+    <label>Drive Arrangement
+      <select id="drive_arrangement">
+        <option>Screw Conveyor Drive</option>
+        <option>Direct Coupled In-line</option>
+        <option>Shaft Mount Drive</option>
+        <option>Gearbox with Chain &amp; Sprocket</option>
+        <option>Gearbox with Belt &amp; Sheave</option>
+        <option>Open Spur Gear</option>
+      </select>
+    </label>
+    <label>Gearbox Model<input type="text" id="gearbox_model"></label>
+    <label>Motor HP<input type="number" id="motor_hp" step="0.5" min="0.5"></label>
+    <label>Motor RPM<input type="number" id="motor_rpm" step="1" min="100"></label>
+    <label>Gearbox Ratio<input type="number" id="gearbox_ratio" step="0.01" min="1"></label>
+    <label>Gearbox Service Factor<input type="number" id="gearbox_sf" step="0.05" min="1"></label>
+  </details>
+
+  <!-- 6. Shaft & Coupling -->
+  <details>
+    <summary>6. Shaft &amp; Coupling</summary>
+    <label>Shaft Diameter (in)<input type="number" id="shaft_dia_in" step="0.125" min="0.5"></label>
+    <label>Shaft Material
+      <select id="shaft_material">
+        <option>1018 CS</option>
+        <option>1045 CS</option>
+        <option>4140 Alloy</option>
+        <option>4140 Hardened</option>
+        <option>304 SS</option>
+        <option>316 SS</option>
+        <option>17-4PH -A</option>
+        <option>17-4PH -H900</option>
+        <option>17-4PH -H1150</option>
+      </select>
+    </label>
+    <label>Pipe Size
+      <select id="pipe_size">
+        <option>2" SCH 40</option>
+        <option>2" SCH 80</option>
+        <option>2.5" SCH 40</option>
+        <option>2.5" SCH 80</option>
+        <option>3" SCH 40</option>
+        <option>3" SCH 80</option>
+        <option>3.5" SCH 40</option>
+        <option>3.5" SCH 80</option>
+        <option>4" SCH 40</option>
+        <option>4" SCH 80</option>
+        <option>5" SCH 40</option>
+        <option>5" SCH 80</option>
+        <option>6" SCH 40</option>
+        <option>6" SCH 80</option>
+        <option>8" SCH 40</option>
+        <option>8" SCH 80</option>
+        <option>10" SCH 40</option>
+        <option>12" SCH 40</option>
+        <option>12" SCH 80</option>
+      </select>
+    </label>
+    <label>Pipe Material<input type="text" id="pipe_material"></label>
+    <label>Coupling Type
+      <select id="coupling_type">
+        <option>Cross-Bolt Coupling</option>
+        <option>Flanged Coupling</option>
+        <option>Welded Stub</option>
+        <option>Keyed</option>
+      </select>
+    </label>
+    <label>Bolt Size (in)<input type="number" id="bolt_size_in" step="0.0625" min="0.25"></label>
+    <label>Bolt Material
+      <select id="bolt_material">
+        <option>A325</option>
+        <option>A307</option>
+        <option>304 SS</option>
+        <option>316 SS</option>
+      </select>
+    </label>
+    <label>Number of Bolts<input type="number" id="num_bolts" step="1" min="1"></label>
+    <label>Bolt Pad (in)<input type="number" id="bolt_pad_in" step="0.0625" min="0"></label>
+  </details>
+
+  <!-- 7. Component Selections -->
+  <details>
+    <summary>7. Component Selections</summary>
+    <label>Flight Material<input type="text" id="flight_material"></label>
+    <label>Trough Type
+      <select id="trough_type">
+        <option value="U">U-Trough</option>
+        <option value="Tube">Tube</option>
+        <option value="Flared">Flared</option>
+        <option value="Other">Other</option>
+      </select>
+    </label>
+    <label>Trough Material<input type="text" id="trough_material"></label>
+    <label>Trough Gauge
+      <select id="trough_gauge">
+        <option>16 ga</option><option>14 ga</option><option>12 ga</option>
+        <option>10 ga</option><option>3/16</option><option>1/4</option>
+        <option>3/8</option><option>1/8</option>
+      </select>
+    </label>
+    <label>Cover Type
+      <select id="cover_type">
+        <option>Flat</option><option>Curved</option><option>Hinged</option>
+        <option>Bolted</option><option>None</option>
+      </select>
+    </label>
+    <label>Cover Material<input type="text" id="cover_material"></label>
+    <label>Cover Gauge
+      <select id="cover_gauge">
+        <option>16 ga</option><option>14 ga</option><option>12 ga</option>
+        <option>10 ga</option><option>3/16</option><option>1/4</option>
+        <option>3/8</option><option>1/8</option>
+      </select>
+    </label>
+    <div class="checkbox-row">
+      <input type="checkbox" id="liner">
+      <label for="liner">Liner</label>
+    </div>
+    <label>Liner Material<input type="text" id="liner_material"></label>
+    <label>Liner Thickness<input type="text" id="liner_thickness"></label>
+    <label>Shaft Bearing Type
+      <select id="shaft_bearing_type">
+        <option>Pillow Block Roller</option>
+        <option>Pillow Block Spherical</option>
+        <option>Ball</option>
+        <option>Flange Block</option>
+      </select>
+    </label>
+    <label>Hanger Bearing Type
+      <select id="hanger_bearing_type">
+        <option>Bronze</option>
+        <option>Bronze with Graphite</option>
+        <option>None</option>
+        <option>Ball</option>
+        <option>Babbit</option>
+        <option>Ceramic</option>
+        <option>Graphite</option>
+        <option>Hard Iron</option>
+        <option>Stellite</option>
+        <option>Plastech</option>
+        <option>Nylon</option>
+        <option>Teflon</option>
+        <option>UHMW</option>
+      </select>
+    </label>
+    <label>Tail Bearing Type
+      <select id="tail_bearing_type">
+        <option>Pillow Block Spherical</option>
+        <option>Pillow Block Roller</option>
+        <option>Ball</option>
+        <option>Flange Block</option>
+      </select>
+    </label>
+    <label>Number of Hanger Bearings<input type="number" id="num_hanger_bearings" step="1" min="0"></label>
+    <label>Drive End Seal<input type="text" id="drive_end_seal"></label>
+    <label>Tail End Seal<input type="text" id="tail_end_seal"></label>
+    <label>Inlet Type<input type="text" id="inlet_type"></label>
+    <label>Outlet Type<input type="text" id="outlet_type"></label>
+    <label>Cover Holddown<input type="text" id="cover_holddown"></label>
+    <label>Zero Speed Switch (ZSS)<input type="text" id="zss"></label>
+    <label>E-Stop<input type="text" id="estop"></label>
+    <label>GB-to-Shaft Coupling<input type="text" id="gb_to_shaft_coupling"></label>
+    <label>Trough CTE Material
+      <select id="trough_cte_material">
+        <option>Carbon Steel</option>
+        <option>Stainless Steel</option>
+      </select>
+    </label>
+  </details>
+
+</div><!-- end form-panel -->
+
+<!-- ===== RIGHT PANEL: OUTPUT ===== -->
+<div class="output-panel" id="output-panel">
+  <p style="color:#888; font-style:italic;">Loading calculations...</p>
+</div>
+
+</div><!-- end app -->
+
+<script>
+// ===========================================================================
+// LOOKUP TABLES
+// ===========================================================================
+const CF2_TABLE = {
+  "Shafted":          {CF15_: 1.00, CF30_: 1.00, CF45_: 1.00},
+  "Single Shaftless": {CF15_: 1.00, CF30_: 1.00, CF45_: 1.00},
+  "Dual Shaftless":   {CF15_: 1.00, CF30_: 1.00, CF45_: 1.00},
+  "Cut":              {CF15_: 1.95, CF30_: 1.57, CF45_: 1.43},
+  "Cut & Folded":     {CF15_: 1.00, CF30_: 3.75, CF45_: 2.54},
+  "Ribbon":           {CF15_: 1.04, CF30_: 1.37, CF45_: 1.62},
+  "Paddle 1x":        {CF15_: 1.00, CF30_: 1.00, CF45_: 1.00},
+  "Paddle 2x":        {CF15_: 1.00, CF30_: 1.00, CF45_: 1.00},
+  "Paddle 3x":        {CF15_: 1.00, CF30_: 1.00, CF45_: 1.00},
+  "Paddle 4x":        {CF15_: 1.00, CF30_: 1.00, CF45_: 1.00},
+};
+const CF3_TABLE = {0:1.00, 1:1.08, 2:1.16, 3:1.24, 4:1.32};
+const FD_TABLE = {6:18, 9:31, 10:37, 12:55, 14:78, 16:106, 18:135, 20:165, 24:235};
+const FB_TABLE = {
+  "None":1.0, "Ball":1.0, "Babbit":1.7, "Bronze":1.7,
+  "Bronze with Graphite":1.7, "Ceramic":1.7, "Graphite":1.0,
+  "Hard Iron":4.4, "Stellite":4.4, "Plastech":2.0,
+  "Nylon":2.0, "Teflon":2.0, "UHMW":2.0
+};
+const FM_TABLE = {
+  "Wet Sludge":1.5, "Wet Sludge + Lime":1.5,
+  "Partially Dried Sludge/Paste":2.0, "Dry Biosolids":2.6,
+  "Raw Screenings":2.0, "Compacted Screenings":1.5,
+  "Submerged Grit":1.5, "Dewatered Grit":2.6,
+  "Lime Pebble":2.0, "Lime Powder/Hydrated":2.0, "Other":1.5
+};
+const FF_TABLE = {
+  "Shafted":1.0, "Single Shaftless":1.0, "Dual Shaftless":1.0,
+  "Ribbon":1.0, "Cut":1.15, "Cut & Folded":1.20,
+  "Paddle 1x":1.0, "Paddle 2x":1.0, "Paddle 3x":1.0, "Paddle 4x":1.0
+};
+const FP_TABLE = {0:1.00, 1:1.29, 2:1.58, 3:1.87, 4:2.16};
+const INCLINE_SHAFTED = {0:1.00, 10:0.90, 15:0.70, 20:0.55, 25:0.42, 30:0.30, 35:0.22, 40:0.15, 45:0.10};
+const INCLINE_SHAFTLESS = {0:1.00, 10:1.00, 15:0.90, 20:0.80, 25:0.70, 30:0.60, 35:0.54, 40:0.50, 45:0.50};
+const DRIVE_EFF = {
+  "Direct Coupled In-line":0.95, "Screw Conveyor Drive":0.95,
+  "Shaft Mount Drive":0.95, "Gearbox with Chain & Sprocket":0.88,
+  "Gearbox with Belt & Sheave":0.89, "Open Spur Gear":0.86
+};
+const SCREW_GEOM = {
+  6:[6,2.375,2.067,7.5,7.00], 9:[9,2.375,2.067,9.5,7.00],
+  10:[10,2.375,2.067,12.0,7.75], 12:[12,2.875,2.469,13.0,8.50],
+  14:[14,3.500,3.068,18.0,10.50], 16:[16,4.000,3.548,20.0,12.50],
+  18:[18,4.000,3.548,21.0,14.50], 20:[20,4.000,3.548,26.0,16.50],
+  24:[24,4.500,4.026,30.0,20.50]
+};
+const PIPE_SIZES = {
+  '2" SCH 40':[2.375,2.067], '2" SCH 80':[2.375,1.939],
+  '2.5" SCH 40':[2.875,2.469], '2.5" SCH 80':[2.875,2.323],
+  '3" SCH 40':[3.500,3.068], '3" SCH 80':[3.500,2.900],
+  '3.5" SCH 40':[4.000,3.548], '3.5" SCH 80':[4.000,3.364],
+  '4" SCH 40':[4.500,4.026], '4" SCH 80':[4.500,3.826],
+  '5" SCH 40':[5.563,5.047], '5" SCH 80':[5.563,4.813],
+  '6" SCH 40':[6.625,6.065], '6" SCH 80':[6.625,5.761],
+  '8" SCH 40':[8.625,7.981], '8" SCH 80':[8.625,7.625],
+  '10" SCH 40':[10.750,10.020],
+  '12" SCH 40':[12.750,11.938], '12" SCH 80':[12.750,11.374]
+};
+const SHAFT_MATERIALS = {
+  "1018 CS":{Sy:58000,E:28e6,CTE:6.33e-6},
+  "1045 CS":{Sy:70000,E:28e6,CTE:6.33e-6},
+  "4140 Alloy":{Sy:70000,E:28e6,CTE:6.33e-6},
+  "4140 Hardened":{Sy:125000,E:28e6,CTE:6.33e-6},
+  "304 SS":{Sy:30000,E:29e6,CTE:9.6e-6},
+  "316 SS":{Sy:30000,E:29e6,CTE:9.6e-6},
+  "17-4PH -A":{Sy:115000,E:28.5e6,CTE:6.0e-6},
+  "17-4PH -H900":{Sy:185000,E:28.5e6,CTE:6.0e-6},
+  "17-4PH -H1150":{Sy:130000,E:28.5e6,CTE:6.0e-6}
+};
+const BOLT_MATERIALS = {
+  "A307":{Sy:36000,Ss:6200}, "A325":{Sy:92000,Ss:15500},
+  "304 SS":{Sy:30000,Ss:6000}, "316 SS":{Sy:30000,Ss:6000}
+};
+const FLIGHT_YIELD = {
+  "Carbon Steel":58000, "304 SS":30000, "316 SS":30000,
+  "Alloy 8620":80000, "T1":100000, "AR400":40000
+};
+const PITCH_MULT = {"Full":1.0, "Short":2/3, "Half":0.5, "Long":1.5};
+const CTE_TROUGH = {"Carbon Steel":6.33e-6, "Stainless Steel":9.6e-6};
+
+// ===========================================================================
+// DEFAULTS
+// ===========================================================================
+const DEFAULTS = {
+  project_no: "EXAMPLE-001",
+  location: "Wastewater Treatment Plant",
+  customer: "Example Municipality",
+  engineer: "JMS Engineering",
+  description: "Belt Press Discharge - Dewatered Sludge Conveyor",
+  by: "JMS",
+  date: "2025-04-15",
+  revision: "0",
+  length_ft: 25,
+  incline_deg: 0,
+  flow_direction: "Push",
+  service_duty: "Standard",
+  live_bottom: false,
+  area_classification: "NO",
+  material: "Wet Sludge",
+  density_lb_ft3: 62,
+  solids_pct: 18,
+  size_class: "Fine",
+  flowability: "Average",
+  abrasiveness: "Mild",
+  temp_min_f: 50,
+  temp_max_f: 100,
+  screw_dia_in: 14,
+  screw_type: "Shafted",
+  pitch_type: "Full",
+  flight_type: "Shafted",
+  trough_fill_pct: 30,
+  design_capacity_ft3hr: 800,
+  drive_arrangement: "Screw Conveyor Drive",
+  gearbox_model: "F87",
+  motor_hp: 10,
+  motor_rpm: 1750,
+  gearbox_ratio: 46.12,
+  gearbox_sf: 1.5,
+  shaft_dia_in: 2.5,
+  shaft_material: "1045 CS",
+  pipe_size: '3.5" SCH 40',
+  pipe_material: "Carbon Steel",
+  coupling_type: "Cross-Bolt Coupling",
+  bolt_size_in: 0.625,
+  bolt_material: "A325",
+  num_bolts: 2,
+  bolt_pad_in: 0,
+  flight_material: "Carbon Steel",
+  trough_type: "U",
+  trough_material: "Carbon Steel",
+  trough_gauge: "12 ga",
+  cover_type: "Flat",
+  cover_material: "Carbon Steel",
+  cover_gauge: "14 ga",
+  liner: false,
+  liner_material: "",
+  liner_thickness: "",
+  shaft_bearing_type: "Pillow Block Roller",
+  hanger_bearing_type: "Bronze",
+  tail_bearing_type: "Pillow Block Spherical",
+  num_hanger_bearings: 1,
+  drive_end_seal: "Flanged Gland",
+  tail_end_seal: "Flanged Gland",
+  inlet_type: "Square Flange",
+  outlet_type: "Square Flange",
+  cover_holddown: "Bolted",
+  zss: "Magnetic Zero Speed Switch",
+  estop: "E-Stop Pull Cord",
+  gb_to_shaft_coupling: "Jaw Coupling",
+  trough_cte_material: "Carbon Steel"
+};
+
+// ===========================================================================
+// HELPERS
+// ===========================================================================
+function fmt(v, digits) {
+  if (v === null || v === undefined || isNaN(v) || !isFinite(v)) return "—";
+  return Number(v).toFixed(digits !== undefined ? digits : 4);
+}
+
+function interpIncline(angle, table) {
+  const keys = Object.keys(table).map(Number).sort((a,b)=>a-b);
+  if (angle <= keys[0]) return table[keys[0]];
+  if (angle >= keys[keys.length-1]) return table[keys[keys.length-1]];
+  for (let i=0; i<keys.length-1; i++) {
+    if (keys[i] <= angle && angle <= keys[i+1]) {
+      const frac = (angle - keys[i]) / (keys[i+1] - keys[i]);
+      return table[keys[i]] + frac * (table[keys[i+1]] - table[keys[i]]);
+    }
+  }
+  return 1.0;
+}
+
+function overloadFactor(hp) {
+  if (hp <= 0) return 1.0;
+  return hp < 5.2 ? Math.log(hp) * -0.6115 + 2.024 : 1.0;
+}
+
+function cf2Key(fill) {
+  if (fill < 16) return "CF15_";
+  if (fill < 31) return "CF30_";
+  return "CF45_";
+}
+
+function paddleCount(flightType) {
+  const m = {"Paddle 1x":1,"Paddle 2x":2,"Paddle 3x":3,"Paddle 4x":4};
+  return m[flightType] || 0;
+}
+
+function getVal(id) {
+  const el = document.getElementById(id);
+  if (!el) return null;
+  if (el.type === "checkbox") return el.checked;
+  const v = el.value;
+  if (el.type === "number") return parseFloat(v) || 0;
+  return v;
+}
+
+function safeDivide(num, den) {
+  if (!den || isNaN(den) || den === 0) return null;
+  return num / den;
+}
+
+// ===========================================================================
+// MAIN CALCULATION
+// ===========================================================================
+function calculate() {
+  // --- Read inputs ---
+  const proj_no    = getVal("project_no");
+  const location   = getVal("location");
+  const customer   = getVal("customer");
+  const engineer   = getVal("engineer");
+  const description= getVal("description");
+  const by         = getVal("by");
+  const date       = getVal("date");
+  const revision   = getVal("revision");
+
+  const length_ft  = getVal("length_ft");
+  const incline_deg= getVal("incline_deg");
+  const flow_dir   = getVal("flow_direction");
+  const svc_duty   = getVal("service_duty");
+  const live_bottom= getVal("live_bottom");
+  const area_class = getVal("area_classification");
+
+  const material   = getVal("material");
+  const density    = getVal("density_lb_ft3");
+  const solids_pct = getVal("solids_pct");
+  const size_class = getVal("size_class");
+  const flowability= getVal("flowability");
+  const abrasiveness=getVal("abrasiveness");
+  const temp_min   = getVal("temp_min_f");
+  const temp_max   = getVal("temp_max_f");
+
+  const screw_dia  = parseInt(getVal("screw_dia_in"));
+  const screw_type = getVal("screw_type");
+  const pitch_type = getVal("pitch_type");
+  const flight_type= getVal("flight_type");
+  const fill_pct   = getVal("trough_fill_pct");
+  const design_cap = getVal("design_capacity_ft3hr");
+
+  const drive_arr  = getVal("drive_arrangement");
+  const gb_model   = getVal("gearbox_model");
+  const motor_hp   = getVal("motor_hp");
+  const motor_rpm  = getVal("motor_rpm");
+  const gb_ratio   = getVal("gearbox_ratio");
+  const gb_sf      = getVal("gearbox_sf");
+
+  const shaft_dia  = getVal("shaft_dia_in");
+  const shaft_mat  = getVal("shaft_material");
+  const pipe_size  = getVal("pipe_size");
+  const pipe_mat   = getVal("pipe_material");
+  const coupling   = getVal("coupling_type");
+  const bolt_size  = getVal("bolt_size_in");
+  const bolt_mat   = getVal("bolt_material");
+  const num_bolts  = getVal("num_bolts");
+  const bolt_pad   = getVal("bolt_pad_in");
+
+  const flight_mat = getVal("flight_material");
+  const trough_type= getVal("trough_type");
+  const trough_mat = getVal("trough_material");
+  const trough_ga  = getVal("trough_gauge");
+  const cover_type = getVal("cover_type");
+  const cover_mat  = getVal("cover_material");
+  const cover_ga   = getVal("cover_gauge");
+  const liner      = getVal("liner");
+  const liner_mat  = getVal("liner_material");
+  const liner_thk  = getVal("liner_thickness");
+  const shaft_brg  = getVal("shaft_bearing_type");
+  const hanger_brg = getVal("hanger_bearing_type");
+  const tail_brg   = getVal("tail_bearing_type");
+  const num_hanger = getVal("num_hanger_bearings");
+  const de_seal    = getVal("drive_end_seal");
+  const te_seal    = getVal("tail_end_seal");
+  const inlet_type = getVal("inlet_type");
+  const outlet_type= getVal("outlet_type");
+  const holddown   = getVal("cover_holddown");
+  const zss        = getVal("zss");
+  const estop      = getVal("estop");
+  const gb_coupling= getVal("gb_to_shaft_coupling");
+  const trough_cte_mat = getVal("trough_cte_material");
+
+  // --- Geometry ---
+  const geom = SCREW_GEOM[screw_dia];
+  const Ds = geom[0];
+  const isShaftless = screw_type.includes("Shaftless");
+
+  let pipe_OD = 0, pipe_ID = 0, Dp = 0;
+  if (!isShaftless) {
+    const pipeData = PIPE_SIZES[pipe_size];
+    if (pipeData) { pipe_OD = pipeData[0]; pipe_ID = pipeData[1]; }
+    else { pipe_OD = geom[1]; pipe_ID = geom[2]; }
+    Dp = pipe_ID;
+  }
+
+  const pm = PITCH_MULT[pitch_type] || 1.0;
+  const P = Ds * pm;
+  const weight_per_ft = geom[3];
+
+  // --- Capacity factors ---
+  const CF1 = pm;
+  const key = cf2Key(fill_pct);
+  const CF2 = (CF2_TABLE[flight_type] || {})[key] || 1.0;
+  const paddles = paddleCount(flight_type);
+  const CF3 = CF3_TABLE[paddles] || 1.0;
+  const C1 = isShaftless ? 1.1 : 1.0;
+  const Ri = interpIncline(incline_deg, isShaftless ? INCLINE_SHAFTLESS : INCLINE_SHAFTED);
+  const K = fill_pct;
+
+  const Cr_per_N = (0.7854 * (Ds*Ds - Dp*Dp) * (K/100) * P * 60 * C1 * Ri) / 1728;
+  const Ceq = design_cap * CF2 * CF3;
+  const N = Cr_per_N > 0 ? Ceq / Cr_per_N : 0;
+  const CF2CF3 = CF2 * CF3;
+  const C_design = (CF2CF3 > 0 && Cr_per_N > 0) ? N * Cr_per_N / CF2CF3 : 0;
+
+  const K_max = Math.min(K * 1.5, 100);
+  const Cr_per_N_max = (0.7854 * (Ds*Ds - Dp*Dp) * (K_max/100) * P * 60 * C1 * Ri) / 1728;
+  const C_max = CF2CF3 > 0 ? N * Cr_per_N_max / CF2CF3 : 0;
+
+  // --- Power ---
+  const Fd = FD_TABLE[screw_dia] || 55;
+  const Fb = FB_TABLE[hanger_brg] !== undefined ? FB_TABLE[hanger_brg] : 1.0;
+  const Fm = FM_TABLE[material] || 1.5;
+  const Ff = FF_TABLE[flight_type] !== undefined ? FF_TABLE[flight_type] : 1.0;
+  const Fp = FP_TABLE[paddles] || 1.0;
+  const e  = DRIVE_EFF[drive_arr] || 0.95;
+  const L  = length_ft;
+
+  const HPf = (L * N * Fd * Fb) / 1e6;
+  const HPm = (Ceq * L * density * Fm * Ff * Fp) / 1e6;
+  const Ceq_max = C_max * CF2 * CF3;
+  const HPm_max = (Ceq_max * L * density * Fm * Ff * Fp) / 1e6;
+  const Lh = L * Math.sin(incline_deg * Math.PI / 180);
+  const HPl = 1.3 * ((C_design * density / 60) * Lh) / 33000;
+  const HPl_max = 1.3 * ((C_max * density / 60) * Lh) / 33000;
+
+  const HPt_sum = HPf + HPm + HPl;
+  const Fo = overloadFactor(HPt_sum);
+  const HPt_sum_max = HPf + HPm_max + HPl_max;
+  const FoMax = overloadFactor(HPt_sum_max);
+
+  const HPt  = e > 0 ? (HPt_sum * Fo) / e : null;
+  const HPtm = e > 0 ? (HPt_sum_max * FoMax) / e : null;
+
+  // --- Drive / Torque ---
+  const gb_rpm = gb_ratio > 0 ? motor_rpm / gb_ratio : motor_rpm;
+  const Tm  = gb_rpm > 0 ? (63025 * motor_hp) / gb_rpm : null;
+  const Tmf = gb_rpm > 0 ? 63025 * (gb_sf * motor_hp) / gb_rpm : null;
+
+  // --- Torsional (shafted only) ---
+  let tors = null;
+  if (!isShaftless && Tmf !== null) {
+    const bh = bolt_size + 1/32;
+    const Ab = Math.PI * Math.pow(bolt_size/2, 2);
+    const Zs = (Math.PI * Math.pow(shaft_dia,3) / 16) - ((bh * shaft_dia*shaft_dia / 6) + (bh*bh*bh / 6));
+    const Zp = pipe_OD > 0 ? Math.PI * (Math.pow(pipe_OD,4) - Math.pow(pipe_ID,4)) / (16 * pipe_OD) : 0;
+    const r_load = shaft_dia/2 + (pipe_OD - shaft_dia)/4;
+    const Ap = (pipe_OD - shaft_dia) * bolt_size;
+
+    const shaftProps = SHAFT_MATERIALS[shaft_mat] || {Sy:70000,E:28e6,CTE:6.33e-6};
+    const sigma_shaft_allow = shaftProps.Sy * 0.30;
+    const sigma_shaft = Zs > 0 ? Tmf / Zs : null;
+
+    const sigma_pipe_allow = 6700;
+    const sigma_pipe = Zp > 0 ? Tmf / Zp : null;
+
+    const boltProps = BOLT_MATERIALS[bolt_mat] || {Ss:6200};
+    const sigma_bolt_allow = boltProps.Ss;
+    const nb = num_bolts > 0 ? num_bolts : 1;
+    const denom_bolt = (shaft_dia/2) * Ab * 2 * nb;
+    const sigma_bolt = denom_bolt > 0 ? Tmf / denom_bolt : null;
+
+    const sigma_bearing_allow = 6000;
+    const denom_bearing = nb * Ap * r_load;
+    const sigma_bearing = denom_bearing > 0 ? Tmf / denom_bearing : null;
+
+    tors = {
+      Ab, Zs, Zp, r_load, Ap,
+      sigma_shaft, sigma_shaft_allow,
+      shaft_pass: sigma_shaft !== null ? sigma_shaft <= sigma_shaft_allow : false,
+      sigma_pipe, sigma_pipe_allow,
+      pipe_pass: sigma_pipe !== null ? sigma_pipe <= sigma_pipe_allow : false,
+      sigma_bolt, sigma_bolt_allow,
+      bolt_pass: sigma_bolt !== null ? sigma_bolt <= sigma_bolt_allow : false,
+      sigma_bearing, sigma_bearing_allow,
+      bearing_pass: sigma_bearing !== null ? sigma_bearing <= sigma_bearing_allow : false
+    };
+  }
+
+  // --- Deflection & Thermal ---
+  const total_len_in = L * 12;
+  const Ls = total_len_in / (num_hanger + 1);
+  const Ws = L * weight_per_ft;
+
+  let delta = null, theta = null, Is = null;
+  if (!isShaftless && pipe_OD > 0 && pipe_ID > 0) {
+    Is = Math.PI * (Math.pow(pipe_OD,4) - Math.pow(pipe_ID,4)) / 64;
+    const shaftProps = SHAFT_MATERIALS[shaft_mat] || {E:28e6};
+    const E_shaft = shaftProps.E;
+    const w = Ws / total_len_in;
+    const denom_delta = 384 * E_shaft * Is;
+    delta = denom_delta > 0 ? (5 * w * Math.pow(Ls,4)) / denom_delta : null;
+    theta = delta !== null ? (180/Math.PI) * (3.2 * delta) / total_len_in : null;
+  }
+
+  const dT = temp_max - temp_min;
+  const shaftProps = SHAFT_MATERIALS[shaft_mat] || {CTE:6.33e-6};
+  const CTE_screw = shaftProps.CTE;
+  const CTE_tr = CTE_TROUGH[trough_cte_mat] || 6.33e-6;
+  const exp_screw  = Ls * dT * CTE_screw;
+  const exp_trough = total_len_in * dT * CTE_tr;
+
+  const delta_allow   = 0.25;
+  const theta_allow   = 0.15;
+  const thermal_allow = 0.125;
+
+  // --- Shaftless spiral stress ---
+  let spiral = null;
+  if (isShaftless && Tmf !== null) {
+    const flightSy = FLIGHT_YIELD[flight_mat] || 58000;
+    const spiral_allow = flightSy * 0.30;
+    const tube_OD = Math.max(Ds * 0.05, 0.75);
+    const spiral_width = (Ds - tube_OD) / 2.0;
+    const spiral_t = Ds >= 12 ? 0.375 : 0.25;
+    const Fr = P > 0 ? Tmf / (P / 2.0) : 0;
+    const c = spiral_width > 0 ? Ds / spiral_width : 4.0;
+    const k_wahl = c > 1 ? (3*c - 1) / (3*c - 3) : 1.5;
+    const arm = spiral_width / 2.0;
+    const denom_spiral = spiral_t * spiral_width * spiral_width;
+    const stress = denom_spiral > 0 ? (Fr * 6 * arm * k_wahl) / denom_spiral : 0;
+    spiral = { stress, spiral_allow, pass: stress <= spiral_allow };
+  }
+
+  // ===========================================================================
+  // RENDER OUTPUT
+  // ===========================================================================
+  function passCell(pass, calc, allow) {
+    const cls = pass ? "pass" : "fail";
+    const lbl = pass ? "PASS" : "FAIL";
+    return `<td class="${cls}">${lbl}</td>`;
+  }
+
+  function checkRow(label, allowStr, calcStr, pass) {
+    const cls = pass ? "pass" : "fail";
+    const lbl = pass ? "PASS" : "FAIL";
+    return `<tr><td>${label}</td><td>${allowStr}</td><td>${calcStr}</td><td class="${cls}">${lbl}</td></tr>`;
+  }
+
+  let html = "";
+
+  // --- Header block ---
+  html += `<div class="project-header">
+    <h2>JMS SCREW CONVEYOR DESIGN SHEET</h2>
+    <div class="project-meta">
+      <span><strong>Project No.:</strong> ${proj_no}</span>
+      <span><strong>By:</strong> ${by}</span>
+      <span><strong>Location:</strong> ${location}</span>
+      <span><strong>Date:</strong> ${date}</span>
+      <span><strong>Customer:</strong> ${customer}</span>
+      <span><strong>Revision:</strong> ${revision}</span>
+      <span><strong>Engineer:</strong> ${engineer}</span>
+    </div>
+    <div style="font-size:11px;margin-top:4px;"><strong>Description:</strong> ${description}</div>
+  </div>`;
+
+  // --- Conveyor Info Summary ---
+  html += `<div class="section-title">CONVEYOR PARAMETERS</div>
+  <table><thead><tr><th>Parameter</th><th>Value</th><th>Parameter</th><th>Value</th></tr></thead><tbody>
+    <tr><td>Length</td><td>${fmt(length_ft,1)} ft</td><td>Incline</td><td>${fmt(incline_deg,1)} deg</td></tr>
+    <tr><td>Screw Diameter</td><td>${Ds}" (${screw_type})</td><td>Pitch</td><td>${pitch_type} (P = ${fmt(P,3)}")</td></tr>
+    <tr><td>Material</td><td>${material}</td><td>Density</td><td>${fmt(density,1)} lb/ft³</td></tr>
+    <tr><td>Fill %</td><td>${fmt(fill_pct,1)}%</td><td>Design Cap.</td><td>${fmt(design_cap,1)} ft³/hr</td></tr>
+    <tr><td>Flight Type</td><td>${flight_type}</td><td>Drive</td><td>${drive_arr}</td></tr>
+  </tbody></table>`;
+
+  // --- 1. Capacity Results ---
+  html += `<div class="section-title">1. CAPACITY RESULTS</div>
+  <table><thead><tr><th>Variable</th><th>Description</th><th>Value</th><th>Unit</th></tr></thead><tbody>
+    <tr><td>Ds</td><td>Screw Outside Diameter</td><td>${fmt(Ds,3)}</td><td>IN</td></tr>
+    <tr><td>Dp</td><td>Screw Inside Diameter (Pipe ID)</td><td>${fmt(Dp,3)}</td><td>IN</td></tr>
+    <tr><td>P</td><td>Pitch</td><td>${fmt(P,3)}</td><td>IN</td></tr>
+    <tr><td>CF1</td><td>Pitch Factor</td><td>${fmt(CF1,4)}</td><td>—</td></tr>
+    <tr><td>CF2</td><td>Flight Modification Factor</td><td>${fmt(CF2,4)}</td><td>—</td></tr>
+    <tr><td>CF3</td><td>Mixing Paddle Factor</td><td>${fmt(CF3,4)}</td><td>—</td></tr>
+    <tr><td>C1</td><td>Mass Flow Factor</td><td>${fmt(C1,2)}</td><td>—</td></tr>
+    <tr><td>Ri</td><td>Incline Factor</td><td>${fmt(Ri,4)}</td><td>—</td></tr>
+    <tr><td>Cr/N</td><td>Capacity per RPM</td><td>${fmt(Cr_per_N,4)}</td><td>ft³/hr/rpm</td></tr>
+    <tr><td>Ceq</td><td>Equivalent Design Capacity</td><td>${fmt(Ceq,2)}</td><td>ft³/hr</td></tr>
+    <tr><td>N</td><td>Required Screw Speed</td><td>${fmt(N,2)}</td><td>RPM</td></tr>
+    <tr><td>C (design)</td><td>Actual Capacity at N</td><td>${fmt(C_design,2)}</td><td>ft³/hr</td></tr>
+    <tr><td>K_max</td><td>Max Fill Percentage</td><td>${fmt(K_max,1)}</td><td>%</td></tr>
+    <tr><td>C_max</td><td>Capacity at Max Fill</td><td>${fmt(C_max,2)}</td><td>ft³/hr</td></tr>
+  </tbody></table>`;
+
+  // --- 2. Power Results ---
+  html += `<div class="section-title">2. POWER RESULTS</div>
+  <table><thead><tr><th>Variable</th><th>Description</th><th>Value</th><th>Unit</th></tr></thead><tbody>
+    <tr><td>Fd</td><td>Diameter HP Factor</td><td>${fmt(Fd,1)}</td><td>—</td></tr>
+    <tr><td>Fb</td><td>Hanger Bearing Factor</td><td>${fmt(Fb,2)}</td><td>—</td></tr>
+    <tr><td>Fm</td><td>Material Factor</td><td>${fmt(Fm,2)}</td><td>—</td></tr>
+    <tr><td>Ff</td><td>Flight Modification Factor</td><td>${fmt(Ff,2)}</td><td>—</td></tr>
+    <tr><td>Fp</td><td>Paddle Factor</td><td>${fmt(Fp,2)}</td><td>—</td></tr>
+    <tr><td>e</td><td>Drive Efficiency</td><td>${fmt(e,2)}</td><td>—</td></tr>
+    <tr><td>HPf</td><td>Frictional HP</td><td>${fmt(HPf,4)}</td><td>HP</td></tr>
+    <tr><td>HPm (design)</td><td>Material HP — Design Fill</td><td>${fmt(HPm,4)}</td><td>HP</td></tr>
+    <tr><td>HPm (max fill)</td><td>Material HP — Max Fill</td><td>${fmt(HPm_max,4)}</td><td>HP</td></tr>
+    <tr><td>Lh</td><td>Lift Height</td><td>${fmt(Lh,3)}</td><td>ft</td></tr>
+    <tr><td>HPl (design)</td><td>Lift HP — Design</td><td>${fmt(HPl,4)}</td><td>HP</td></tr>
+    <tr><td>HPl (max fill)</td><td>Lift HP — Max Fill</td><td>${fmt(HPl_max,4)}</td><td>HP</td></tr>
+    <tr><td>Fo</td><td>Overload Factor (Design)</td><td>${fmt(Fo,4)}</td><td>—</td></tr>
+    <tr><td>FoMax</td><td>Overload Factor (Max Fill)</td><td>${fmt(FoMax,4)}</td><td>—</td></tr>
+    <tr><td>HPt (design)</td><td>Total HP Required — Design</td><td><strong>${fmt(HPt,1)}</strong></td><td>HP</td></tr>
+    <tr><td>HPtm (max fill)</td><td>Total HP Required — Max Fill</td><td><strong>${fmt(HPtm,1)}</strong></td><td>HP</td></tr>
+    <tr><td>Motor HP (selected)</td><td>Selected Motor HP</td><td><strong>${fmt(motor_hp,1)}</strong></td><td>HP</td></tr>
+  </tbody></table>`;
+
+  // --- 3. Drive & Torque ---
+  html += `<div class="section-title">3. DRIVE &amp; TORQUE</div>
+  <table><thead><tr><th>Variable</th><th>Description</th><th>Value</th><th>Unit</th></tr></thead><tbody>
+    <tr><td>Motor RPM</td><td>Motor Speed</td><td>${fmt(motor_rpm,1)}</td><td>RPM</td></tr>
+    <tr><td>GB Ratio</td><td>Gearbox Ratio</td><td>${fmt(gb_ratio,2)}</td><td>:1</td></tr>
+    <tr><td>gb_rpm</td><td>Gearbox Output RPM</td><td>${fmt(gb_rpm,2)}</td><td>RPM</td></tr>
+    <tr><td>GB SF</td><td>Gearbox Service Factor</td><td>${fmt(gb_sf,2)}</td><td>—</td></tr>
+    <tr><td>Tm</td><td>Torque at Output Shaft</td><td>${fmt(Tm,1)}</td><td>in-lb</td></tr>
+    <tr><td>Tmf</td><td>Torque with Safety Factor</td><td>${fmt(Tmf,1)}</td><td>in-lb</td></tr>
+  </tbody></table>`;
+
+  // --- 4. Torsional Checks ---
+  html += `<div class="section-title">4. TORSIONAL CHECKS</div>`;
+  if (isShaftless) {
+    html += `<p class="na" style="padding:8px 0;">N/A — Shaftless screw: no shaft torsional analysis required.</p>`;
+  } else if (!tors) {
+    html += `<p class="warn" style="padding:8px 0;">Cannot compute — check torque inputs.</p>`;
+  } else {
+    html += `<table><thead><tr><th>Intermediate</th><th>Value</th><th>Unit</th></tr></thead><tbody>
+      <tr><td>Ab — Bolt Area</td><td>${fmt(tors.Ab,5)}</td><td>in²</td></tr>
+      <tr><td>Zs — Polar Section Modulus of Shaft</td><td>${fmt(tors.Zs,5)}</td><td>in³</td></tr>
+      <tr><td>Zp — Polar Section Modulus of Pipe</td><td>${fmt(tors.Zp,5)}</td><td>in³</td></tr>
+      <tr><td>r — Load Radius</td><td>${fmt(tors.r_load,4)}</td><td>in</td></tr>
+      <tr><td>Ap — Projected Bearing Area per Bolt</td><td>${fmt(tors.Ap,5)}</td><td>in²</td></tr>
+    </tbody></table>
+    <table><thead><tr><th>Check</th><th>Allowable (PSI)</th><th>Calculated (PSI)</th><th>Result</th></tr></thead><tbody>
+      ${checkRow("Shaft Torsional Stress", fmt(tors.sigma_shaft_allow,0), tors.sigma_shaft !== null ? fmt(tors.sigma_shaft,1) : "—", tors.shaft_pass)}
+      ${checkRow("Pipe Torsional Stress", fmt(tors.sigma_pipe_allow,0), tors.sigma_pipe !== null ? fmt(tors.sigma_pipe,1) : "—", tors.pipe_pass)}
+      ${checkRow("Bolt Shear Stress", fmt(tors.sigma_bolt_allow,0), tors.sigma_bolt !== null ? fmt(tors.sigma_bolt,1) : "—", tors.bolt_pass)}
+      ${checkRow("Pipe Bearing Stress", fmt(tors.sigma_bearing_allow,0), tors.sigma_bearing !== null ? fmt(tors.sigma_bearing,1) : "—", tors.bearing_pass)}
+    </tbody></table>`;
+  }
+
+  // --- 5. Additional Checks ---
+  html += `<div class="section-title">5. ADDITIONAL CHECKS</div>
+  <table><thead><tr><th>Check</th><th>Limit</th><th>Calculated</th><th>Result</th></tr></thead><tbody>`;
+
+  if (!isShaftless && delta !== null) {
+    html += checkRow("Screw Deflection (IN)", fmt(delta_allow,3), fmt(delta,4), delta <= delta_allow);
+    html += checkRow("Shaft End Angle (DEG)", fmt(theta_allow,3), fmt(theta,4), theta <= theta_allow);
+  } else if (isShaftless) {
+    html += `<tr><td>Screw Deflection (IN)</td><td>${fmt(delta_allow,3)}</td><td class="na">N/A — Shaftless</td><td class="na">N/A</td></tr>`;
+    html += `<tr><td>Shaft End Angle (DEG)</td><td>${fmt(theta_allow,3)}</td><td class="na">N/A — Shaftless</td><td class="na">N/A</td></tr>`;
+  } else {
+    html += `<tr><td>Screw Deflection (IN)</td><td>${fmt(delta_allow,3)}</td><td class="na">—</td><td class="na">N/A</td></tr>`;
+    html += `<tr><td>Shaft End Angle (DEG)</td><td>${fmt(theta_allow,3)}</td><td class="na">—</td><td class="na">N/A</td></tr>`;
+  }
+
+  html += checkRow("Thermal Exp. — Screw (IN)", fmt(thermal_allow,4), fmt(exp_screw,4), exp_screw <= thermal_allow);
+  html += checkRow("Thermal Exp. — Trough (IN)", fmt(thermal_allow,4), fmt(exp_trough,4), exp_trough <= thermal_allow);
+
+  if (spiral) {
+    html += checkRow("Shaftless Spiral Stress (PSI)", fmt(spiral.spiral_allow,0), fmt(spiral.stress,1), spiral.pass);
+  } else if (!isShaftless) {
+    html += `<tr><td>Shaftless Spiral Stress (PSI)</td><td>—</td><td class="na">N/A — Shafted</td><td class="na">N/A</td></tr>`;
+  }
+
+  html += `</tbody></table>`;
+
+  // Additional info
+  html += `<div class="section-title">ADDITIONAL INFORMATION</div>
+  <table><thead><tr><th>Parameter</th><th>Value</th><th>Unit</th></tr></thead><tbody>
+    <tr><td>Span Between Bearings (Ls)</td><td>${fmt(Ls,2)}</td><td>in</td></tr>
+    <tr><td>Total Screw Weight (Ws)</td><td>${fmt(Ws,1)}</td><td>lb</td></tr>
+    <tr><td>Screw Tip Speed (STS)</td><td>${fmt((Ds * N * Math.PI) / 12, 1)}</td><td>ft/min</td></tr>
+    <tr><td>ΔT (Thermal)</td><td>${fmt(dT,1)}</td><td>°F</td></tr>
+  </tbody></table>`;
+
+  // --- 6. Component Selection ---
+  html += `<div class="section-title">6. COMPONENT SELECTION</div>
+  <table><thead><tr><th>Component</th><th>Detail</th><th>Size</th><th>Material</th></tr></thead><tbody>
+    <tr><td>Screw Flights</td><td>${flight_type}</td><td>${Ds}"</td><td>${flight_mat}</td></tr>
+    <tr><td>Trough</td><td>${trough_type}</td><td></td><td>${trough_mat} ${trough_ga}</td></tr>
+    <tr><td>Cover</td><td>${cover_type}</td><td></td><td>${cover_mat} ${cover_ga}</td></tr>
+    <tr><td>Liner</td><td>${liner ? "YES" : "NONE"}</td><td>${liner ? liner_thk : ""}</td><td>${liner ? liner_mat : ""}</td></tr>
+    <tr><td>Shaft Bearing</td><td>${shaft_brg}</td><td></td><td></td></tr>
+    <tr><td>Hanger Bearing</td><td>${hanger_brg}</td><td></td><td></td></tr>
+    <tr><td>Tail Bearing</td><td>${tail_brg}</td><td></td><td></td></tr>
+    <tr><td>Drive End Seal</td><td>${de_seal}</td><td></td><td></td></tr>
+    <tr><td>Tail End Seal</td><td>${te_seal}</td><td></td><td></td></tr>
+    <tr><td>Inlet</td><td>${inlet_type}</td><td></td><td></td></tr>
+    <tr><td>Outlet</td><td>${outlet_type}</td><td></td><td></td></tr>
+    <tr><td>Cover Holddown</td><td>${holddown}</td><td></td><td></td></tr>
+    <tr><td>Zero Speed Switch</td><td>${zss}</td><td></td><td></td></tr>
+    <tr><td>E-Stop</td><td>${estop}</td><td></td><td></td></tr>
+    <tr><td>GB-to-Shaft Coupling</td><td>${gb_coupling}</td><td></td><td></td></tr>
+    ${!isShaftless ? `<tr><td>Shaft &amp; Pipe</td><td>${coupling}</td><td>${shaft_dia}" shaft / ${pipe_size}</td><td>${shaft_mat} / ${pipe_mat}</td></tr>` : ""}
+  </tbody></table>`;
+
+  // --- Footer ---
+  html += `<div class="footer-bar">JMS SCREW CONVEYOR DESIGN SHEET &nbsp;|&nbsp; REV. ${revision} &nbsp;|&nbsp; ${date}</div>`;
+
+  document.getElementById("output-panel").innerHTML = html;
+}
+
+// ===========================================================================
+// DOM SETUP
+// ===========================================================================
+function setField(id, val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (el.type === "checkbox") {
+    el.checked = !!val;
+  } else {
+    el.value = val;
+  }
+}
+
+function resetToDefaults() {
+  for (const [key, val] of Object.entries(DEFAULTS)) {
+    setField(key, val);
+  }
+  // Auto trough CTE
+  autoTroughCTE();
+  calculate();
+}
+
+function autoTroughCTE() {
+  const mat = (getVal("trough_material") || "").toLowerCase();
+  const el = document.getElementById("trough_cte_material");
+  if (!el) return;
+  if (mat.includes("ss") || mat.includes("stainless")) {
+    el.value = "Stainless Steel";
+  } else {
+    el.value = "Carbon Steel";
+  }
+}
+
+function wireEvents() {
+  const ids = [
+    "project_no","location","customer","engineer","description","by","date","revision",
+    "length_ft","incline_deg","flow_direction","service_duty","live_bottom","area_classification",
+    "material","density_lb_ft3","solids_pct","size_class","flowability","abrasiveness","temp_min_f","temp_max_f",
+    "screw_dia_in","screw_type","pitch_type","flight_type","trough_fill_pct","design_capacity_ft3hr",
+    "drive_arrangement","gearbox_model","motor_hp","motor_rpm","gearbox_ratio","gearbox_sf",
+    "shaft_dia_in","shaft_material","pipe_size","pipe_material","coupling_type",
+    "bolt_size_in","bolt_material","num_bolts","bolt_pad_in",
+    "flight_material","trough_type","trough_material","trough_gauge",
+    "cover_type","cover_material","cover_gauge",
+    "liner","liner_material","liner_thickness",
+    "shaft_bearing_type","hanger_bearing_type","tail_bearing_type","num_hanger_bearings",
+    "drive_end_seal","tail_end_seal","inlet_type","outlet_type",
+    "cover_holddown","zss","estop","gb_to_shaft_coupling","trough_cte_material"
+  ];
+
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const evtType = (el.tagName === "SELECT" || el.type === "checkbox") ? "change" : "input";
+    el.addEventListener(evtType, () => {
+      // Auto-update trough CTE when trough_material changes
+      if (id === "trough_material") autoTroughCTE();
+      calculate();
+    });
+  });
+}
+
+// On load: set defaults, wire events, run first calc
+document.addEventListener("DOMContentLoaded", () => {
+  resetToDefaults();
+  wireEvents();
+  calculate();
+});
+</script>
+</body>
+</html>
