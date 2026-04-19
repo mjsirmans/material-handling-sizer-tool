@@ -1227,23 +1227,37 @@ function autoConfig() {
   const trough = iDeg > 5 ? 35 : 20;
   setSelectVal('trough_angle', String(trough));
 
-  // Step 3 — belt speed: start 75 fpm, bump to 100 for high cap
-  let speed = cap > 300 ? 100 : 75;
-
-  // Step 4 — belt width: smallest CEMA table width that handles required volume
+  // Step 3 — belt width + speed: target 20–50% capacity utilization
+  // Try each width at 75 fpm then 100 fpm; pick smallest belt where
+  // utilization = volRequired / (capPerFpm * speed) lands in [0.20, 0.50].
+  // If nothing hits the band, fall back to smallest belt that fits at all.
   const volRequired = cap; // already ft³/hr
   const widths = [18, 24, 30, 36, 42, 48];
+  const speeds = [75, 100];
   let selWidth = 48;
-  for (const w of widths) {
-    const capPerFpm = CAPACITY_TABLE[trough]?.[w] || 0;
-    if (capPerFpm * speed >= volRequired) { selWidth = w; break; }
-  }
-  // If 75 fpm doesn't fit smallest, try 100 fpm
-  if (selWidth === 48 && speed === 75) {
-    speed = 100;
+  let speed = 75;
+  let found = false;
+
+  for (const spd of speeds) {
     for (const w of widths) {
       const capPerFpm = CAPACITY_TABLE[trough]?.[w] || 0;
-      if (capPerFpm * speed >= volRequired) { selWidth = w; break; }
+      if (capPerFpm <= 0) continue;
+      const util = volRequired / (capPerFpm * spd);
+      if (util >= 0.20 && util <= 0.50) {
+        selWidth = w; speed = spd; found = true; break;
+      }
+    }
+    if (found) break;
+  }
+
+  // Fallback: smallest belt that physically handles the load
+  if (!found) {
+    for (const spd of speeds) {
+      for (const w of widths) {
+        const capPerFpm = CAPACITY_TABLE[trough]?.[w] || 0;
+        if (capPerFpm * spd >= volRequired) { selWidth = w; speed = spd; found = true; break; }
+      }
+      if (found) break;
     }
   }
   setSelectVal('belt_width_in', String(selWidth));
