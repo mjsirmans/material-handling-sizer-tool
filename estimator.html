@@ -438,32 +438,32 @@ function renderChuteList() {
       </div>
       <div class="field-row"><label>Top L × W</label>
         <div style="display:flex;gap:4px">
-          <input type="number" min="0" value="${c.lt||''}" placeholder="L" style="width:60px;text-align:right" oninput="setChuteField(${c.id},'lt',this.value)">
-          <input type="number" min="0" value="${c.wt||''}" placeholder="W" style="width:60px;text-align:right" oninput="setChuteField(${c.id},'wt',this.value)">
+          <input type="number" min="0" value="${c.lt||''}" placeholder="L" style="width:60px;text-align:right" onchange="setChuteField(${c.id},'lt',this.value)">
+          <input type="number" min="0" value="${c.wt||''}" placeholder="W" style="width:60px;text-align:right" onchange="setChuteField(${c.id},'wt',this.value)">
         </div>
         <span class="unit">in × in</span></div>
       <div class="field-row"><label>Bottom L × W</label>
         <div style="display:flex;gap:4px">
-          <input type="number" min="0" value="${c.lb||''}" placeholder="L" style="width:60px;text-align:right" oninput="setChuteField(${c.id},'lb',this.value)">
-          <input type="number" min="0" value="${c.wb||''}" placeholder="W" style="width:60px;text-align:right" oninput="setChuteField(${c.id},'wb',this.value)">
+          <input type="number" min="0" value="${c.lb||''}" placeholder="L" style="width:60px;text-align:right" onchange="setChuteField(${c.id},'lb',this.value)">
+          <input type="number" min="0" value="${c.wb||''}" placeholder="W" style="width:60px;text-align:right" onchange="setChuteField(${c.id},'wb',this.value)">
         </div>
         <span class="unit">in × in</span></div>
       <div class="field-row"><label>Height</label>
-        <input type="number" min="0" value="${c.h||''}" oninput="setChuteField(${c.id},'h',this.value)">
+        <input type="number" min="0" value="${c.h||''}" onchange="setChuteField(${c.id},'h',this.value)">
         <span class="unit">in</span></div>
       <div class="field-row"><label>Flange Width</label>
-        <input type="number" min="0" value="${c.fw}" oninput="setChuteField(${c.id},'fw',this.value)">
+        <input type="number" min="0" value="${c.fw}" onchange="setChuteField(${c.id},'fw',this.value)">
         <span class="unit">in</span></div>
       <div class="field-row"><label>Material</label>
-        <select onchange="setChuteField(${c.id},'mat',parseInt(this.value));render()">${matOpts}</select>
+        <select onchange="setChuteField(${c.id},'mat',parseInt(this.value))">${matOpts}</select>
         <span class="unit"></span></div>
       <div class="field-row"><label>Assembly Labor</label>
-        <input type="number" min="0" value="${c.asm_hrs||''}" oninput="setChuteField(${c.id},'asm_hrs',this.value)">
+        <input type="number" min="0" value="${c.asm_hrs||''}" onchange="setChuteField(${c.id},'asm_hrs',this.value)">
         <span class="unit">hrs</span></div>
       <div class="field-row"><label>Extra Cost</label>
-        <input type="number" min="0" value="${c.extra_cost||''}" placeholder="flex chute, etc." oninput="setChuteField(${c.id},'extra_cost',this.value)">
+        <input type="number" min="0" value="${c.extra_cost||''}" placeholder="flex chute, etc." onchange="setChuteField(${c.id},'extra_cost',this.value)">
         <span class="unit">$</span></div>
-      <div class="calc-output">
+      <div class="calc-output" id="calc-out-${c.id}">
         <span>Sq Ft: <strong>${calc.sqft.toFixed(1)}</strong></span>
         <span>Weight: <strong>${calc.weight.toFixed(0)} lb</strong></span>
         <span>Mat Cost: <strong>${fmt(calc.mat_cost)}</strong></span>
@@ -479,8 +479,22 @@ function setChuteField(id, key, val) {
   const c = equip.chute.chutes.find(x=>x.id===id);
   if (!c) return;
   c[key] = (key==='mat') ? parseInt(val)||0 : (parseFloat(val)||0);
-  renderChuteList();
+  // only update this chute's calc output — don't rebuild the whole list
+  updateChuteCalcOutput(c);
   render();
+}
+
+function updateChuteCalcOutput(c) {
+  const el = document.getElementById('calc-out-'+c.id);
+  if (!el) return;
+  const calc = calcChute(c);
+  el.innerHTML = `
+    <span>Sq Ft: <strong>${calc.sqft.toFixed(1)}</strong></span>
+    <span>Weight: <strong>${calc.weight.toFixed(0)} lb</strong></span>
+    <span>Mat Cost: <strong>${fmt(calc.mat_cost)}</strong></span>
+    <span>Weld Ft: <strong>${calc.weld_ft.toFixed(1)}</strong></span>
+    <span>Weld Cost: <strong>${fmt(calc.weld_cost)}</strong></span>
+    <span>Total: <strong>${fmt(calc.total)}</strong></span>`;
 }
 
 // Chute geometry formulas from Excel
