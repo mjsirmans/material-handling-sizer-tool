@@ -136,11 +136,11 @@ button.primary:hover{background:#002244}
 </div>
 <div class="sec-body" id="sec-dims">
 <div style="height:6px"></div>
-<div class="field-row input-primary"><label>Qty of Hoppers</label><input id="qty_hoppers" type="number" value="1" min="1" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
+<div class="field-row input-primary"><label>Qty of Hoppers</label><input id="qty_hoppers" type="number" min="1" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
 <div class="field-row input-primary"><label>OAL (Overall Length)</label><input id="oal_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
 <div class="field-row input-primary"><label>OAW (Overall Width)</label><input id="oaw_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
 <div class="field-row input-primary"><label>OAH (Overall Height)</label><input id="oah_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
-<div class="field-row input-primary"><label>Side Slope</label><input id="side_slope_deg" type="number" value="65" step="0.5" min="60" max="90" oninput="calculate()" onchange="calculate()"><span class="std">deg</span></div>
+<div class="field-row input-primary"><label>Side Slope</label><input id="side_slope_deg" type="number" step="0.5" min="60" max="90" oninput="calculate()" onchange="calculate()"><span class="std">deg</span></div>
 <div id="slope-warn" class="warn-inline" style="display:none">⚠ Slope must be &gt; 60°</div>
 <div class="field-row input-primary"><label>Required Volume</label><input id="req_volume_yds" type="number" step="1" min="0" oninput="calculate()" onchange="calculate()"><span class="std">yd³</span></div>
 <div class="field-row input-primary"><label>Discharge Length</label><input id="discharge_len_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
@@ -166,7 +166,7 @@ button.primary:hover{background:#002244}
 <option>Other</option>
 </select><span class="std"></span></div>
 <div class="field-row input-secondary"><label>Density</label><input id="density_lbft3" type="number" step="1" min="1" oninput="calculate()" onchange="calculate()"><span class="std">lb/ft³</span></div>
-<div class="field-row input-secondary"><label>Angle of Repose</label><input id="angle_repose_deg" type="number" value="38" step="1" min="0" max="90" oninput="calculate()" onchange="calculate()"><span class="std">deg</span></div>
+<div class="field-row input-secondary"><label>Angle of Repose</label><input id="angle_repose_deg" type="number" step="1" min="0" max="90" oninput="calculate()" onchange="calculate()"><span class="std">deg</span></div>
 <div class="field-row input-primary"><label>Flowrate</label><input id="flowrate_lbhr" type="number" step="100" min="0" oninput="calculate()" onchange="calculate()"><span class="std">lb/hr</span></div>
 </div>
 </div>
@@ -178,10 +178,11 @@ button.primary:hover{background:#002244}
 </div>
 <div class="sec-body" id="sec-screw">
 <div style="height:6px"></div>
-<div class="field-row input-primary"><label>Qty LB Screws</label><input id="qty_lb_screws" type="number" value="2" min="1" step="1" oninput="autoFillDischargeWidth();calculate()" onchange="autoFillDischargeWidth();calculate()"><span class="std">#</span></div>
+<div class="field-row input-primary"><label>Qty LB Screws</label><input id="qty_lb_screws" type="number" min="1" step="1" oninput="autoFillDischargeWidth();calculate()" onchange="autoFillDischargeWidth();calculate()"><span class="std">#</span></div>
 <div class="field-row input-primary"><label>LB Screw Dia</label>
 <select id="lb_screw_dia_in" oninput="autoFillDischargeWidth();calculate()" onchange="autoFillDischargeWidth();calculate()">
-<option value="9">9"</option><option value="12">12"</option><option value="14" selected>14"</option>
+<option value="">— select —</option>
+<option value="9">9"</option><option value="12">12"</option><option value="14">14"</option>
 <option value="16">16"</option><option value="18">18"</option><option value="20">20"</option>
 <option value="22">22"</option><option value="24">24"</option>
 </select><span class="std">in</span></div>
@@ -190,8 +191,8 @@ button.primary:hover{background:#002244}
 <div class="field-row input-secondary"><label>LB Pipe Schedule</label><input id="lb_pipe_sched" type="text" oninput="calculate()" onchange="calculate()"><span class="std"></span></div>
 <div class="field-row input-secondary"><label>Drive Shaft Ø</label><input id="lb_drive_shaft_dia" type="number" step="0.0625" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
 <div class="field-row input-secondary"><label>Driven Shaft Ø</label><input id="lb_driven_shaft_dia" type="number" step="0.0625" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
-<div class="field-row input-secondary"><label>Qty Dist. Screws</label><input id="qty_dist_screws" type="number" value="2" min="1" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
-<div class="field-row input-secondary"><label>Inlets per Screw</label><input id="inlets_per_screw" type="number" value="4" min="1" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
+<div class="field-row input-secondary"><label>Qty Dist. Screws</label><input id="qty_dist_screws" type="number" min="1" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
+<div class="field-row input-secondary"><label>Inlets per Screw</label><input id="inlets_per_screw" type="number" min="1" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
 </div>
 </div>
 
@@ -218,9 +219,9 @@ button.primary:hover{background:#002244}
 <select id="roof_thickness" oninput="calculate()" onchange="calculate()">
 <option>1/4"</option><option>3/16"</option><option>3/8"</option>
 </select><span class="std"></span></div>
-<div class="field-row input-secondary"><label>Stiff Spacing — Straight</label><input id="stiff_spacing_straight" type="number" value="36" step="1" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
-<div class="field-row input-secondary"><label>Stiff Spacing — Angled</label><input id="stiff_spacing_angled" type="number" value="24" step="1" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
-<div class="field-row input-secondary"><label>Qty Hopper Legs</label><input id="qty_legs" type="number" value="4" min="0" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
+<div class="field-row input-secondary"><label>Stiff Spacing — Straight</label><input id="stiff_spacing_straight" type="number" step="1" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+<div class="field-row input-secondary"><label>Stiff Spacing — Angled</label><input id="stiff_spacing_angled" type="number" step="1" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+<div class="field-row input-secondary"><label>Qty Hopper Legs</label><input id="qty_legs" type="number" min="0" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
 </div>
 </div>
 
@@ -250,18 +251,18 @@ button.primary:hover{background:#002244}
 </div>
 <div class="sec-body collapsed" id="sec-acc">
 <div style="height:6px"></div>
-<div class="field-row input-secondary"><label>Zero Speed Sensors</label><input id="qty_zss" type="number" value="0" min="0" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
-<div class="field-row input-secondary"><label>E-Stop Switches</label><input id="qty_estop" type="number" value="0" min="0" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
-<div class="field-row input-secondary"><label>Level Sensors</label><input id="qty_level_sensor" type="number" value="0" min="0" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
-<div class="field-row input-secondary"><label>Slide Gates (qty)</label><input id="qty_gates" type="number" value="0" min="0" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
+<div class="field-row input-secondary"><label>Zero Speed Sensors</label><input id="qty_zss" type="number" min="0" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
+<div class="field-row input-secondary"><label>E-Stop Switches</label><input id="qty_estop" type="number" min="0" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
+<div class="field-row input-secondary"><label>Level Sensors</label><input id="qty_level_sensor" type="number" min="0" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
+<div class="field-row input-secondary"><label>Slide Gates (qty)</label><input id="qty_gates" type="number" min="0" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
 <div class="field-row input-secondary"><label>Gate Width</label><input id="gate_width_in" type="number" step="0.5" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
 <div class="field-row input-secondary"><label>Gate Length</label><input id="gate_length_in" type="number" step="0.5" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
 <div class="field-row input-secondary"><label>Gate Actuator</label>
 <select id="actuator_type" oninput="calculate()" onchange="calculate()">
 <option>Manual</option><option>Electric</option><option>Pneumatic</option><option>Hydraulic</option>
 </select><span class="std"></span></div>
-<div class="field-row input-secondary"><label>Manways</label><input id="qty_manways" type="number" value="0" min="0" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
-<div class="field-row input-secondary"><label>Foul Air Ducts</label><input id="qty_foul_air" type="number" value="0" min="0" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
+<div class="field-row input-secondary"><label>Manways</label><input id="qty_manways" type="number" min="0" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
+<div class="field-row input-secondary"><label>Foul Air Ducts</label><input id="qty_foul_air" type="number" min="0" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
 </div>
 </div>
 
@@ -657,36 +658,36 @@ function onMaterialChange() {
 }
 
 function resetToDefaults() {
-  document.getElementById('qty_hoppers').value         = 1;
-  document.getElementById('side_slope_deg').value      = 65;
-  document.getElementById('qty_lb_screws').value       = 2;
-  document.getElementById('lb_screw_dia_in').value     = 14;
-  document.getElementById('lb_screw_pitch_in').value   = 14;
-  document.getElementById('lb_pipe_nps').value         = 6;
-  document.getElementById('lb_drive_shaft_dia').value  = 3.4375;
-  document.getElementById('lb_driven_shaft_dia').value = 3.4375;
-  document.getElementById('qty_dist_screws').value     = 2;
-  document.getElementById('inlets_per_screw').value    = 4;
-  document.getElementById('stiff_spacing_straight').value = 36;
-  document.getElementById('stiff_spacing_angled').value   = 24;
-  document.getElementById('qty_legs').value            = 4;
-  document.getElementById('material').value            = 'Biosolids (Wet Cake)';
+  // Clear all numeric inputs
+  const numericIds = [
+    'qty_hoppers','oal_in','oaw_in','oah_in','side_slope_deg','req_volume_yds',
+    'discharge_len_in','discharge_wid_in','density_lbft3','angle_repose_deg',
+    'flowrate_lbhr','qty_lb_screws','lb_screw_pitch_in','lb_pipe_nps',
+    'lb_pipe_sched','lb_drive_shaft_dia','lb_driven_shaft_dia','qty_dist_screws',
+    'inlets_per_screw','stiff_spacing_straight','stiff_spacing_angled','qty_legs',
+    'motor_hp','gate_width_in','gate_length_in','qty_zss','qty_estop',
+    'qty_level_sensor','qty_gates','qty_manways','qty_foul_air',
+  ];
+  numericIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  // Reset selects to first option
+  ['material','lb_screw_dia_in','mat_construction','upper_thickness','lower_thickness',
+   'roof_thickness','drive_arrangement','area_class','actuator_type'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.selectedIndex = 0;
+  });
   const dw = document.getElementById('discharge_wid_in');
   if (dw) delete dw.dataset.manualOverride;
-  onMaterialChange();
-  autoFillDischargeWidth();
   calculate();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Set today's date
   const d = new Date();
   const iso = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   const dateEl = document.getElementById('proj_date');
-  if (dateEl && !dateEl.value) dateEl.value = iso;
-
-  resetToDefaults();
-  autoFillDischargeWidth();
+  if (dateEl) dateEl.value = iso;
   calculate();
 });
 </script>

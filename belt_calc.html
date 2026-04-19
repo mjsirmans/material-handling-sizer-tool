@@ -155,10 +155,11 @@ button.primary:hover{background:#002244}
   <div class="field-row input-primary"><label>Incline Angle<span class="req">*</span></label><input type="number" id="incline_deg" step="0.1" min="0" max="30" oninput="calculate()" onchange="calculate()"><span class="std">deg</span></div>
   <div class="field-row input-primary"><label>Belt Width<span class="req">*</span></label>
     <select id="belt_width_in" onchange="calculate()">
+      <option value="">— select —</option>
       <option value="18">18"</option>
       <option value="24">24"</option>
       <option value="30">30"</option>
-      <option value="36" selected>36"</option>
+      <option value="36">36"</option>
       <option value="42">42"</option>
       <option value="48">48"</option>
     </select>
@@ -167,8 +168,9 @@ button.primary:hover{background:#002244}
   <div class="field-row input-primary"><label>Belt Speed<span class="req">*</span></label><input type="number" id="belt_speed_fpm" step="10" min="50" max="800" oninput="calculate()" onchange="calculate()"><span class="std">fpm</span></div>
   <div class="field-row input-primary"><label>Trough Angle<span class="req">*</span></label>
     <select id="trough_angle" onchange="calculate()">
+      <option value="">— select —</option>
       <option value="0">Flat (0°)</option>
-      <option value="20" selected>20°</option>
+      <option value="20">20°</option>
       <option value="35">35°</option>
       <option value="45">45°</option>
     </select>
@@ -186,6 +188,7 @@ button.primary:hover{background:#002244}
   <div style="height:6px"></div>
   <div class="field-row input-primary"><label>Material<span class="req">*</span></label>
     <select id="material" onchange="onMaterialChange()">
+      <option value="">— select —</option>
       <option>Biosolids (Wet Cake)</option>
       <option>Biosolids (Dry)</option>
       <option>Coal</option>
@@ -239,7 +242,8 @@ button.primary:hover{background:#002244}
   <div style="height:6px"></div>
   <div class="field-row input-secondary"><label>Roll Diameter</label>
     <select id="idler_roll_dia" onchange="calculate()">
-      <option value="5" selected>5"</option>
+      <option value="">— select —</option>
+      <option value="5">5"</option>
       <option value="6">6"</option>
     </select>
     <span class="std">in</span>
@@ -337,7 +341,7 @@ button.primary:hover{background:#002244}
   <div class="field-row input-secondary"><label>Service Duty <span class="spec-tag">spec</span></label>
     <select id="service_duty" onchange="calculate()">
       <option>Light</option>
-      <option selected>Standard</option>
+      <option>Standard</option>
       <option>Heavy</option>
     </select>
   </div>
@@ -480,20 +484,20 @@ const DEFAULTS = {
   horiz_length_ft: "",
   incline_length_ft: "",
   incline_deg: "",
-  belt_width_in: 36,
+  belt_width_in: "",
   belt_speed_fpm: "",
-  trough_angle: 20,
-  material: "Biosolids (Wet Cake)",
+  trough_angle: "",
+  material: "",
   density_lb_ft3: "",
   capacity_tph: "",
   max_incline_deg: "",
-  belt_type: "Fabric",
+  belt_type: "",
   belt_rating_piw: "",
   belt_thick_in: "",
-  lagging: "Yes",
+  lagging: "",
   lagging_thick_in: "",
-  idler_type: "TROUGHING",
-  idler_roll_dia: 5,
+  idler_type: "",
+  idler_roll_dia: "",
   carry_spacing_ft: "",
   return_spacing_ft: "",
   impact_spacing_ft: "",
@@ -512,11 +516,11 @@ const DEFAULTS = {
   angle_tension_oh_deg: "",
   skirt_length_ft: "",
   skirt_friction: "",
-  num_plows: 0,
-  plow_type: "None",
+  num_plows: "",
+  plow_type: "",
   num_scrapers: "",
-  service_duty: "Standard",
-  area_classification: "NO",
+  service_duty: "",
+  area_classification: "",
   drive_notes: "",
 };
 
@@ -1129,8 +1133,8 @@ function onMaterialChange() {
     "Lime":                  20,
     "Other":                 18,
   };
-  if (densityMap[mat]) setField("density_lb_ft3", densityMap[mat]);
-  if (inclMap[mat])    setField("max_incline_deg", inclMap[mat]);
+  if (mat && densityMap[mat] !== undefined) setField("density_lb_ft3", densityMap[mat]);
+  if (mat && inclMap[mat]    !== undefined) setField("max_incline_deg", inclMap[mat]);
   calculate();
 }
 
@@ -1138,6 +1142,7 @@ function resetToDefaults() {
   for (const [key, val] of Object.entries(DEFAULTS)) {
     setField(key, val);
   }
+  // Do not call onMaterialChange() — density/max_incline start blank
   calculate();
 }
 
@@ -1192,7 +1197,10 @@ function wireEvents() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  resetToDefaults();
+  const d = new Date();
+  const iso = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const dateEl = document.getElementById('date');
+  if (dateEl) dateEl.value = iso;
   wireEvents();
   calculate();
 });
