@@ -154,8 +154,8 @@ button.primary:hover{background:#002244}
   </div>
   <div class="sec-body" id="sec-geometry">
   <div style="height:6px"></div>
-  <div class="field-row input-primary"><label>Horiz. Length<span class="req">*</span></label><input type="number" id="horiz_length_ft" step="1" min="1" oninput="calculate()" onchange="calculate()"><span class="std">ft</span></div>
-  <div class="field-row input-primary"><label>Incline Length<span class="req">*</span></label><input type="number" id="incline_length_ft" step="1" min="0" oninput="calculate()" onchange="calculate()"><span class="std">ft</span></div>
+  <div class="field-row input-primary" data-ac-req><label>Horiz. Length<span class="req">*</span></label><input type="number" id="horiz_length_ft" step="1" min="1" oninput="calculate()" onchange="calculate()"><span class="std">ft</span></div>
+  <div class="field-row input-primary" data-ac-req><label>Incline Length<span class="req">*</span></label><input type="number" id="incline_length_ft" step="1" min="0" oninput="calculate()" onchange="calculate()"><span class="std">ft</span></div>
   <div class="field-row input-primary"><label>Incline Angle<span class="req">*</span></label><input type="number" id="incline_deg" step="0.1" min="0" max="30" oninput="calculate()" onchange="calculate()"><span class="std">deg</span></div>
   <div class="field-row input-primary"><label>Belt Width<span class="req">*</span></label>
     <select id="belt_width_in" onchange="calculate()">
@@ -190,7 +190,7 @@ button.primary:hover{background:#002244}
   </div>
   <div class="sec-body" id="sec-material">
   <div style="height:6px"></div>
-  <div class="field-row input-primary"><label>Material<span class="req">*</span></label>
+  <div class="field-row input-primary" data-ac-req><label>Material<span class="req">*</span></label>
     <select id="material" onchange="onMaterialChange()">
       <option value="">— select —</option>
       <option>Biosolids (Wet Cake)</option>
@@ -208,7 +208,8 @@ button.primary:hover{background:#002244}
     </select>
   </div>
   <div class="field-row input-primary"><label>Density<span class="req">*</span></label><input type="number" id="density_lb_ft3" step="1" min="10" oninput="calculate()" onchange="calculate()"><span class="std">lb/ft³</span></div>
-  <div class="field-row input-primary"><label>Design Cap.<span class="req">*</span></label><input type="number" id="capacity_tph" step="1" min="0.1" oninput="calculate()" onchange="calculate()"><span class="std">ton/hr</span></div>
+  <div class="field-row input-primary" data-ac-req><label>Design Vol. Load<span class="req">*</span></label><input type="number" id="capacity_ft3hr" step="10" min="1" oninput="calculate()" onchange="calculate()"><span class="std">ft³/hr</span></div>
+  <div class="field-row input-calculated"><label>Weight Loading</label><input type="number" id="weight_loading_tph" step="0.1" disabled><span class="std">ton/hr</span></div>
   <div class="field-row input-primary"><label>Max Incline<span class="req">*</span></label><input type="number" id="max_incline_deg" step="1" min="5" max="30" placeholder="std: 18 (biosolids)" oninput="calculate()" onchange="calculate()"><span class="std">deg</span></div>
   </div>
   </div>
@@ -502,7 +503,7 @@ const DEFAULTS = {
   trough_angle: "",
   material: "",
   density_lb_ft3: "",
-  capacity_tph: "",
+  capacity_ft3hr: "",
   max_incline_deg: "",
   belt_type: "",
   belt_rating_piw: "",
@@ -635,7 +636,8 @@ function calculate() {
 
   const material    = getVal("material");
   const density     = getVal("density_lb_ft3");
-  const cap_tph     = getVal("capacity_tph");
+  const cap_ft3hr   = getVal("capacity_ft3hr");
+  const cap_tph     = (cap_ft3hr * density) / 2000;
   const max_incl    = getVal("max_incline_deg");
 
   const belt_type   = getVal("belt_type");
@@ -691,7 +693,10 @@ function calculate() {
   // Volume capacity at input speed
   const vol_cap_ft3hr = cap_per_fpm * speed_fpm;
   // Design volume loading required
-  const vol_required_ft3hr = (cap_tph * 2000) / density;
+  const vol_required_ft3hr = cap_ft3hr;
+  // Write back weight loading display
+  const wlEl = document.getElementById('weight_loading_tph');
+  if (wlEl) wlEl.value = (cap_tph > 0 ? cap_tph.toFixed(2) : '');
   // Capacity utilization
   const cap_util = vol_required_ft3hr / vol_cap_ft3hr;
   const cap_overload = cap_util > 1.0;
@@ -704,7 +709,7 @@ function calculate() {
   // Wm = (2000/60) * (TPH / speed_fpm)   [Design!P38]
   // Wb = from table                        [Design!P39 = M30]
   // ===========================================================================
-  const Wm = speed_fpm > 0 ? (2000 / 60) * (cap_tph / speed_fpm) : 0;
+  const Wm = speed_fpm > 0 ? (cap_ft3hr * density) / (60 * speed_fpm) : 0;
   const Wb = beltWeightLookup(bw, rating_piw);
   const WmWb = Wm + Wb;
 
@@ -739,7 +744,7 @@ function calculate() {
   const Tm = H * Wm;
 
   // Tam = accelerated material = 2.8755e-4 * Q * V  [Design!AU45]
-  const Tam = 2.8755e-4 * cap_tph * speed_fpm;
+  const Tam = 2.8755e-4 * cap_tph * speed_fpm;  // cap_tph derived from ft3/hr × density
 
   // Tsb = skirtboard friction = skirt_length * (skirt_friction * (2/3*bw)^2 + 6)  [Design!P48]
   const skirt_gap = (2 / 3) * bw;  // in inches
@@ -968,7 +973,8 @@ function calculate() {
   <div>
     ${resultRow('Material', material, '', '')}
     ${resultRow('Density', fmt(density,1), 'lb/ft³', '')}
-    ${resultRow('Design Cap.', fmt(cap_tph,1), 'ton/hr', '')}
+    ${resultRow('Design Vol. Load', fmt(cap_ft3hr,1), 'ft³/hr', '')}
+    ${resultRow('Weight Loading', fmt(cap_tph,2), 'ton/hr', '(calculated)')}
     ${resultRow('Belt Type', belt_type, '', '')}
     ${resultRow('Belt Rating', fmt(rating_piw,0), 'PIW', '')}
     ${resultRow('Drive', drive_arr, '', '')}
@@ -1127,13 +1133,13 @@ function calculate() {
 }
 
 function validateFields() {
-  // Required for sizing: input-primary → red if empty, green if filled
   document.querySelectorAll('.input-primary').forEach(row => {
     const el = row.querySelector('input, select');
     if (!el) return;
     const empty = el.value === '' || el.value === null ||
       (el.tagName === 'SELECT' && (el.value === '' || el.selectedIndex === 0 && el.options[0].value === ''));
-    row.classList.toggle('field-empty',  empty);
+    const acReq = row.hasAttribute('data-ac-req');
+    row.classList.toggle('field-empty',  empty && acReq);
     row.classList.toggle('field-filled', !empty);
     row.classList.remove('field-pricing');
   });
@@ -1185,14 +1191,14 @@ function onMaterialChange() {
 }
 
 function autoConfig() {
-  const cap  = parseFloat(document.getElementById('capacity_tph')?.value);
+  const cap  = parseFloat(document.getElementById('capacity_ft3hr')?.value);
   const hLen = parseFloat(document.getElementById('horiz_length_ft')?.value);
   const iLen = parseFloat(document.getElementById('incline_length_ft')?.value);
   const iDeg = parseFloat(document.getElementById('incline_deg')?.value) || 0;
   const mat  = document.getElementById('material')?.value;
 
   const missing = [];
-  if (!cap  || isNaN(cap))  missing.push('Design Capacity');
+  if (!cap  || isNaN(cap))  missing.push('Design Vol. Load (ft³/hr)');
   if (!hLen || isNaN(hLen)) missing.push('Horizontal Length');
   if (isNaN(iLen))          missing.push('Incline Length');
   if (!mat)                 missing.push('Material');
@@ -1225,7 +1231,7 @@ function autoConfig() {
   let speed = cap > 300 ? 100 : 75;
 
   // Step 4 — belt width: smallest CEMA table width that handles required volume
-  const volRequired = (cap * 2000) / density; // ft³/hr
+  const volRequired = cap; // already ft³/hr
   const widths = [18, 24, 30, 36, 42, 48];
   let selWidth = 48;
   for (const w of widths) {
@@ -1309,7 +1315,7 @@ function wireEvents() {
   ];
   const numberIds = [
     "horiz_length_ft","incline_length_ft","incline_deg","belt_speed_fpm",
-    "density_lb_ft3","capacity_tph","max_incline_deg",
+    "density_lb_ft3","capacity_ft3hr","max_incline_deg",
     "belt_rating_piw","belt_thick_in","lagging_thick_in",
     "carry_spacing_ft","return_spacing_ft","impact_spacing_ft","num_impact_zones","impact_zone_len_ft","fall_height_in",
     "head_pulley_dia","motor_hp","wrap_deg","shaft_dia_in","gearbox_weight_lb","pulley_weight_lb","angle_tension_oh_deg",
