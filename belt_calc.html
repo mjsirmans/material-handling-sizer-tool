@@ -583,12 +583,6 @@ function calculate() {
   // Tm = H * Wm — lift/lower material  [Design!AU43]
   const Tm = H * Wm;
 
-  // Tp = pulley friction  [Design!AU44]
-  // If belt type = Fabric: (0.00541*T1est + 15.6)*numPulleys
-  // Using 2 pulleys (head + tail), estimated as 5 lbs initially (Design formula uses AU48 which creates circularity)
-  // Using simplified: Tp = 5 lb (conservative per xlsm default)
-  const Tp = 5;
-
   // Tam = accelerated material = 2.8755e-4 * Q * V  [Design!AU45]
   const Tam = 2.8755e-4 * cap_tph * speed_fpm;
 
@@ -605,6 +599,19 @@ function calculate() {
 
   // Tac = resistance of accessories = Tsb + Tpl + TBC  [Design!AU47]
   const Tac = Tsb + Tpl + TBC;
+
+  // Tp = pulley friction  [Design!AU44] — iterative solve (xlsm circular ref AU44↔AU48)
+  // Formula: Fabric: (0.00541*Te + 15.6)*2 pulleys; Steel: (0.0077*Te + 29.6)*2
+  // Tam and Tac don't depend on Tp so are pre-computed above; iterate Tp only
+  let Tp = 5;
+  for (let _i = 0; _i < 10; _i++) {
+    const _Te_est = Tx + Tyc + Tyr + Tym + Tm + Tp + Tam + Tac;
+    const _Tp_new = belt_type === "Fabric"
+      ? (0.00541 * _Te_est + 15.6) * 2
+      : (0.0077  * _Te_est + 29.6) * 2;
+    if (Math.abs(_Tp_new - Tp) < 0.01) { Tp = _Tp_new; break; }
+    Tp = _Tp_new;
+  }
 
   // Te = effective tension = sum  [Design!AU48]
   const Te = Tx + Tyc + Tyr + Tym + Tm + Tp + Tam + Tac;
