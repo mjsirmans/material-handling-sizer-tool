@@ -11,7 +11,7 @@ h1{font-size:17px;font-weight:700;color:#003366}
 h2{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#003366;margin:10px 0 6px;border-bottom:1px solid #ccd;padding-bottom:3px}
 h3{font-size:13px;font-weight:600;color:#555;margin:8px 0 4px}
 
-/* ── Password gate ── */
+/* password gate */
 #gate{position:fixed;inset:0;background:#003366;display:flex;align-items:center;justify-content:center;z-index:9999}
 #gate-box{background:#fff;border-radius:8px;padding:36px 40px;width:320px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.4)}
 #gate-box h2{color:#003366;font-size:18px;border:none;letter-spacing:0;text-transform:none;margin-bottom:6px}
@@ -21,18 +21,16 @@ h3{font-size:13px;font-weight:600;color:#555;margin:8px 0 4px}
 #gate-btn{width:100%;padding:9px;background:#003366;color:#fff;border:none;border-radius:4px;font-size:14px;font-weight:600;cursor:pointer}
 #gate-btn:hover{background:#002244}
 #gate-err{color:#c00;font-size:12px;margin-top:8px;display:none}
-#app{display:none}
 
 .header{background:#003366;color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
 .header h1{color:#fff}
 .header .rev{font-size:11px;opacity:.7}
-.main{display:grid;grid-template-columns:480px 1fr;gap:0;min-height:calc(100vh - 42px)}
-@media(max-width:860px){.main{grid-template-columns:1fr}}
+.main{display:grid;grid-template-columns:500px 1fr;gap:0;min-height:calc(100vh - 42px)}
+@media(max-width:900px){.main{grid-template-columns:1fr}}
 .left{background:#fff;border-right:1px solid #d0d4dc;padding:12px;overflow-y:auto;max-height:calc(100vh - 42px)}
 .right{background:#f8f9fc;padding:12px;overflow-y:auto;max-height:calc(100vh - 42px)}
-@media(max-width:860px){.left{max-height:none;border-right:none;border-bottom:1px solid #d0d4dc}.right{max-height:none}}
+@media(max-width:900px){.left{max-height:none;border-right:none;border-bottom:1px solid #d0d4dc}.right{max-height:none}}
 
-/* collapsible sections */
 .sec-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding-bottom:3px;border-bottom:1px solid #ccd}
 .sec-header h2{margin:8px 0 0;border-bottom:none;padding-bottom:0;flex:1}
 .sec-toggle{font-size:11px;color:#669;margin-left:6px;transition:transform .15s;flex-shrink:0;margin-top:8px}
@@ -40,7 +38,6 @@ h3{font-size:13px;font-weight:600;color:#555;margin:8px 0 4px}
 .sec-body.collapsed{display:none}
 .section{margin-bottom:8px}
 
-/* equipment block */
 .equip-block{margin:0 0 6px;border:1px solid #dde;border-radius:4px;overflow:hidden}
 .equip-header{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#eef2f8;cursor:pointer;user-select:none}
 .equip-header label{font-size:13px;font-weight:700;color:#003366;cursor:pointer;flex:1}
@@ -49,18 +46,15 @@ h3{font-size:13px;font-weight:600;color:#555;margin:8px 0 4px}
 .equip-body{padding:10px;display:none;background:#fff}
 .equip-body.open{display:block}
 
-/* field rows */
-.field-row{display:grid;grid-template-columns:160px 1fr auto;align-items:center;gap:4px;margin-bottom:4px}
+.field-row{display:grid;grid-template-columns:165px 1fr auto;align-items:center;gap:4px;margin-bottom:4px}
 .field-row label{font-size:13px;color:#333;font-weight:500}
 .field-row .unit{font-size:11px;color:#888;white-space:nowrap}
 .field-row input,.field-row select{width:100%;padding:4px 6px;border:1px solid #bbb;border-radius:3px;font-size:13px;background:#fff;min-height:28px}
 .field-row input:focus,.field-row select:focus{outline:none;border-color:#003366;box-shadow:0 0 0 2px rgba(0,51,102,.12)}
 .field-row input[type=number]{text-align:right}
 
-/* subsection within equipment */
 .sub-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#669;margin:10px 0 4px;padding-bottom:2px;border-bottom:1px solid #eee}
 
-/* material line items */
 .line-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:6px}
 .line-table th{background:#eef2f8;color:#003366;font-weight:700;padding:4px 6px;text-align:left;font-size:11px;border:1px solid #dde}
 .line-table td{padding:3px 4px;border:1px solid #e4e8ee;vertical-align:middle}
@@ -71,16 +65,35 @@ h3{font-size:13px;font-weight:600;color:#555;margin:8px 0 4px}
 .add-row-btn{font-size:11px;padding:2px 8px;margin-top:3px;border:1px dashed #99a;border-radius:3px;background:#f8f9fc;color:#669;cursor:pointer}
 .add-row-btn:hover{background:#eef2f8;color:#003366}
 
+/* chute rows */
+.chute-list{margin-bottom:6px}
+.chute-row{border:1px solid #dde;border-radius:3px;padding:8px;margin-bottom:6px;background:#fafbff;position:relative}
+.chute-row-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.chute-row-header span{font-size:12px;font-weight:700;color:#003366}
+.chute-row-header .del-btn{font-size:10px;padding:1px 6px;border:1px solid #c77;border-radius:3px;color:#c00;background:#fff;cursor:pointer}
+.chute-row-header .del-btn:hover{background:#fee;color:#900}
+.calc-output{font-size:11px;color:#555;background:#f0f4fa;border-radius:3px;padding:4px 8px;margin-top:6px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px 10px}
+.calc-output span{white-space:nowrap}
+.calc-output strong{color:#003366}
+
+/* support takeoff */
+.support-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:6px}
+.support-table th{background:#eef2f8;color:#003366;padding:4px 6px;text-align:center;font-size:11px;border:1px solid #dde}
+.support-table th.left{text-align:left}
+.support-table td{padding:4px 6px;border:1px solid #e4e8ee;text-align:center}
+.support-table td.left{text-align:left;font-weight:600;color:#444}
+.support-table td input{width:60px;border:1px solid #bbb;border-radius:3px;font-size:12px;padding:2px 4px;text-align:center}
+.support-table td.cost-cell{color:#003366;font-weight:600}
+.support-table tr.total-row td{background:#f0f4fa;font-weight:700}
+
 /* results */
 .result-box{background:#fff;border:1px solid #d0d4dc;border-radius:4px;padding:10px 12px;margin-bottom:8px}
 .result-box h3{margin-bottom:8px;font-size:13px}
 .result-row{display:grid;grid-template-columns:1fr 100px 60px;align-items:center;gap:4px;margin-bottom:4px;font-size:13px}
 .result-row .lbl{color:#555}
 .result-row .val{font-weight:600;text-align:right;color:#003366}
-.result-row .unit{color:#888;font-size:11px}
 .result-divider{border:none;border-top:1px solid #e0e4ea;margin:6px 0}
 
-/* tier price grid */
 .tier-grid{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
 .tier-grid th{background:#eef2f8;color:#003366;font-weight:700;padding:5px 8px;text-align:left;border:1px solid #dde;font-size:11px}
 .tier-grid td{padding:5px 8px;border:1px solid #e4e8ee;text-align:right}
@@ -89,8 +102,6 @@ h3{font-size:13px;font-weight:600;color:#555;margin:8px 0 4px}
 .tier-grid tr.tier-med td.price-cell{color:#0055aa;font-weight:700}
 .tier-grid tr.tier-high td.price-cell{color:#7700aa;font-weight:700}
 .tier-grid tr.tier-br td.price-cell{color:#885500;font-weight:700}
-.tier-grid tr.grand-row td{background:#003366;color:#fff;font-weight:700;font-size:13px}
-.tier-grid tr.grand-row td.tier-name-cell{color:#fff}
 
 button{padding:4px 12px;font-size:12px;border:1px solid #003366;border-radius:3px;cursor:pointer;background:#fff;color:#003366}
 button:hover{background:#003366;color:#fff}
@@ -112,7 +123,6 @@ button.primary:hover{background:#002244}
 </head>
 <body>
 
-<!-- ── Password Gate ── -->
 <div id="gate" style="position:fixed;inset:0;background:#003366;display:flex;align-items:center;justify-content:center;z-index:9999">
   <div id="gate-box">
     <h2>Bio-TOOL Estimator</h2>
@@ -123,13 +133,12 @@ button.primary:hover{background:#002244}
   </div>
 </div>
 
-<!-- ── App ── -->
 <div id="app" style="display:none">
 <div class="header">
   <div>
     <a href="index.html" style="font-size:11px;color:#aac;text-decoration:none;display:block;margin-bottom:2px;">← Back to Tool Index</a>
     <h1>Bio-TOOL Estimator</h1>
-    <span class="rev">Rev 1.1</span>
+    <span class="rev">Rev 1.2</span>
   </div>
   <div class="btn-row" style="margin:0">
     <button onclick="window.print()" class="primary">Print / PDF</button>
@@ -137,7 +146,6 @@ button.primary:hover{background:#002244}
 </div>
 
 <div class="main">
-<!-- ===== LEFT: INPUTS ===== -->
 <div class="left">
 
 <!-- Project Info -->
@@ -156,14 +164,14 @@ button.primary:hover{background:#002244}
 </div>
 </div>
 
-<!-- Equipment Selector -->
+<!-- Equipment -->
 <div class="section">
 <div class="sec-header" onclick="toggleSec('sec-equip')">
   <h2>Equipment</h2><span class="sec-toggle" id="tog-equip" style="transform:rotate(90deg)">▸</span>
 </div>
 <div class="sec-body" id="sec-equip">
 <div style="height:6px"></div>
-<p class="note" style="margin-bottom:8px">Check each equipment type on this project. All three pricing tiers shown automatically in results.</p>
+<p class="note" style="margin-bottom:8px">Check each equipment type on this project.</p>
 <div id="equip-blocks"></div>
 </div>
 </div>
@@ -203,17 +211,13 @@ button.primary:hover{background:#002244}
 
 </div><!-- /left -->
 
-<!-- ===== RIGHT: RESULTS ===== -->
 <div class="right" id="results-panel">
   <div id="summary-out"></div>
 </div>
-
-</div><!-- /main -->
+</div>
 </div><!-- /app -->
 
 <script>
-// ── Password ───────────────────────────────────────────────────────────────
-const PW_HASH = '8b4d952b6a06b3e0b5e8b0c9f1c4e2a7d5f3e9c2b8a1d6f4e7c0b3a9d2f5e8c1'; // placeholder — replaced below
 const CORRECT_PW = 'JMS';
 
 function checkPw() {
@@ -229,85 +233,104 @@ function checkPw() {
   }
 }
 
-// ── Pricing Tiers (from Excel) ─────────────────────────────────────────────
+// ── Pricing tiers ─────────────────────────────────────────────────────────
 const TIERS = [
-  { id:'low',  name:'Low',         gmac:30.0, comm:4.0 },
-  { id:'med',  name:'Medium',      gmac:33.0, comm:6.0 },
-  { id:'high', name:'High',        gmac:36.0, comm:8.0 },
-  { id:'br',   name:'Buy/Resell',  gmac:36.0, comm:8.0 },
+  { id:'low',  name:'Low',        gmac:30.0, comm:4.0 },
+  { id:'med',  name:'Medium',     gmac:33.0, comm:6.0 },
+  { id:'high', name:'High',       gmac:36.0, comm:8.0 },
+  { id:'br',   name:'Buy/Resell', gmac:36.0, comm:8.0 },
 ];
 
-// ── Equipment Types ────────────────────────────────────────────────────────
+// ── Material options for chute (304 SS sheet, from Excel) ─────────────────
+const CHUTE_MATERIALS = [
+  { label:'304 SS 11 GA',  wt_psf:5.625, cost_plb:2.10 },
+  { label:'304 SS 3/16"',  wt_psf:7.65,  cost_plb:2.05 },
+  { label:'304 SS 1/4"',   wt_psf:10.2,  cost_plb:2.00 },
+  { label:'316 SS 11 GA',  wt_psf:5.625, cost_plb:3.05 },
+  { label:'316 SS 3/16"',  wt_psf:7.65,  cost_plb:3.00 },
+  { label:'A36 MS 11 GA',  wt_psf:5.625, cost_plb:0.85 },
+  { label:'A36 MS 3/16"',  wt_psf:7.65,  cost_plb:0.80 },
+];
+
+// ── Support BOM (from Excel: 2.5', 5', 10', 15', 20') ────────────────────
+// Per height: { mat_cost (material $), labor_hrs }
+// Material costs derived from Excel BOM component weights × material price
+const SUPPORT_CONFIGS = [
+  { label:"2.5'", mat_cost:420,  labor_hrs:4  },
+  { label:"5'",   mat_cost:680,  labor_hrs:6  },
+  { label:"10'",  mat_cost:1050, labor_hrs:8  },
+  { label:"15'",  mat_cost:1480, labor_hrs:10 },
+  { label:"20'",  mat_cost:1920, labor_hrs:12 },
+];
+
+// ── Equipment types ───────────────────────────────────────────────────────
 const EQUIP_TYPES = [
-  { id:'screw',    label:'Screw Conveyor'          },
-  { id:'belt',     label:'Belt Conveyor'           },
-  { id:'hopper',   label:'Hopper (Enclosed Storage)' },
-  { id:'diverter', label:'Diverter'                },
-  { id:'silo',     label:'Silo'                    },
-  { id:'chute',    label:'Chute'                   },
-  { id:'support',  label:'Support Structure'       },
+  { id:'screw',    label:'Screw Conveyor',            type:'standard' },
+  { id:'belt',     label:'Belt Conveyor',             type:'standard' },
+  { id:'hopper',   label:'Hopper (Enclosed Storage)', type:'standard' },
+  { id:'diverter', label:'Diverter',                  type:'standard' },
+  { id:'silo',     label:'Silo',                      type:'standard' },
+  { id:'chute',    label:'Chutes',                    type:'chute'    },
+  { id:'support',  label:'Support Structures',        type:'support'  },
 ];
 
 // ── State ─────────────────────────────────────────────────────────────────
 const equip = {};
 EQUIP_TYPES.forEach(e => {
-  equip[e.id] = {
-    enabled: false,
-    qty: 1,
-    mats_offsite:   buildLines(5),
-    mats_raw:       buildLines(5),
-    mats_nonmetal:  buildLines(3),
-    purchased_sys:  buildLines(3),
-    purchased_comp: buildLines(3),
-    eng_hrs:   0,
-    asm_hrs:   0,
-    fin_hrs:   0,
-    proc_hrs:  0,
-    freight:   0,
-  };
+  if (e.type === 'chute') {
+    equip[e.id] = { enabled:false, chutes:[] };
+  } else if (e.type === 'support') {
+    equip[e.id] = {
+      enabled: false,
+      mat_type: 'HDG',  // HDG | 304 | 316
+      mat_mult: 1.0,    // price multiplier vs base HDG
+      qtys: [0, 0, 0, 0, 0], // qty per height tier [2.5',5',10',15',20']
+      eng_hrs: 0,
+      freight: 0,
+    };
+  } else {
+    equip[e.id] = {
+      enabled:false, qty:1,
+      mats_offsite:buildLines(5), mats_raw:buildLines(5),
+      mats_nonmetal:buildLines(3), purchased_sys:buildLines(3),
+      purchased_comp:buildLines(3),
+      eng_hrs:0, asm_hrs:0, fin_hrs:0, proc_hrs:0, freight:0,
+    };
+  }
 });
 
+// chute counter for unique IDs
+let chuteSeq = 0;
+
 function buildLines(n) {
-  const rows = [];
-  for (let i=0;i<n;i++) rows.push({desc:'',vendor:'',qty:0,unit_cost:0});
-  return rows;
+  const a = [];
+  for (let i=0;i<n;i++) a.push({desc:'',vendor:'',qty:0,unit_cost:0});
+  return a;
 }
 
-// ── Init ───────────────────────────────────────────────────────────────────
+// ── Init ──────────────────────────────────────────────────────────────────
 function init() {
   buildTierOverrideRows();
   buildEquipBlocks();
 }
 
 function buildTierOverrideRows() {
-  const tbody = document.getElementById('tier-override-rows');
-  tbody.innerHTML = TIERS.map(t => `
+  document.getElementById('tier-override-rows').innerHTML = TIERS.map(t => `
     <tr>
       <td style="padding:3px 6px;border:1px solid #e4e8ee;font-weight:600;color:#444">${t.name}</td>
       <td style="padding:3px 4px;border:1px solid #e4e8ee">
         <input type="number" id="gmac-${t.id}" value="${t.gmac}" step="0.5" min="0" max="99"
-          style="width:100%;border:none;background:transparent;font-size:12px;text-align:right;padding:1px 3px"
-          oninput="render()">
+          style="width:100%;border:none;background:transparent;font-size:12px;text-align:right;padding:1px 3px" oninput="render()">
       </td>
       <td style="padding:3px 4px;border:1px solid #e4e8ee">
         <input type="number" id="comm-${t.id}" value="${t.comm}" step="0.5" min="0" max="99"
-          style="width:100%;border:none;background:transparent;font-size:12px;text-align:right;padding:1px 3px"
-          oninput="render()">
+          style="width:100%;border:none;background:transparent;font-size:12px;text-align:right;padding:1px 3px" oninput="render()">
       </td>
     </tr>`).join('');
 }
 
-function activeTiers() {
-  return TIERS.map(t => ({
-    ...t,
-    gmac: parseFloat(document.getElementById('gmac-'+t.id)?.value) ?? t.gmac,
-    comm: parseFloat(document.getElementById('comm-'+t.id)?.value) ?? t.comm,
-  }));
-}
-
 function buildEquipBlocks() {
-  const container = document.getElementById('equip-blocks');
-  container.innerHTML = EQUIP_TYPES.map(e => `
+  document.getElementById('equip-blocks').innerHTML = EQUIP_TYPES.map(e => `
     <div class="equip-block" id="eb-${e.id}">
       <div class="equip-header" onclick="toggleEquip('${e.id}')">
         <input type="checkbox" id="chk-${e.id}" onclick="event.stopPropagation();toggleEquipCheck('${e.id}')">
@@ -315,66 +338,58 @@ function buildEquipBlocks() {
         <span class="equip-toggle" id="etog-${e.id}">▸</span>
       </div>
       <div class="equip-body" id="ebody-${e.id}">
-        ${buildEquipBody(e.id)}
+        ${buildEquipBody(e)}
       </div>
     </div>`).join('');
 }
 
-function buildEquipBody(id) {
+function buildEquipBody(e) {
+  if (e.type === 'chute')   return buildChuteBody();
+  if (e.type === 'support') return buildSupportBody();
+  return buildStandardBody(e.id);
+}
+
+// ── Standard equipment body ───────────────────────────────────────────────
+function buildStandardBody(id) {
   return `
-    <div class="field-row"><label>Quantity</label><input type="number" value="1" min="1" id="qty-${id}" oninput="updateEquip('${id}','qty',this.value);render()" style="width:70px"><span class="unit">ea</span></div>
-
-    <div class="sub-label">Materials — Off-Site Purchased</div>
-    ${buildLineTable(id,'mats_offsite')}
-
-    <div class="sub-label">Materials — Raw / Metallic</div>
-    ${buildLineTable(id,'mats_raw')}
-
-    <div class="sub-label">Materials — Non-Metallic</div>
-    ${buildLineTable(id,'mats_nonmetal')}
-
-    <div class="sub-label">Purchased Systems</div>
-    ${buildLineTable(id,'purchased_sys')}
-
-    <div class="sub-label">Purchased Components</div>
-    ${buildLineTable(id,'purchased_comp')}
-
+    <div class="field-row"><label>Quantity</label>
+      <input type="number" value="1" min="1" id="qty-${id}" style="width:70px"
+        oninput="updateEquip('${id}','qty',this.value);render()">
+      <span class="unit">ea</span></div>
+    <div class="sub-label">Materials — Off-Site Purchased</div>${buildLineTable(id,'mats_offsite')}
+    <div class="sub-label">Materials — Raw / Metallic</div>${buildLineTable(id,'mats_raw')}
+    <div class="sub-label">Materials — Non-Metallic</div>${buildLineTable(id,'mats_nonmetal')}
+    <div class="sub-label">Purchased Systems</div>${buildLineTable(id,'purchased_sys')}
+    <div class="sub-label">Purchased Components</div>${buildLineTable(id,'purchased_comp')}
     <div class="sub-label">Labor Hours</div>
     <div class="field-row"><label>Engineering</label><input type="number" min="0" value="0" id="eng-${id}" oninput="updateEquip('${id}','eng_hrs',this.value);render()"><span class="unit">hrs</span></div>
     <div class="field-row"><label>Assembly</label><input type="number" min="0" value="0" id="asm-${id}" oninput="updateEquip('${id}','asm_hrs',this.value);render()"><span class="unit">hrs</span></div>
     <div class="field-row"><label>Finishing</label><input type="number" min="0" value="0" id="fin-${id}" oninput="updateEquip('${id}','fin_hrs',this.value);render()"><span class="unit">hrs</span></div>
     <div class="field-row"><label>Processing</label><input type="number" min="0" value="0" id="proc-${id}" oninput="updateEquip('${id}','proc_hrs',this.value);render()"><span class="unit">hrs</span></div>
-    <div class="field-row"><label>Freight</label><input type="number" min="0" value="0" id="freight-${id}" oninput="updateEquip('${id}','freight',this.value);render()"><span class="unit">$</span></div>
-  `;
+    <div class="field-row"><label>Freight</label><input type="number" min="0" value="0" id="freight-${id}" oninput="updateEquip('${id}','freight',this.value);render()"><span class="unit">$</span></div>`;
 }
 
 function buildLineTable(eid, section) {
   const sid = eid+'_'+section;
   return `
-    <table class="line-table" id="tbl-${sid}">
+    <table class="line-table">
       <thead><tr>
-        <th style="width:34%">Description</th>
-        <th style="width:22%">Vendor</th>
-        <th style="width:10%">Qty</th>
-        <th style="width:18%">Unit Cost</th>
-        <th style="width:16%">Total</th>
+        <th style="width:34%">Description</th><th style="width:22%">Vendor</th>
+        <th style="width:10%">Qty</th><th style="width:18%">Unit Cost</th><th style="width:16%">Total</th>
       </tr></thead>
-      <tbody id="tbody-${sid}">
-        ${equip[eid][section].map((_,i)=>lineRow(eid,section,i)).join('')}
-      </tbody>
+      <tbody id="tbody-${sid}">${equip[eid][section].map((_,i)=>lineRow(eid,section,i)).join('')}</tbody>
       <tfoot><tr class="total-row">
         <td colspan="4" style="text-align:right;font-size:11px;padding:3px 6px">Section Total</td>
         <td class="total-cell" id="sec-total-${sid}">$0</td>
       </tr></tfoot>
     </table>
-    <button class="add-row-btn" onclick="addLine('${eid}','${section}')">+ Add Row</button>
-  `;
+    <button class="add-row-btn" onclick="addLine('${eid}','${section}')">+ Add Row</button>`;
 }
 
 function lineRow(eid, section, i) {
   const sid = eid+'_'+section;
   const r = equip[eid][section][i];
-  return `<tr id="row-${sid}-${i}">
+  return `<tr>
     <td><input value="${r.desc}" oninput="setLine('${eid}','${section}',${i},'desc',this.value)"></td>
     <td><input value="${r.vendor}" oninput="setLine('${eid}','${section}',${i},'vendor',this.value)"></td>
     <td><input type="number" min="0" value="${r.qty||''}" oninput="setLine('${eid}','${section}',${i},'qty',this.value);render()"></td>
@@ -383,7 +398,199 @@ function lineRow(eid, section, i) {
   </tr>`;
 }
 
-// ── State mutators ─────────────────────────────────────────────────────────
+// ── Chute body ────────────────────────────────────────────────────────────
+function buildChuteBody() {
+  const matOpts = CHUTE_MATERIALS.map((m,i)=>`<option value="${i}">${m.label}</option>`).join('');
+  return `
+    <p class="note" style="margin-bottom:8px">Add one entry per chute. Dimensions in inches.</p>
+    <div class="chute-list" id="chute-list"></div>
+    <button class="add-row-btn" style="margin-top:2px" onclick="addChute()">+ Add Chute</button>
+    <div class="sub-label" style="margin-top:10px">Additional Labor &amp; Freight</div>
+    <div class="field-row"><label>Engineering</label><input type="number" min="0" value="0" id="eng-chute" oninput="render()"><span class="unit">hrs</span></div>
+    <div class="field-row"><label>Freight</label><input type="number" min="0" value="0" id="freight-chute" oninput="render()"><span class="unit">$</span></div>
+    <div style="display:none" id="chute-mat-opts">${matOpts}</div>`;
+}
+
+function addChute() {
+  const id = ++chuteSeq;
+  equip.chute.chutes.push({ id, lt:0, wt:0, lb:0, wb:0, fw:2, mat:0, asm_hrs:0, extra_cost:0 });
+  renderChuteList();
+  render();
+}
+
+function removeChute(id) {
+  equip.chute.chutes = equip.chute.chutes.filter(c => c.id !== id);
+  renderChuteList();
+  render();
+}
+
+function renderChuteList() {
+  const container = document.getElementById('chute-list');
+  if (!container) return;
+  container.innerHTML = equip.chute.chutes.map((c, idx) => {
+    const matOpts = CHUTE_MATERIALS.map((m,i)=>`<option value="${i}"${c.mat===i?' selected':''}>${m.label}</option>`).join('');
+    const calc = calcChute(c);
+    return `
+    <div class="chute-row" id="cr-${c.id}">
+      <div class="chute-row-header">
+        <span>Chute ${idx+1}</span>
+        <button class="del-btn" onclick="removeChute(${c.id})">✕ Remove</button>
+      </div>
+      <div class="field-row"><label>Top L × W</label>
+        <div style="display:flex;gap:4px">
+          <input type="number" min="0" value="${c.lt||''}" placeholder="L" style="width:60px;text-align:right" oninput="setChuteField(${c.id},'lt',this.value)">
+          <input type="number" min="0" value="${c.wt||''}" placeholder="W" style="width:60px;text-align:right" oninput="setChuteField(${c.id},'wt',this.value)">
+        </div>
+        <span class="unit">in × in</span></div>
+      <div class="field-row"><label>Bottom L × W</label>
+        <div style="display:flex;gap:4px">
+          <input type="number" min="0" value="${c.lb||''}" placeholder="L" style="width:60px;text-align:right" oninput="setChuteField(${c.id},'lb',this.value)">
+          <input type="number" min="0" value="${c.wb||''}" placeholder="W" style="width:60px;text-align:right" oninput="setChuteField(${c.id},'wb',this.value)">
+        </div>
+        <span class="unit">in × in</span></div>
+      <div class="field-row"><label>Height</label>
+        <input type="number" min="0" value="${c.h||''}" oninput="setChuteField(${c.id},'h',this.value)">
+        <span class="unit">in</span></div>
+      <div class="field-row"><label>Flange Width</label>
+        <input type="number" min="0" value="${c.fw}" oninput="setChuteField(${c.id},'fw',this.value)">
+        <span class="unit">in</span></div>
+      <div class="field-row"><label>Material</label>
+        <select onchange="setChuteField(${c.id},'mat',parseInt(this.value));render()">${matOpts}</select>
+        <span class="unit"></span></div>
+      <div class="field-row"><label>Assembly Labor</label>
+        <input type="number" min="0" value="${c.asm_hrs||''}" oninput="setChuteField(${c.id},'asm_hrs',this.value)">
+        <span class="unit">hrs</span></div>
+      <div class="field-row"><label>Extra Cost</label>
+        <input type="number" min="0" value="${c.extra_cost||''}" placeholder="flex chute, etc." oninput="setChuteField(${c.id},'extra_cost',this.value)">
+        <span class="unit">$</span></div>
+      <div class="calc-output">
+        <span>Sq Ft: <strong>${calc.sqft.toFixed(1)}</strong></span>
+        <span>Weight: <strong>${calc.weight.toFixed(0)} lb</strong></span>
+        <span>Mat Cost: <strong>${fmt(calc.mat_cost)}</strong></span>
+        <span>Weld Ft: <strong>${calc.weld_ft.toFixed(1)}</strong></span>
+        <span>Weld Cost: <strong>${fmt(calc.weld_cost)}</strong></span>
+        <span>Total: <strong>${fmt(calc.total)}</strong></span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setChuteField(id, key, val) {
+  const c = equip.chute.chutes.find(x=>x.id===id);
+  if (!c) return;
+  c[key] = (key==='mat') ? parseInt(val)||0 : (parseFloat(val)||0);
+  renderChuteList();
+  render();
+}
+
+// Chute geometry formulas from Excel
+function calcChute(c) {
+  const lt=c.lt||0, wt=c.wt||0, lb=c.lb||0, wb=c.wb||0, h=c.h||0, fw=c.fw||2;
+  if (!lt || !wt || !h) return { sqft:0, weight:0, mat_cost:0, weld_ft:0, weld_cost:0, total:0 };
+
+  const mat = CHUTE_MATERIALS[c.mat] || CHUTE_MATERIALS[0];
+  const lr = laborRates();
+
+  // Side panels (length direction)
+  const ah_side = Math.sqrt(h*h + ((wt-wb)/2)**2);
+  const area_side_trap = (lt+lb)/2 * ah_side;
+  const area_side_flange = fw*(lt+lb);
+  const area_side_total = (area_side_trap + area_side_flange) / 144; // sq ft, ×2 sides
+
+  // End pieces (width direction)
+  const ah_end = Math.sqrt(h*h + ((lt-lb)/2)**2);
+  const area_end_trap = (wt+wb)/2 * ah_end;
+  const area_end_flange = fw*(wt+wb + 4*fw);
+  const area_end_total = (area_end_trap + area_end_flange) / 144; // sq ft, ×2 ends
+
+  const sqft = 2*(area_side_total + area_end_total);
+  const weight = sqft * mat.wt_psf;
+  const mat_cost = (weight * mat.cost_plb) / 0.9; // 0.9 scrap factor
+
+  // Welding perimeter
+  const perim = ((2*(lt+wt)) + (2*(lb+wb))) / 12;
+  const slant_side = (4*Math.sqrt(ah_side**2 + ((lt-lb)/2)**2)) / 12;
+  const slant_end  = (4*Math.sqrt(ah_end**2  + ((wt-wb)/2)**2)) / 12;
+  const weld_ft = perim + slant_side + slant_end;
+  const weld_cost_per_ft = 12; // $/ft welding rate
+  const weld_cost = weld_ft * weld_cost_per_ft;
+
+  const asm_labor = (c.asm_hrs||0) * lr.asm;
+  const extra = c.extra_cost||0;
+  const total = mat_cost + weld_cost + asm_labor + extra;
+
+  return { sqft, weight, mat_cost, weld_ft, weld_cost, total };
+}
+
+// ── Support body ──────────────────────────────────────────────────────────
+function buildSupportBody() {
+  const rows = SUPPORT_CONFIGS.map((s,i) => `
+    <tr>
+      <td class="left">${s.label} tall</td>
+      <td>${fmt(s.mat_cost)}</td>
+      <td>${s.labor_hrs} hrs</td>
+      <td><input type="number" min="0" value="0" id="sup-qty-${i}"
+        oninput="updateSupportQty(${i},this.value)" style="width:55px;text-align:center;padding:2px 4px;border:1px solid #bbb;border-radius:3px;font-size:12px"></td>
+      <td class="cost-cell" id="sup-cost-${i}">$0</td>
+    </tr>`).join('');
+
+  return `
+    <div class="field-row" style="margin-bottom:8px"><label>Material</label>
+      <select id="sup-mat" onchange="updateSupportMat(this.value)">
+        <option value="HDG">HDG (Hot-Dip Galvanized)</option>
+        <option value="304">304 Stainless Steel</option>
+        <option value="316">316 Stainless Steel</option>
+      </select><span class="unit"></span></div>
+    <p class="note" style="margin-bottom:8px">Enter quantity needed for each support height. Costs auto-calculate from BOM.</p>
+    <table class="support-table">
+      <thead><tr>
+        <th class="left">Height</th><th>Mat Cost ea</th><th>Labor ea</th><th>Qty</th><th>Total Cost</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr class="total-row">
+        <td class="left" colspan="3">Total</td>
+        <td id="sup-qty-total">0</td>
+        <td class="cost-cell" id="sup-cost-total">$0</td>
+      </tr></tfoot>
+    </table>
+    <div class="sub-label" style="margin-top:10px">Additional</div>
+    <div class="field-row"><label>Engineering</label><input type="number" min="0" value="0" id="eng-support" oninput="render()"><span class="unit">hrs</span></div>
+    <div class="field-row"><label>Freight</label><input type="number" min="0" value="0" id="freight-support" oninput="render()"><span class="unit">$</span></div>`;
+}
+
+// Material multipliers vs HDG baseline
+const MAT_MULT = { HDG:1.0, '304':1.55, '316':1.90 };
+
+function updateSupportMat(val) {
+  equip.support.mat_type = val;
+  equip.support.mat_mult = MAT_MULT[val] || 1.0;
+  renderSupportTotals();
+  render();
+}
+
+function updateSupportQty(i, val) {
+  equip.support.qtys[i] = parseInt(val)||0;
+  renderSupportTotals();
+  render();
+}
+
+function renderSupportTotals() {
+  let totalCost=0, totalQty=0;
+  SUPPORT_CONFIGS.forEach((s,i) => {
+    const qty = equip.support.qtys[i]||0;
+    const cost = qty * s.mat_cost * (equip.support.mat_mult||1.0);
+    totalCost += cost;
+    totalQty  += qty;
+    const el = document.getElementById('sup-cost-'+i);
+    if (el) el.textContent = fmt(cost);
+  });
+  const tc = document.getElementById('sup-cost-total');
+  const tq = document.getElementById('sup-qty-total');
+  if (tc) tc.textContent = fmt(totalCost);
+  if (tq) tq.textContent = totalQty;
+}
+
+// ── State mutators ────────────────────────────────────────────────────────
 function toggleEquipCheck(id) {
   equip[id].enabled = !equip[id].enabled;
   document.getElementById('chk-'+id).checked = equip[id].enabled;
@@ -413,136 +620,152 @@ function addLine(eid, section) {
   tbody.insertAdjacentHTML('beforeend', lineRow(eid, section, i));
 }
 
-// ── Pricing engine (SalePrice from Excel VBA) ──────────────────────────────
+// ── Pricing engine ────────────────────────────────────────────────────────
 function salePrice(cost, gmacPct, commPct) {
   if (cost <= 0) return 0;
-  const gm_target = gmacPct / 100;
-  const comm = commPct / 100;
+  const gm_target = gmacPct/100, comm = commPct/100;
   let xL=0, xU=0.9999, xr=0, xold=0, ea=1, iter=0;
-  while (ea > 0.0001 && iter < 30) {
-    xr = (xU + xL) / 2;
-    ea = xold ? Math.abs((xr - xold) / xr) : 1;
-    const gm  = cost / (1 - xr) - cost;
-    const sp  = cost + gm + comm * (cost + gm);
-    const fxr = gm / sp;
-    if (gm_target - fxr < 0) xU = xr; else xL = xr;
-    xold = xr; iter++;
+  while (ea>0.0001 && iter<30) {
+    xr = (xU+xL)/2;
+    ea = xold ? Math.abs((xr-xold)/xr) : 1;
+    const gm=cost/(1-xr)-cost, sp=cost+gm+comm*(cost+gm), fxr=gm/sp;
+    if (gm_target-fxr<0) xU=xr; else xL=xr;
+    xold=xr; iter++;
   }
-  const gm_final = cost / (1 - xr) - cost;
-  return cost + gm_final + comm * (cost + gm_final);
+  const gm_final = cost/(1-xr)-cost;
+  return cost + gm_final + comm*(cost+gm_final);
 }
 
-// ── Cost helpers ──────────────────────────────────────────────────────────
-function sectionTotal(eid, section) {
-  return equip[eid][section].reduce((s,r) => s + (r.qty||0)*(r.unit_cost||0), 0);
+function activeTiers() {
+  return TIERS.map(t => ({
+    ...t,
+    gmac: parseFloat(document.getElementById('gmac-'+t.id)?.value) ?? t.gmac,
+    comm: parseFloat(document.getElementById('comm-'+t.id)?.value) ?? t.comm,
+  }));
 }
 
-function equipCost(eid) {
-  const e = equip[eid];
-  const lr = laborRates();
-  const mat = sectionTotal(eid,'mats_offsite')
-             + sectionTotal(eid,'mats_raw')
-             + sectionTotal(eid,'mats_nonmetal')
-             + sectionTotal(eid,'purchased_sys')
-             + sectionTotal(eid,'purchased_comp');
-  const labor = e.eng_hrs  * lr.eng
-              + e.asm_hrs  * lr.asm
-              + e.fin_hrs  * lr.fin
-              + e.proc_hrs * lr.proc;
-  const freight = e.freight || 0;
-  return { mat, labor, freight, total: mat + labor + freight };
-}
-
+// ── Cost calculators ──────────────────────────────────────────────────────
 function laborRates() {
   return {
-    eng:  parseFloat(document.getElementById('lr-eng').value)  || 110,
-    asm:  parseFloat(document.getElementById('lr-asm').value)  || 119,
-    fin:  parseFloat(document.getElementById('lr-fin').value)  || 110,
-    proc: parseFloat(document.getElementById('lr-proc').value) || 110,
+    eng:  parseFloat(document.getElementById('lr-eng')?.value)  || 110,
+    asm:  parseFloat(document.getElementById('lr-asm')?.value)  || 119,
+    fin:  parseFloat(document.getElementById('lr-fin')?.value)  || 110,
+    proc: parseFloat(document.getElementById('lr-proc')?.value) || 110,
   };
 }
 
-// ── Tier price table HTML ─────────────────────────────────────────────────
+function sectionTotal(eid, section) {
+  return equip[eid][section].reduce((s,r) => s+(r.qty||0)*(r.unit_cost||0), 0);
+}
+
+function standardCost(eid) {
+  const e=equip[eid], lr=laborRates();
+  const mat = sectionTotal(eid,'mats_offsite')+sectionTotal(eid,'mats_raw')
+             +sectionTotal(eid,'mats_nonmetal')+sectionTotal(eid,'purchased_sys')
+             +sectionTotal(eid,'purchased_comp');
+  const labor = e.eng_hrs*lr.eng + e.asm_hrs*lr.asm + e.fin_hrs*lr.fin + e.proc_hrs*lr.proc;
+  return { mat, labor, freight:e.freight||0, total:mat+labor+(e.freight||0) };
+}
+
+function chuteCost() {
+  const lr = laborRates();
+  const chutes = equip.chute.chutes;
+  let mat=0, labor=0, extra=0;
+  chutes.forEach(c => {
+    const calc = calcChute(c);
+    mat   += calc.mat_cost + calc.weld_cost;
+    labor += (c.asm_hrs||0) * lr.asm;
+    extra += c.extra_cost||0;
+  });
+  const eng_labor = (parseFloat(document.getElementById('eng-chute')?.value)||0) * lr.eng;
+  const freight   = parseFloat(document.getElementById('freight-chute')?.value)||0;
+  labor += eng_labor;
+  return { mat, labor, freight, extra, total:mat+labor+freight+extra };
+}
+
+function supportCost() {
+  const lr = laborRates();
+  const mult = equip.support.mat_mult || 1.0;
+  let mat=0, labor_hrs=0;
+  SUPPORT_CONFIGS.forEach((s,i) => {
+    const qty = equip.support.qtys[i]||0;
+    mat       += qty * s.mat_cost * mult;
+    labor_hrs += qty * s.labor_hrs;
+  });
+  const labor = labor_hrs * lr.asm
+              + (parseFloat(document.getElementById('eng-support')?.value)||0) * lr.eng;
+  const freight = parseFloat(document.getElementById('freight-support')?.value)||0;
+  return { mat, labor, freight, total:mat+labor+freight };
+}
+
+// ── Tier table HTML ───────────────────────────────────────────────────────
 function tierTableHtml(cost, qty) {
-  qty = qty || 1;
+  qty = qty||1;
   const rows = activeTiers().map(t => {
-    const unitSP  = salePrice(cost, t.gmac, t.comm);
-    const totalSP = unitSP * qty;
-    const gm      = unitSP - cost;
+    const usp=salePrice(cost,t.gmac,t.comm), tsp=usp*qty;
     return `<tr class="tier-${t.id}">
       <td class="tier-name-cell">${t.name}</td>
-      <td>${pct(t.gmac)}/${pct(t.comm)}</td>
-      <td class="price-cell">${fmt(unitSP)}</td>
-      ${qty > 1 ? `<td class="price-cell">${fmt(totalSP)}</td>` : ''}
+      <td>${t.gmac}%/${t.comm}%</td>
+      <td class="price-cell">${fmt(usp)}</td>
+      ${qty>1?`<td class="price-cell">${fmt(tsp)}</td>`:''}
     </tr>`;
   }).join('');
-  return `<table class="tier-grid">
-    <thead><tr>
-      <th>Tier</th>
-      <th>GMaC/Comm</th>
-      <th>Unit Price</th>
-      ${qty > 1 ? '<th>Total Price</th>' : ''}
-    </tr></thead>
-    <tbody>${rows}</tbody>
-  </table>`;
+  return `<table class="tier-grid"><thead><tr>
+    <th>Tier</th><th>GMaC/Comm</th><th>Unit Price</th>${qty>1?'<th>Total Price</th>':''}
+  </tr></thead><tbody>${rows}</tbody></table>`;
 }
 
 function grandTierTableHtml(grandCost) {
   const rows = activeTiers().map(t => {
-    const sp = salePrice(grandCost, t.gmac, t.comm);
-    const gm = sp - grandCost;
+    const sp=salePrice(grandCost,t.gmac,t.comm), gm=sp-grandCost;
     return `<tr class="tier-${t.id}">
       <td class="tier-name-cell">${t.name}</td>
-      <td>${pct(t.gmac)}/${pct(t.comm)}</td>
+      <td>${t.gmac}%/${t.comm}%</td>
       <td class="price-cell">${fmt(sp)}</td>
-      <td>${pct2(gm, sp)}</td>
+      <td>${pct2(gm,sp)}</td>
     </tr>`;
   }).join('');
-  return `<table class="tier-grid">
-    <thead><tr>
-      <th>Tier</th><th>GMaC/Comm</th><th>Sale Price</th><th>GM%</th>
-    </tr></thead>
-    <tbody>${rows}</tbody>
-  </table>`;
+  return `<table class="tier-grid"><thead><tr>
+    <th>Tier</th><th>GMaC/Comm</th><th>Sale Price</th><th>GM%</th>
+  </tr></thead><tbody>${rows}</tbody></table>`;
 }
 
-// ── Render ─────────────────────────────────────────────────────────────────
+// ── Render ────────────────────────────────────────────────────────────────
 function render() {
-  const activeEquip = EQUIP_TYPES.filter(e => equip[e.id].enabled);
-
-  // update line-item totals in DOM
-  EQUIP_TYPES.forEach(e => {
+  // Update standard section totals in DOM
+  EQUIP_TYPES.filter(e=>e.type==='standard').forEach(e => {
     if (!equip[e.id].enabled) return;
     ['mats_offsite','mats_raw','mats_nonmetal','purchased_sys','purchased_comp'].forEach(sec => {
-      const sid = e.id+'_'+sec;
-      let secSum = 0;
+      const sid=e.id+'_'+sec;
+      let sum=0;
       equip[e.id][sec].forEach((r,i) => {
-        const t = (r.qty||0)*(r.unit_cost||0);
-        secSum += t;
-        const el = document.getElementById('lt-'+sid+'-'+i);
-        if (el) el.textContent = fmt(t);
+        const t=(r.qty||0)*(r.unit_cost||0); sum+=t;
+        const el=document.getElementById('lt-'+sid+'-'+i);
+        if(el) el.textContent=fmt(t);
       });
-      const el = document.getElementById('sec-total-'+sid);
-      if (el) el.textContent = fmt(secSum);
+      const el=document.getElementById('sec-total-'+sid);
+      if(el) el.textContent=fmt(sum);
     });
   });
 
-  const out = document.getElementById('summary-out');
-  const proj = v('projNo'), cust = v('customer');
-  const est  = v('estimator'), dt = v('proj-date');
-  const loc  = v('location'), desc = v('desc');
+  // Update support inline totals
+  if (equip.support.enabled) renderSupportTotals();
 
-  let html = `<div class="result-box">
-    <h3>Project Summary</h3>
-    ${proj ? `<div class="result-row"><span class="lbl">Project No.</span><span class="val" style="grid-column:2/4">${esc(proj)}</span></div>` : ''}
-    ${cust ? `<div class="result-row"><span class="lbl">Customer</span><span class="val" style="grid-column:2/4">${esc(cust)}</span></div>` : ''}
-    ${loc  ? `<div class="result-row"><span class="lbl">Location</span><span class="val" style="grid-column:2/4">${esc(loc)}</span></div>` : ''}
-    ${desc ? `<div class="result-row"><span class="lbl">Description</span><span class="val" style="grid-column:2/4">${esc(desc)}</span></div>` : ''}
-    ${est  ? `<div class="result-row"><span class="lbl">Estimator</span><span class="val" style="grid-column:2/4">${esc(est)}</span></div>` : ''}
-    ${dt   ? `<div class="result-row"><span class="lbl">Date</span><span class="val" style="grid-column:2/4">${dt}</span></div>` : ''}
+  const out = document.getElementById('summary-out');
+  const proj=v('projNo'), cust=v('customer'), est=v('estimator');
+  const dt=v('proj-date'), loc=v('location'), desc=v('desc');
+
+  let html = `<div class="result-box"><h3>Project Summary</h3>
+    ${proj?`<div class="result-row"><span class="lbl">Project No.</span><span class="val" style="grid-column:2/4">${esc(proj)}</span></div>`:''}
+    ${cust?`<div class="result-row"><span class="lbl">Customer</span><span class="val" style="grid-column:2/4">${esc(cust)}</span></div>`:''}
+    ${loc?`<div class="result-row"><span class="lbl">Location</span><span class="val" style="grid-column:2/4">${esc(loc)}</span></div>`:''}
+    ${desc?`<div class="result-row"><span class="lbl">Description</span><span class="val" style="grid-column:2/4">${esc(desc)}</span></div>`:''}
+    ${est?`<div class="result-row"><span class="lbl">Estimator</span><span class="val" style="grid-column:2/4">${esc(est)}</span></div>`:''}
+    ${dt?`<div class="result-row"><span class="lbl">Date</span><span class="val" style="grid-column:2/4">${dt}</span></div>`:''}
   </div>`;
 
-  if (activeEquip.length === 0) {
+  const activeEquip = EQUIP_TYPES.filter(e => equip[e.id].enabled);
+  if (!activeEquip.length) {
     html += `<div class="result-box"><p style="color:#888;font-size:13px">Select equipment types on the left to begin estimating.</p></div>`;
     out.innerHTML = html;
     return;
@@ -551,23 +774,44 @@ function render() {
   let grandCost = 0;
 
   activeEquip.forEach(e => {
-    const ec  = equipCost(e.id);
-    const qty = equip[e.id].qty || 1;
+    let ec, qty=1, extraRows='';
+
+    if (e.type==='chute') {
+      ec = chuteCost();
+      const n = equip.chute.chutes.length;
+      extraRows = `<div class="result-row"><span class="lbl">Chutes</span><span class="val">${n} ea</span><span class="unit"></span></div>
+        <div class="result-row"><span class="lbl">Materials</span><span class="val">${fmt(ec.mat)}</span><span class="unit"></span></div>
+        <div class="result-row"><span class="lbl">Labor</span><span class="val">${fmt(ec.labor)}</span><span class="unit"></span></div>
+        ${ec.freight?`<div class="result-row"><span class="lbl">Freight</span><span class="val">${fmt(ec.freight)}</span><span class="unit"></span></div>`:''}`;
+    } else if (e.type==='support') {
+      ec = supportCost();
+      const totalQty = equip.support.qtys.reduce((a,b)=>a+b,0);
+      const matLabel = equip.support.mat_type||'HDG';
+      extraRows = `<div class="result-row"><span class="lbl">Supports (${matLabel})</span><span class="val">${totalQty} ea</span><span class="unit"></span></div>
+        ${SUPPORT_CONFIGS.map((s,i)=>{const q=equip.support.qtys[i]||0;return q?`<div class="result-row"><span class="lbl" style="padding-left:10px">${s.label}</span><span class="val">${q} ea</span><span class="unit"></span></div>`:''}).join('')}
+        <div class="result-row"><span class="lbl">Materials</span><span class="val">${fmt(ec.mat)}</span><span class="unit"></span></div>
+        <div class="result-row"><span class="lbl">Labor</span><span class="val">${fmt(ec.labor)}</span><span class="unit"></span></div>
+        ${ec.freight?`<div class="result-row"><span class="lbl">Freight</span><span class="val">${fmt(ec.freight)}</span><span class="unit"></span></div>`:''}`;
+    } else {
+      ec = standardCost(e.id);
+      qty = equip[e.id].qty||1;
+      extraRows = `<div class="result-row"><span class="lbl">Materials</span><span class="val">${fmt(ec.mat)}</span><span class="unit"></span></div>
+        <div class="result-row"><span class="lbl">Labor</span><span class="val">${fmt(ec.labor)}</span><span class="unit"></span></div>
+        ${ec.freight?`<div class="result-row"><span class="lbl">Freight</span><span class="val">${fmt(ec.freight)}</span><span class="unit"></span></div>`:''}`;
+    }
+
     grandCost += ec.total * qty;
 
     html += `<div class="result-box">
-      <h3>${esc(e.label)}${qty > 1 ? ' <span style="font-weight:400;color:#888">(×'+qty+')</span>' : ''}</h3>
-      <div class="result-row"><span class="lbl">Materials</span><span class="val">${fmt(ec.mat)}</span><span class="unit"></span></div>
-      <div class="result-row"><span class="lbl">Labor</span><span class="val">${fmt(ec.labor)}</span><span class="unit"></span></div>
-      ${ec.freight ? `<div class="result-row"><span class="lbl">Freight</span><span class="val">${fmt(ec.freight)}</span><span class="unit"></span></div>` : ''}
-      <div class="result-row"><span class="lbl"><strong>Unit Cost</strong></span><span class="val" style="color:#003366;font-size:14px">${fmt(ec.total)}</span><span class="unit"></span></div>
+      <h3>${esc(e.label)}${qty>1?` <span style="font-weight:400;color:#888">(×${qty})</span>`:''}</h3>
+      ${extraRows}
+      <div class="result-row"><span class="lbl"><strong>Total Cost</strong></span><span class="val" style="font-size:14px">${fmt(ec.total*qty)}</span><span class="unit"></span></div>
       <hr class="result-divider">
       ${tierTableHtml(ec.total, qty)}
     </div>`;
   });
 
-  // Grand total
-  html += `<div class="result-box" style="border-color:#003366;border-width:2px">
+  html += `<div class="result-box" style="border:2px solid #003366">
     <h3 style="font-size:15px;color:#003366">Project Total</h3>
     <div class="result-row"><span class="lbl"><strong>Total Cost</strong></span><span class="val" style="font-size:15px">${fmt(grandCost)}</span><span class="unit"></span></div>
     <hr class="result-divider">
@@ -577,18 +821,16 @@ function render() {
   out.innerHTML = html;
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────────
-function v(id)  { return document.getElementById(id)?.value?.trim()||''; }
-function fmt(n) { return '$'+(n||0).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}); }
-function pct(n) { return n+'%'; }
-function pct2(a,b) { return b ? Math.round(a/b*100)+'%' : '—'; }
-function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+// ── Helpers ───────────────────────────────────────────────────────────────
+function v(id)   { return document.getElementById(id)?.value?.trim()||''; }
+function fmt(n)  { return '$'+(n||0).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+function pct2(a,b){ return b?Math.round(a/b*100)+'%':'—'; }
+function esc(s)  { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function toggleSec(id) {
-  const body = document.getElementById(id);
-  const tog  = document.getElementById('tog-'+id.replace('sec-',''));
-  const collapsed = body.classList.toggle('collapsed');
-  tog.style.transform = collapsed ? '' : 'rotate(90deg)';
+  const body=document.getElementById(id), tog=document.getElementById('tog-'+id.replace('sec-',''));
+  const collapsed=body.classList.toggle('collapsed');
+  tog.style.transform = collapsed?'':'rotate(90deg)';
 }
 
 init();
