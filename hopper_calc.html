@@ -5,427 +5,278 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hopper Design Calculator</title>
 <style>
-:root {
-  --navy: #1a2744;
-  --navy-light: #2c3e6b;
-  --pass-bg: #e8f5e9;
-  --pass-text: #2e7d32;
-  --fail-bg: #ffebee;
-  --fail-text: #c62828;
-  --warn-bg: #fff8e1;
-  --warn-text: #f57f17;
-  --border: #dee2e6;
-  --label: #495057;
-  --dev-banner: #e65100;
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;font-size:15px;background:#f0f2f5;color:#1a1a1a}
+h1{font-size:17px;font-weight:700;color:#003366}
+h2{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#003366;margin:10px 0 6px;border-bottom:1px solid #ccd;padding-bottom:3px}
+h3{font-size:13px;font-weight:600;color:#555;margin:8px 0 4px}
+.header{background:#003366;color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+@media(max-width:600px){.header{padding:8px 10px;}.header h1{font-size:15px;}.btn-row button{font-size:11px;padding:3px 8px;}}
+.header h1{color:#fff}
+.header .rev{font-size:11px;opacity:.7}
+.main{display:grid;grid-template-columns:460px 1fr;gap:0;min-height:calc(100vh - 42px)}
+@media(max-width:800px){.main{grid-template-columns:1fr;}}
+.left{background:#fff;border-right:1px solid #d0d4dc;padding:12px;overflow-y:auto;max-height:calc(100vh - 42px)}
+.right{background:#f8f9fc;padding:12px;overflow-y:auto;max-height:calc(100vh - 42px)}
+@media(max-width:800px){
+  .left{max-height:none;border-right:none;border-bottom:1px solid #d0d4dc;}
+  .right{max-height:none;}
 }
-* { box-sizing: border-box; }
-body { font-family: system-ui, sans-serif; font-size: 13px; margin: 0; }
-.app { display: flex; height: 100vh; }
-.form-panel { width: 38%; min-width: 320px; overflow-y: auto; padding: 12px; border-right: 2px solid var(--navy); background: #f8f9fa; }
-.output-panel { flex: 1; overflow-y: auto; padding: 16px; }
-.section-title { background: var(--navy); color: white; padding: 6px 10px; font-weight: 600; margin: 12px 0 6px; font-size: 12px; letter-spacing: 0.5px; }
-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 12px; }
-th { background: var(--navy); color: white; padding: 5px 8px; text-align: left; }
-td { padding: 4px 8px; border-bottom: 1px solid var(--border); }
-tr:nth-child(even) td { background: #f8f9fa; }
-.pass { background: var(--pass-bg) !important; color: var(--pass-text); font-weight: 600; }
-.fail { background: var(--fail-bg) !important; color: var(--fail-text); font-weight: 600; }
-.na { color: #888; font-style: italic; }
-.project-header { background: var(--navy); color: white; padding: 10px 14px; margin-bottom: 12px; }
-.project-header h2 { margin: 0; font-size: 15px; }
-.project-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 20px; font-size: 11px; margin-top: 6px; }
-.btn { padding: 7px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; }
-.btn-primary { background: var(--navy); color: white; }
-.btn-secondary { background: #6c757d; color: white; }
-.btn-bar { display: flex; gap: 8px; margin-bottom: 12px; }
-input[type="text"], input[type="number"], select { width: 100%; padding: 4px 6px; border: 1px solid #ced4da; border-radius: 3px; font-size: 12px; }
-input[type="checkbox"] { width: auto; margin-right: 6px; }
-.checkbox-row { display: flex; align-items: center; margin-top: 6px; }
-.checkbox-row label { margin: 0; font-size: 11px; color: var(--label); font-weight: 500; }
-label { display: block; font-size: 11px; color: var(--label); margin-bottom: 2px; margin-top: 6px; font-weight: 500; }
-details summary { cursor: pointer; padding: 6px 8px; background: #e9ecef; border-radius: 3px; font-weight: 600; font-size: 12px; margin-bottom: 4px; list-style: none; }
-details summary::-webkit-details-marker { display: none; }
-details summary::before { content: "▶ "; font-size: 10px; }
-details[open] summary::before { content: "▼ "; font-size: 10px; }
-details[open] summary { background: var(--navy-light); color: white; }
-details { margin-bottom: 6px; }
-.form-panel h1 { font-size: 14px; color: var(--navy); margin: 0 0 10px; font-weight: 700; border-bottom: 2px solid var(--navy); padding-bottom: 6px; }
-.footer-bar { background: var(--navy); color: white; padding: 6px 14px; font-size: 11px; font-weight: 600; text-align: center; margin-top: 12px; letter-spacing: 0.5px; }
-.warn { color: #856404; font-size: 11px; }
-.dev-banner { background: var(--dev-banner); color: white; padding: 5px 10px; font-size: 11px; font-weight: 600; border-radius: 3px; margin-bottom: 10px; }
-.stub-note { background: #fff3e0; border-left: 3px solid var(--dev-banner); padding: 10px 14px; margin: 12px 0; font-size: 12px; color: #5d3a1a; border-radius: 0 4px 4px 0; }
-.stub-note strong { display: block; margin-bottom: 4px; }
-.pricing-slot { background: white; border: 1px solid var(--border); border-radius: 4px; padding: 10px 12px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
-.pricing-slot .slot-name { font-weight: 600; font-size: 12px; color: var(--navy); }
-.pricing-slot .slot-status { font-size: 11px; color: #888; font-style: italic; }
-.pricing-slot .slot-status.loaded { color: var(--pass-text); font-style: normal; font-weight: 600; }
-@media print {
-  .form-panel, .btn-bar, .dev-banner { display: none !important; }
-  .output-panel { width: 100%; padding: 8px; overflow: visible; }
-  .app { display: block; height: auto; }
-  body { font-size: 11px; }
-  table { page-break-inside: avoid; }
+.field-row{display:grid;grid-template-columns:150px 1fr 48px;align-items:center;gap:4px;margin-bottom:4px}
+@media(max-width:480px){.field-row{grid-template-columns:110px 1fr 40px;}}
+.field-row label{font-size:14px;color:#333;font-weight:500}
+.field-row .std{font-size:12px;color:#666;font-style:italic;white-space:nowrap}
+.field-row input,.field-row select{width:100%;padding:4px 5px;border:1px solid #bbb;border-radius:3px;font-size:14px;background:#fff;min-height:30px}
+.field-row input:focus,.field-row select:focus{outline:none;border-color:#003366;box-shadow:0 0 0 2px rgba(0,51,102,.15)}
+input[disabled],select[disabled]{background:#f0f0f0;color:#888;cursor:not-allowed}
+.warn-inline{font-size:10px;color:#c07000;font-style:italic;grid-column:2/4}
+
+.input-primary input,.input-primary select{background:#cce5ff}
+.input-secondary input,.input-secondary select{background:#ddeeff}
+.input-calculated input,.input-calculated select{background:#f0f0f0;color:#555;font-style:italic}
+
+.section{margin-bottom:8px}
+.sec-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;margin-bottom:0;padding-bottom:3px;border-bottom:1px solid #ccd}
+.sec-header h2{margin:8px 0 0;border-bottom:none;padding-bottom:0;flex:1}
+.sec-toggle{font-size:11px;color:#669;margin-left:6px;transition:transform .15s;flex-shrink:0;margin-top:8px}
+.sec-body{overflow:hidden;transition:max-height .2s ease}
+.sec-body.collapsed{display:none}
+.result-box{background:#fff;border:1px solid #d0d4dc;border-radius:4px;padding:8px 10px;margin-bottom:8px}
+.result-box h2{margin-bottom:6px}
+.result-box h3{margin-bottom:6px}
+.result-row{display:grid;grid-template-columns:140px 80px 60px 1fr;align-items:center;gap:4px;margin-bottom:3px;font-size:14px}
+@media(max-width:480px){.result-row{grid-template-columns:115px 65px 45px 1fr;font-size:12px;gap:2px;}}
+.result-row .label{color:#555}
+.result-row .val{font-weight:600;text-align:right}
+.result-row .unit{color:#888;font-size:11px}
+.badge{display:inline-block;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:700}
+.badge.ok{background:#d4edda;color:#155724}
+.badge.warn{background:#fff3cd;color:#856404}
+.badge.fail{background:#f8d7da;color:#721c24}
+.badge.na{background:#e9ecef;color:#6c757d}
+.highlight-warn{color:#c07000;font-weight:600}
+.highlight-fail{color:#c00;font-weight:600}
+.highlight-ok{color:#155724}
+
+button{padding:4px 12px;font-size:12px;border:1px solid #003366;border-radius:3px;cursor:pointer;background:#fff;color:#003366}
+button:hover{background:#003366;color:#fff}
+button.primary{background:#003366;color:#fff}
+button.primary:hover{background:#002244}
+.btn-row{display:flex;gap:8px;margin-top:8px}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:start}
+.two-col>.result-box{margin-bottom:0}
+@media(max-width:900px){.two-col{grid-template-columns:1fr;}}
+.sew-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:600px){.sew-grid{grid-template-columns:1fr;}}
+@media(max-width:800px){#mobile-jump{display:block!important;}}
+
+.project-header{background:#003366;color:white;padding:10px 14px;margin-bottom:12px;border-radius:4px}
+.project-header h2{margin:0;font-size:15px;color:#fff;border-bottom:none;letter-spacing:.5px;text-transform:uppercase}
+.project-meta{display:grid;grid-template-columns:1fr 1fr;gap:2px 20px;font-size:11px;margin-top:6px}
+.footer-bar{background:#003366;color:white;padding:6px 14px;font-size:11px;font-weight:600;text-align:center;margin-top:12px;letter-spacing:.5px;border-radius:4px}
+
+.note{font-size:10px;color:#777;margin-top:4px;padding:3px 6px;background:#fffbe6;border-left:2px solid #f0a800;border-radius:0 2px 2px 0}
+.stub-note{font-size:11px;color:#555;background:#f8f9fc;border:1px dashed #bbb;border-radius:4px;padding:8px 10px;margin-bottom:8px}
+
+@media print{
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .left,.header button,.btn-row{display:none!important}
+  .header{padding:6px 12px}
+  .main{display:block;min-height:unset}
+  .right{padding:8px;overflow:visible;max-height:unset}
+  .result-box{break-inside:avoid;border:1px solid #999;margin-bottom:6px}
+  button{display:none!important}
 }
 </style>
 </head>
 <body>
-<div class="app">
 
-<!-- ===== LEFT PANEL: INPUT FORM ===== -->
-<div class="form-panel">
-  <div class="dev-banner">⚠ DEV — Phase 2 calcs live (volume, LB sizing, HP). Structural/cost modules pending.</div>
-  <h1>Hopper Design</h1>
-  <div class="btn-bar">
-    <button class="btn btn-primary" onclick="window.print()">Print / Save as PDF</button>
-    <button class="btn btn-secondary" onclick="resetToDefaults()">Reset to Defaults</button>
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <div>
+    <a href="index.html" style="font-size:11px;color:#aac;text-decoration:none;display:block;margin-bottom:2px;">← Back to Tool Index</a>
+    <h1>Hopper Design Calculator</h1>
+    <span class="rev">Live-Bottom Biosolids Hopper · Phase 2</span>
   </div>
-
-  <!-- 1. Project Info -->
-  <details open>
-    <summary>1. Project Info</summary>
-    <label>Plant Name<input type="text" id="plant_name" oninput="calculate()" onchange="calculate()"></label>
-    <label>City<input type="text" id="city" oninput="calculate()" onchange="calculate()"></label>
-    <label>State<input type="text" id="state" oninput="calculate()" onchange="calculate()"></label>
-    <label>Sales Representative<input type="text" id="sales_rep" oninput="calculate()" onchange="calculate()"></label>
-    <label>Engineer<input type="text" id="engineer" oninput="calculate()" onchange="calculate()"></label>
-    <label>Contractor<input type="text" id="contractor" oninput="calculate()" onchange="calculate()"></label>
-    <label>Date<input type="text" id="date_field" oninput="calculate()" onchange="calculate()"></label>
-    <label>Bid Date<input type="text" id="bid_date" oninput="calculate()" onchange="calculate()"></label>
-    <label>Rev<input type="text" id="rev" oninput="calculate()" onchange="calculate()"></label>
-  </details>
-
-  <!-- 2. Hopper Dimensions -->
-  <details open>
-    <summary>2. Hopper Dimensions</summary>
-    <label>Qty of Hoppers<input type="number" id="qty_hoppers" value="1" min="1" step="1" oninput="calculate()" onchange="calculate()"></label>
-    <label>Overall Length OAL (in)<input type="number" id="oal_in" step="0.25" min="0" oninput="calculate()" onchange="calculate()"></label>
-    <label>Overall Width OAW (in)<input type="number" id="oaw_in" step="0.25" min="0" oninput="calculate()" onchange="calculate()"></label>
-    <label>Overall Hopper Height OAH (in)<input type="number" id="oah_in" step="0.25" min="0" oninput="calculate()" onchange="calculate()"></label>
-    <label>Hopper Side Slope (deg, must be &gt;60)<input type="number" id="side_slope_deg" value="65" step="0.5" min="60" max="90" oninput="calculate()" onchange="calculate()"></label>
-    <label>Required Usable Hopper Volume (yd³)<input type="number" id="req_volume_yds" step="1" min="0" oninput="calculate()" onchange="calculate()"></label>
-    <label>Discharge Opening Length (in)<input type="number" id="discharge_len_in" step="0.25" min="0" oninput="calculate()" onchange="calculate()"></label>
-    <label>Discharge Opening Width (in)
-      <input type="number" id="discharge_wid_in" step="0.001" min="0"
-        oninput="this.dataset.manualOverride='1';calculate()"
-        onchange="this.dataset.manualOverride='1';calculate()"
-        title="Auto-filled from LB screw qty × dia. Edit to override.">
-      <span style="font-size:10px;color:var(--label);margin-left:4px;">(auto from LB table)</span>
-    </label>
-  </details>
-
-  <!-- 3. Material Properties -->
-  <details open>
-    <summary>3. Material Properties</summary>
-    <label>Product Angle of Repose (deg)<input type="number" id="angle_repose_deg" value="38" step="1" min="0" max="90" oninput="calculate()" onchange="calculate()"></label>
-    <label>Material Density (lb/ft³)<input type="number" id="density_lbft3" value="60" step="1" min="1" oninput="calculate()" onchange="calculate()"></label>
-    <label>Flowrate m (lb/hr)<input type="number" id="flowrate_lbhr" step="100" min="0" oninput="calculate()" onchange="calculate()"></label>
-  </details>
-
-  <!-- 4. Hopper Construction -->
-  <details>
-    <summary>4. Hopper Construction</summary>
-    <label>Material of Construction
-      <select id="mat_construction" oninput="calculate()" onchange="calculate()">
-        <option>316SS</option>
-        <option>304SS</option>
-        <option>304L SS</option>
-        <option>316L SS</option>
-        <option>Carbon Steel</option>
-      </select>
-    </label>
-    <label>Upper Hopper Body Thickness
-      <select id="upper_thickness" oninput="calculate()" onchange="calculate()">
-        <option>1/4in</option>
-        <option>3/8in</option>
-        <option>1/2in</option>
-      </select>
-    </label>
-    <label>Lower Hopper Body Thickness
-      <select id="lower_thickness" oninput="calculate()" onchange="calculate()">
-        <option>3/8in</option>
-        <option>1/4in</option>
-        <option>1/2in</option>
-      </select>
-    </label>
-    <label>Roof Panel Material Type<input type="text" id="roof_mat_type" oninput="calculate()" onchange="calculate()"></label>
-    <label>Roof Panel Thickness
-      <select id="roof_thickness" oninput="calculate()" onchange="calculate()">
-        <option>1/4in</option>
-        <option>3/16in</option>
-        <option>3/8in</option>
-      </select>
-    </label>
-    <label>Roof Stiffener Thickness
-      <select id="roof_stiff_thickness" oninput="calculate()" onchange="calculate()">
-        <option>1/4in</option>
-        <option>3/8in</option>
-      </select>
-    </label>
-    <label>Roof Stiffener Size<input type="text" id="roof_stiff_size" value="12in X 12in" oninput="calculate()" onchange="calculate()"></label>
-    <label>Horiz. Stiffener Thickness
-      <select id="horiz_stiff_thickness" oninput="calculate()" onchange="calculate()">
-        <option>1/4in</option>
-        <option>3/8in</option>
-      </select>
-    </label>
-    <label>Horiz. Stiffener Size<input type="text" id="horiz_stiff_size" value="6in X 6in" oninput="calculate()" onchange="calculate()"></label>
-    <label>Spacing from top to first stiffener (in)<input type="number" id="stiff_top_spacing" value="48" step="1" oninput="calculate()" onchange="calculate()"></label>
-    <label>Horiz. Stiffener Spacing — Straight Wall (in)<input type="number" id="stiff_spacing_straight" value="36" step="1" oninput="calculate()" onchange="calculate()"></label>
-    <label>Horiz. Stiffener Spacing — Angled Wall (in)<input type="number" id="stiff_spacing_angled" value="24" step="1" oninput="calculate()" onchange="calculate()"></label>
-    <label>Vertical Stiffener Thickness
-      <select id="vert_stiff_thickness" oninput="calculate()" onchange="calculate()">
-        <option>3/8in</option>
-        <option>1/4in</option>
-        <option>1/2in</option>
-      </select>
-    </label>
-    <label>Vertical Stiffener Size<input type="text" id="vert_stiff_size" value="7in X 7in" oninput="calculate()" onchange="calculate()"></label>
-    <label>Flange Mount to Live Bottom<input type="text" id="flange_mount" value="6in X 6in" oninput="calculate()" onchange="calculate()"></label>
-    <label>Flange Thickness<input type="text" id="flange_thickness" oninput="calculate()" onchange="calculate()"></label>
-    <label>Qty of Hopper Legs<input type="number" id="qty_legs" value="4" min="0" step="1" oninput="calculate()" onchange="calculate()"></label>
-    <div class="checkbox-row">
-      <input type="checkbox" id="shop_assembled" checked onchange="calculate()">
-      <label for="shop_assembled">Shop Assembled</label>
-    </div>
-  </details>
-
-  <!-- 5. Live Bottom Screw Configuration -->
-  <details open>
-    <summary>5. Live Bottom Screw Configuration</summary>
-    <label>Qty of Distribution Screws<input type="number" id="qty_dist_screws" value="2" min="1" step="1" oninput="calculate()" onchange="calculate()"></label>
-    <label>Qty of Hopper Inlets per Screw<input type="number" id="inlets_per_screw" value="4" min="1" step="1" oninput="calculate()" onchange="calculate()"></label>
-    <div class="checkbox-row">
-      <input type="checkbox" id="leveling_screws" onchange="calculate()">
-      <label for="leveling_screws">Leveling Screws</label>
-    </div>
-    <label>Qty of Leveling Screws<input type="number" id="qty_leveling_screws" value="0" min="0" step="1" oninput="calculate()" onchange="calculate()"></label>
-    <label>Leveling Screw Diameter (in)<input type="number" id="ls_dia_in" step="0.25" min="0" oninput="calculate()" onchange="calculate()"></label>
-    <label>Leveling Screw Pitch (in)<input type="number" id="ls_pitch_in" step="0.25" min="0" oninput="calculate()" onchange="calculate()"></label>
-    <label>LS Pipe Schedule<input type="text" id="ls_pipe_sched" oninput="calculate()" onchange="calculate()"></label>
-    <label>LS Pipe NPS (in)<input type="number" id="ls_pipe_nps" step="0.5" min="0" oninput="calculate()" onchange="calculate()"></label>
-    <label>Qty of Live Bottom Screws<input type="number" id="qty_lb_screws" value="2" min="1" step="1" oninput="autoFillDischargeWidth();calculate()" onchange="autoFillDischargeWidth();calculate()"></label>
-    <label>Live Bottom Screw Diameter (in)
-      <select id="lb_screw_dia_in" oninput="autoFillDischargeWidth();calculate()" onchange="autoFillDischargeWidth();calculate()">
-        <option value="6">6</option>
-        <option value="9">9</option>
-        <option value="10">10</option>
-        <option value="12">12</option>
-        <option value="14" selected>14</option>
-        <option value="16">16</option>
-        <option value="18">18</option>
-        <option value="20">20</option>
-        <option value="24">24</option>
-      </select>
-    </label>
-    <label>Live Bottom Screw Pitch (in)<input type="number" id="lb_screw_pitch_in" step="0.25" min="0" oninput="calculate()" onchange="calculate()"></label>
-    <label>LB Pipe NPS (in)<input type="number" id="lb_pipe_nps" step="0.5" min="0" oninput="calculate()" onchange="calculate()"></label>
-    <label>LB Pipe Schedule<input type="text" id="lb_pipe_sched" oninput="calculate()" onchange="calculate()"></label>
-    <label>LB Drive Shaft Ø (in)<input type="number" id="lb_drive_shaft_dia" value="3.4375" step="0.0625" min="0" oninput="calculate()" onchange="calculate()"></label>
-    <label>LB Driven Shaft Ø (in)<input type="number" id="lb_driven_shaft_dia" value="3.4375" step="0.0625" min="0" oninput="calculate()" onchange="calculate()"></label>
-  </details>
-
-  <!-- 6. Accessories -->
-  <details>
-    <summary>6. Accessories</summary>
-    <p style="font-size:11px;color:var(--label);margin:4px 0 8px;">Electronics</p>
-    <label>Zero Speed Sensor (qty)<input type="number" id="qty_zss" value="0" min="0" step="1" oninput="calculate()" onchange="calculate()"></label>
-    <label>E-Stop Switch (qty)<input type="number" id="qty_estop" value="0" min="0" step="1" oninput="calculate()" onchange="calculate()"></label>
-    <label>Level Sensor (qty)<input type="number" id="qty_level_sensor" value="0" min="0" step="1" oninput="calculate()" onchange="calculate()"></label>
-    <label>Load Cell / Stand (qty)<input type="number" id="qty_load_cell" value="0" min="0" step="1" oninput="calculate()" onchange="calculate()"></label>
-    <div class="checkbox-row">
-      <input type="checkbox" id="has_controls" onchange="calculate()">
-      <label for="has_controls">Controls</label>
-    </div>
-    <p style="font-size:11px;color:var(--label);margin:8px 0 4px;">Slide Gates</p>
-    <label>Material of Construction
-      <select id="gate_mat" oninput="calculate()" onchange="calculate()">
-        <option>304SS</option>
-        <option>316SS</option>
-        <option>Carbon Steel</option>
-      </select>
-    </label>
-    <label>Qty of Gates<input type="number" id="qty_gates" value="0" min="0" step="1" oninput="calculate()" onchange="calculate()"></label>
-    <label>Gate Width (in)<input type="number" id="gate_width_in" step="0.5" min="0" oninput="calculate()" onchange="calculate()"></label>
-    <label>Gate Length (in)<input type="number" id="gate_length_in" step="0.5" min="0" oninput="calculate()" onchange="calculate()"></label>
-    <label>Actuator Type
-      <select id="actuator_type" oninput="calculate()" onchange="calculate()">
-        <option>Manual</option>
-        <option>Electric</option>
-        <option>Pneumatic</option>
-        <option>Hydraulic</option>
-      </select>
-    </label>
-    <p style="font-size:11px;color:var(--label);margin:8px 0 4px;">Miscellaneous</p>
-    <label>Foul Air Ducts (qty)<input type="number" id="qty_foul_air" value="0" min="0" step="1" oninput="calculate()" onchange="calculate()"></label>
-    <label>Manways (qty)<input type="number" id="qty_manways" value="0" min="0" step="1" oninput="calculate()" onchange="calculate()"></label>
-    <div class="checkbox-row">
-      <input type="checkbox" id="has_handrails" onchange="calculate()">
-      <label for="has_handrails">Handrails</label>
-    </div>
-    <div class="checkbox-row">
-      <input type="checkbox" id="has_platforms" onchange="calculate()">
-      <label for="has_platforms">Platform(s)</label>
-    </div>
-    <div class="checkbox-row">
-      <input type="checkbox" id="has_stairs" onchange="calculate()">
-      <label for="has_stairs">Stair(s) / Ladder(s)</label>
-    </div>
-    <div class="checkbox-row">
-      <input type="checkbox" id="has_pe_stamp" onchange="calculate()">
-      <label for="has_pe_stamp">PE Stamp</label>
-    </div>
-  </details>
-
-</div><!-- /form-panel -->
-
-<!-- ===== RIGHT PANEL: OUTPUT ===== -->
-<div class="output-panel">
-
-  <!-- Project Header -->
-  <div class="project-header">
-    <h2 id="out_title">Hopper Design</h2>
-    <div class="project-meta">
-      <span>Plant: <strong id="out_plant">—</strong></span>
-      <span>Engineer: <strong id="out_engineer">—</strong></span>
-      <span>Date: <strong id="out_date">—</strong></span>
-      <span>Rev: <strong id="out_rev">—</strong></span>
-    </div>
+  <div class="btn-row" style="margin:0">
+    <button class="primary" onclick="window.print()">Print / Save PDF</button>
+    <button onclick="resetToDefaults()">Reset to Defaults</button>
   </div>
+</div>
 
-  <!-- Volume Check -->
-  <div class="section-title">VOLUME CHECK</div>
-  <table>
-    <tr><th>Parameter</th><th>Value</th><th>Units</th></tr>
-    <tr><td>Horiz. dist. to bend line — front (H)</td><td id="out_H_ft">—</td><td>ft</td></tr>
-    <tr><td>Horiz. dist. to bend line — side (I)</td><td id="out_I_ft">—</td><td>ft</td></tr>
-    <tr><td>Sloped section height (L)</td><td id="out_L_ft">—</td><td>ft</td></tr>
-    <tr><td>Upper straight section height (M)</td><td id="out_M_ft">—</td><td>ft</td></tr>
-    <tr><td>Truncated Pyramid Volume</td><td id="out_v_pyr">—</td><td>ft³</td></tr>
-    <tr><td>Upper Rectangular Volume</td><td id="out_v_rect">—</td><td>ft³</td></tr>
-    <tr><td>Usable Hopper Volume</td><td id="out_v_usable">—</td><td>yd³</td></tr>
-    <tr><td>Total (Air) Hopper Volume</td><td id="out_v_total">—</td><td>yd³</td></tr>
-    <tr><td>% of Total Volume Used</td><td id="out_v_pct">—</td><td>%</td></tr>
-    <tr><td>Required Volume</td><td id="out_v_req">—</td><td>yd³</td></tr>
-    <tr><td>Volume Check</td><td id="out_v_check" colspan="2">—</td></tr>
-    <tr><td>Side Slope Check</td><td id="out_slope_check" colspan="2">—</td></tr>
-  </table>
+<div class="main">
 
-  <!-- LB Screw Sizing -->
-  <div class="section-title">LIVE BOTTOM SCREW SIZING</div>
-  <table>
-    <tr><th>Parameter</th><th>Value</th><th>Units</th></tr>
-    <tr><td>Flowrate per Screw (v)</td><td id="out_v_per_screw">—</td><td>ft³/hr</td></tr>
-    <tr><td>Pipe OD (d)</td><td id="out_pipe_od">—</td><td>in</td></tr>
-    <tr><td>Incline Factor (R)</td><td id="out_R">—</td><td>—</td></tr>
-    <tr><td>Capacity per Revolution</td><td id="out_cap_rev">—</td><td>ft³/hr/rpm</td></tr>
-    <tr><td>Required Screw Speed (N)</td><td id="out_N_rpm">—</td><td>rpm</td></tr>
-    <tr><td>Diameter Factor (F<sub>d</sub>)</td><td id="out_Fd">—</td><td>—</td></tr>
-    <tr><td>HP<sub>f</sub> (Friction)</td><td id="out_HPf">—</td><td>HP</td></tr>
-    <tr><td>HP<sub>m</sub> (Material)</td><td id="out_HPm">—</td><td>HP</td></tr>
-    <tr><td>HP<sub>i</sub> (Inlet)</td><td id="out_HPi">—</td><td>HP</td></tr>
-    <tr><td>Overload Factor (F<sub>o</sub>)</td><td id="out_Fo">—</td><td>—</td></tr>
-    <tr><td>HP per Screw</td><td id="out_hp_per_screw">—</td><td>HP</td></tr>
-    <tr><td>Total HP (all screws)</td><td id="out_hp_total">—</td><td>HP</td></tr>
-    <tr><td>Selected Motor HP</td><td id="out_hp_selected">—</td><td>HP</td></tr>
-  </table>
+<!-- ===== LEFT PANEL: INPUTS ===== -->
+<div class="left">
+<div id="mobile-jump" style="display:none;text-align:center;padding:4px 0 8px">
+  <a href="#results-panel" style="font-size:12px;color:#003366;text-decoration:none;background:#e8f0ff;padding:4px 16px;border-radius:12px;border:1px solid #aac">Jump to Results ↓</a>
+</div>
 
-  <!-- Structural / Shaft Sizing — Phase 3 -->
-  <div class="section-title">STRUCTURAL — SHAFT &amp; TORSIONAL RATINGS</div>
-  <div class="stub-note">
-    <strong>Phase 3 — Not yet implemented</strong>
-    Calculates: min drive shaft diameter at rated stress, min drive shaft diameter at yield, pipe torque rating, drive shaft torque rating, full motor torque. Source: Live Bottom Sizing (sheet17) and Torsion &amp; Bending (sheet14).
-  </div>
-  <table>
-    <tr><th>Check</th><th>Rating (in·lb)</th><th>Required (in·lb)</th><th>Status</th></tr>
-    <tr><td>Bolts In Shear</td><td class="na">—</td><td class="na">—</td><td class="na">—</td></tr>
-    <tr><td>Bolts &amp; Pipe In Bearing</td><td class="na">—</td><td class="na">—</td><td class="na">—</td></tr>
-    <tr><td>Pipe Torque Rating</td><td class="na">—</td><td class="na">—</td><td class="na">—</td></tr>
-    <tr><td>Drive Shaft Torque Rating</td><td class="na">—</td><td class="na">—</td><td class="na">—</td></tr>
-  </table>
-  <table>
-    <tr><th>Parameter</th><th>Value</th><th>Units</th></tr>
-    <tr><td>Min Shaft Ø @ Rated Stress</td><td class="na">—</td><td>in</td></tr>
-    <tr><td>Min Shaft Ø @ Yield Stress</td><td class="na">—</td><td>in</td></tr>
-    <tr><td>Provided Drive Shaft Ø</td><td id="out_drive_shaft_dia" class="na">—</td><td>in</td></tr>
-    <tr><td>Full Motor Torque</td><td class="na">—</td><td>in·lb</td></tr>
-  </table>
+<!-- 1. Project Info -->
+<div class="section">
+<div class="sec-header" onclick="toggleSec('sec-project')">
+  <h2>1. Project Info</h2><span class="sec-toggle" id="tog-project">▸</span>
+</div>
+<div class="sec-body collapsed" id="sec-project">
+<div style="height:6px"></div>
+<div class="field-row"><label>Project No.</label><input id="projNo" type="text" oninput="calculate()" onchange="calculate()"></div>
+<div class="field-row"><label>Customer</label><input id="customer" type="text" oninput="calculate()" onchange="calculate()"></div>
+<div class="field-row"><label>Location</label><input id="location" type="text" oninput="calculate()" onchange="calculate()"></div>
+<div class="field-row"><label>Engineer</label><input id="engineer" type="text" oninput="calculate()" onchange="calculate()"></div>
+<div class="field-row"><label>Date</label><input id="proj_date" type="date" oninput="calculate()" onchange="calculate()"></div>
+<div class="field-row"><label>Revision</label><input id="revision" type="text" oninput="calculate()" onchange="calculate()"></div>
+</div>
+</div>
 
-  <!-- Pricing Data — Phase 4 -->
-  <div class="section-title">PRICING DATA</div>
-  <div class="stub-note">
-    <strong>Phase 4 — Not yet implemented</strong>
-    This panel will show which pricing snapshot is loaded, the export date of each CSV, and staleness. Pricing is served from the <code>pricing/</code> folder in the repo and fetched at page load — all recipients see the same baseline. See <code>pricing/README.md</code> for the CSV schema and refresh workflow.
-  </div>
-  <div id="pricing_slots">
-    <div class="pricing-slot">
-      <div>
-        <div class="slot-name">Steel Cost</div>
-        <div class="slot-status">pricing/steel_cost.csv — not yet added</div>
-      </div>
-    </div>
-    <div class="pricing-slot">
-      <div>
-        <div class="slot-name">Plate &amp; Sheet</div>
-        <div class="slot-status">pricing/plate_sheet.csv — not yet added</div>
-      </div>
-    </div>
-    <div class="pricing-slot">
-      <div>
-        <div class="slot-name">Pricing Matrix</div>
-        <div class="slot-status">pricing/pricing_matrix.csv — not yet added</div>
-      </div>
-    </div>
-    <div class="pricing-slot">
-      <div>
-        <div class="slot-name">Purchased Components</div>
-        <div class="slot-status">pricing/purchased_components.csv — not yet added</div>
-      </div>
-    </div>
-    <div class="pricing-slot">
-      <div>
-        <div class="slot-name">500 Costs</div>
-        <div class="slot-status">pricing/500_costs.csv — not yet added</div>
-      </div>
-    </div>
-  </div>
+<!-- 2. Hopper Dimensions -->
+<div class="section">
+<div class="sec-header" onclick="toggleSec('sec-dims')">
+  <h2>2. Hopper Dimensions</h2><span class="sec-toggle" id="tog-dims" style="transform:rotate(90deg)">▸</span>
+</div>
+<div class="sec-body" id="sec-dims">
+<div style="height:6px"></div>
+<div class="field-row input-primary"><label>Qty of Hoppers</label><input id="qty_hoppers" type="number" value="1" min="1" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
+<div class="field-row input-primary"><label>OAL (Overall Length)</label><input id="oal_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+<div class="field-row input-primary"><label>OAW (Overall Width)</label><input id="oaw_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+<div class="field-row input-primary"><label>OAH (Overall Height)</label><input id="oah_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+<div class="field-row input-primary"><label>Side Slope</label><input id="side_slope_deg" type="number" value="65" step="0.5" min="60" max="90" oninput="calculate()" onchange="calculate()"><span class="std">deg</span></div>
+<div id="slope-warn" class="warn-inline" style="display:none">⚠ Slope must be &gt; 60°</div>
+<div class="field-row input-primary"><label>Required Volume</label><input id="req_volume_yds" type="number" step="1" min="0" oninput="calculate()" onchange="calculate()"><span class="std">yd³</span></div>
+<div class="field-row input-primary"><label>Discharge Length</label><input id="discharge_len_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+<div class="field-row input-calculated"><label>Discharge Width</label><input id="discharge_wid_in" type="number" step="0.001" min="0" title="Auto-filled from LB screw qty × dia. Edit to override." oninput="this.dataset.manualOverride='1';calculate()" onchange="this.dataset.manualOverride='1';calculate()"><span class="std">in</span></div>
+<div style="font-size:10px;color:#888;margin:-2px 0 4px 154px">Auto-filled from LB table · edit to override</div>
+</div>
+</div>
 
-  <!-- Cost Output — Phase 4 -->
-  <div class="section-title">COST OUTPUT</div>
-  <div class="stub-note">
-    <strong>Phase 4 — Not yet implemented</strong>
-    Cost output requires pricing CSVs to be committed to <code>pricing/</code>. Line items: engineering hours, hopper steel (angled walls, roof, vertical walls, live bottom trough), passivation, slide gates, LB screws, bearings/seals/shafts, controls, misc. accessories, field service, freight.
-  </div>
+<!-- 3. Material Properties -->
+<div class="section">
+<div class="sec-header" onclick="toggleSec('sec-material')">
+  <h2>3. Material Properties</h2><span class="sec-toggle" id="tog-material" style="transform:rotate(90deg)">▸</span>
+</div>
+<div class="sec-body" id="sec-material">
+<div style="height:6px"></div>
+<div class="field-row input-primary"><label>Material</label>
+<select id="material" onchange="onMaterialChange()">
+<option>Biosolids (Wet Cake)</option>
+<option>Biosolids (Dry)</option>
+<option>Lime</option>
+<option>Grit</option>
+<option>Screenings</option>
+<option>Other</option>
+</select><span class="std"></span></div>
+<div class="field-row input-secondary"><label>Density</label><input id="density_lbft3" type="number" step="1" min="1" oninput="calculate()" onchange="calculate()"><span class="std">lb/ft³</span></div>
+<div class="field-row input-secondary"><label>Angle of Repose</label><input id="angle_repose_deg" type="number" value="38" step="1" min="0" max="90" oninput="calculate()" onchange="calculate()"><span class="std">deg</span></div>
+<div class="field-row input-primary"><label>Flowrate</label><input id="flowrate_lbhr" type="number" step="100" min="0" oninput="calculate()" onchange="calculate()"><span class="std">lb/hr</span></div>
+</div>
+</div>
 
-  <!-- Summary / Print -->
-  <div class="section-title">SUMMARY</div>
-  <table>
-    <tr><th colspan="2">Project</th></tr>
-    <tr><td>Plant</td><td id="sum_plant">—</td></tr>
-    <tr><td>City / State</td><td id="sum_location">—</td></tr>
-    <tr><td>Engineer</td><td id="sum_engineer">—</td></tr>
-    <tr><td>Date</td><td id="sum_date">—</td></tr>
-    <tr><td>Rev</td><td id="sum_rev">—</td></tr>
-  </table>
-  <table>
-    <tr><th colspan="2">Configuration</th></tr>
-    <tr><td>Qty Hoppers</td><td id="sum_qty_hoppers">—</td></tr>
-    <tr><td>OAL × OAW × OAH (in)</td><td id="sum_dims">—</td></tr>
-    <tr><td>Material of Construction</td><td id="sum_mat">—</td></tr>
-    <tr><td>Qty LB Screws × Dia</td><td id="sum_lb_screws">—</td></tr>
-    <tr><td>Required Usable Volume</td><td id="sum_req_vol">—</td></tr>
-    <tr><td>Actual Usable Volume</td><td id="sum_v_usable">—</td></tr>
-    <tr><td>Required Speed</td><td id="sum_N">—</td></tr>
-    <tr><td>HP per Screw / Total HP</td><td id="sum_hp">—</td></tr>
-    <tr><td>Selected Motor HP</td><td id="sum_hp_sel">—</td></tr>
-  </table>
+<!-- 4. LB Screw Configuration -->
+<div class="section">
+<div class="sec-header" onclick="toggleSec('sec-screw')">
+  <h2>4. Live Bottom Screw Config</h2><span class="sec-toggle" id="tog-screw" style="transform:rotate(90deg)">▸</span>
+</div>
+<div class="sec-body" id="sec-screw">
+<div style="height:6px"></div>
+<div class="field-row input-primary"><label>Qty LB Screws</label><input id="qty_lb_screws" type="number" value="2" min="1" step="1" oninput="autoFillDischargeWidth();calculate()" onchange="autoFillDischargeWidth();calculate()"><span class="std">#</span></div>
+<div class="field-row input-primary"><label>LB Screw Dia</label>
+<select id="lb_screw_dia_in" oninput="autoFillDischargeWidth();calculate()" onchange="autoFillDischargeWidth();calculate()">
+<option value="9">9"</option><option value="12">12"</option><option value="14" selected>14"</option>
+<option value="16">16"</option><option value="18">18"</option><option value="20">20"</option>
+<option value="22">22"</option><option value="24">24"</option>
+</select><span class="std">in</span></div>
+<div class="field-row input-primary"><label>LB Screw Pitch</label><input id="lb_screw_pitch_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+<div class="field-row input-secondary"><label>LB Pipe NPS</label><input id="lb_pipe_nps" type="number" step="0.5" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+<div class="field-row input-secondary"><label>LB Pipe Schedule</label><input id="lb_pipe_sched" type="text" oninput="calculate()" onchange="calculate()"><span class="std"></span></div>
+<div class="field-row input-secondary"><label>Drive Shaft Ø</label><input id="lb_drive_shaft_dia" type="number" step="0.0625" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+<div class="field-row input-secondary"><label>Driven Shaft Ø</label><input id="lb_driven_shaft_dia" type="number" step="0.0625" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+<div class="field-row input-secondary"><label>Qty Dist. Screws</label><input id="qty_dist_screws" type="number" value="2" min="1" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
+<div class="field-row input-secondary"><label>Inlets per Screw</label><input id="inlets_per_screw" type="number" value="4" min="1" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
+</div>
+</div>
 
-  <div class="footer-bar">Hopper Design Calculator | Phase 2 — Volume &amp; LB Screw Sizing</div>
-</div><!-- /output-panel -->
+<!-- 5. Hopper Construction -->
+<div class="section">
+<div class="sec-header" onclick="toggleSec('sec-const')">
+  <h2>5. Construction</h2><span class="sec-toggle" id="tog-const">▸</span>
+</div>
+<div class="sec-body collapsed" id="sec-const">
+<div style="height:6px"></div>
+<div class="field-row input-secondary"><label>Material of Construction</label>
+<select id="mat_construction" oninput="calculate()" onchange="calculate()">
+<option>316L SS</option><option>304L SS</option><option>316 SS</option><option>304 SS</option><option>Carbon Steel</option>
+</select><span class="std"></span></div>
+<div class="field-row input-secondary"><label>Upper Body Thickness</label>
+<select id="upper_thickness" oninput="calculate()" onchange="calculate()">
+<option>1/4"</option><option>3/8"</option><option>1/2"</option>
+</select><span class="std"></span></div>
+<div class="field-row input-secondary"><label>Lower Body Thickness</label>
+<select id="lower_thickness" oninput="calculate()" onchange="calculate()">
+<option>3/8"</option><option>1/4"</option><option>1/2"</option>
+</select><span class="std"></span></div>
+<div class="field-row input-secondary"><label>Roof Thickness</label>
+<select id="roof_thickness" oninput="calculate()" onchange="calculate()">
+<option>1/4"</option><option>3/16"</option><option>3/8"</option>
+</select><span class="std"></span></div>
+<div class="field-row input-secondary"><label>Stiff Spacing — Straight</label><input id="stiff_spacing_straight" type="number" value="36" step="1" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+<div class="field-row input-secondary"><label>Stiff Spacing — Angled</label><input id="stiff_spacing_angled" type="number" value="24" step="1" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+<div class="field-row input-secondary"><label>Qty Hopper Legs</label><input id="qty_legs" type="number" value="4" min="0" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
+</div>
+</div>
 
-</div><!-- /app -->
+<!-- 6. Drive -->
+<div class="section">
+<div class="sec-header" onclick="toggleSec('sec-drive')">
+  <h2>6. Drive</h2><span class="sec-toggle" id="tog-drive">▸</span>
+</div>
+<div class="sec-body collapsed" id="sec-drive">
+<div style="height:6px"></div>
+<div class="field-row input-secondary"><label>Drive Arrangement</label>
+<select id="drive_arrangement" oninput="calculate()" onchange="calculate()">
+<option>Parallel Shaft Gearbox (FA)</option><option>Right Angle (KA)</option><option>Direct Coupled</option>
+</select><span class="std"></span></div>
+<div class="field-row input-secondary"><label>Motor HP (selected)</label><input id="motor_hp" type="number" step="0.5" min="0" oninput="calculate()" onchange="calculate()"><span class="std">HP</span></div>
+<div class="field-row input-secondary"><label>Area Classification</label>
+<select id="area_class" oninput="calculate()" onchange="calculate()">
+<option>Non-Hazardous</option><option>Class I Div 1</option><option>Class I Div 2</option><option>Class II Div 1</option><option>Class II Div 2</option>
+</select><span class="std"></span></div>
+</div>
+</div>
+
+<!-- 7. Accessories -->
+<div class="section">
+<div class="sec-header" onclick="toggleSec('sec-acc')">
+  <h2>7. Accessories</h2><span class="sec-toggle" id="tog-acc">▸</span>
+</div>
+<div class="sec-body collapsed" id="sec-acc">
+<div style="height:6px"></div>
+<div class="field-row input-secondary"><label>Zero Speed Sensors</label><input id="qty_zss" type="number" value="0" min="0" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
+<div class="field-row input-secondary"><label>E-Stop Switches</label><input id="qty_estop" type="number" value="0" min="0" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
+<div class="field-row input-secondary"><label>Level Sensors</label><input id="qty_level_sensor" type="number" value="0" min="0" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
+<div class="field-row input-secondary"><label>Slide Gates (qty)</label><input id="qty_gates" type="number" value="0" min="0" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
+<div class="field-row input-secondary"><label>Gate Width</label><input id="gate_width_in" type="number" step="0.5" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+<div class="field-row input-secondary"><label>Gate Length</label><input id="gate_length_in" type="number" step="0.5" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+<div class="field-row input-secondary"><label>Gate Actuator</label>
+<select id="actuator_type" oninput="calculate()" onchange="calculate()">
+<option>Manual</option><option>Electric</option><option>Pneumatic</option><option>Hydraulic</option>
+</select><span class="std"></span></div>
+<div class="field-row input-secondary"><label>Manways</label><input id="qty_manways" type="number" value="0" min="0" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
+<div class="field-row input-secondary"><label>Foul Air Ducts</label><input id="qty_foul_air" type="number" value="0" min="0" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
+</div>
+</div>
+
+</div><!-- end left -->
+
+<!-- ===== RIGHT PANEL: OUTPUTS ===== -->
+<div class="right" id="results-panel">
+<div id="output-panel"></div>
+</div>
+
+</div><!-- end main -->
 
 <script>
-// ─── Pipe OD lookup (NPS → OD, inches) — from Torsion&Bending sheet14 U11:V32
+// ─── Lookup tables ─────────────────────────────────────────────────────────────
+
 const PIPE_OD = {
   1.25:1.660, 1.5:1.900, 2:2.375, 2.5:2.875, 3:3.500, 3.5:4.000,
   4:4.500, 4.5:5.000, 5:5.563, 6:6.625, 7:7.625, 8:8.625, 9:9.625,
@@ -433,12 +284,10 @@ const PIPE_OD = {
   20:20.000, 22:22.000, 24:24.000
 };
 
-// Standard motor HP sizes
 const STD_HP = [1, 1.5, 2, 3, 5, 7.5, 10, 15, 20, 25, 30, 40, 50, 60, 75, 100, 125, 150, 200];
 
 // LB screw discharge width lookup — from Hopper Volume Calculator Table sheet
 // Key: numScrews * 100 + screwDiaIn  →  [dischargeWidth_ft, troughHeight_ft]
-// e.g., 2 screws × 16in dia → key 216 → [3.75, 2.25]
 const LB_WIDTH_TABLE = {
   209:[1.500,1.667], 212:[2.833,1.917], 214:[3.333,2.083], 216:[3.750,2.250],
   218:[4.250,2.417], 220:[4.667,2.583], 222:[5.167,2.750], 224:[5.583,2.917],
@@ -448,6 +297,73 @@ const LB_WIDTH_TABLE = {
   418:[7.333,2.417], 420:[8.167,2.583], 422:[8.917,2.750], 424:[9.667,2.917],
 };
 
+// SEW FAZ standard gear ratios (parallel shaft, B14 flange, foot mount)
+const SEW_FAZ_RATIOS = [
+  3.11,3.55,4.06,4.65,5.30,6.08,6.95,7.96,9.10,10.4,11.9,13.6,15.6,
+  17.8,20.4,23.3,26.7,30.5,34.9,39.9,45.7,52.2,59.8,68.4,78.3,89.6,
+  103,118,135,154,176,202,231,264,302,345,395,452,517,592,677,775
+];
+
+// SEW FAZ frame sizes by HP with available hollow shaft diameters (inches)
+const SEW_FAZ_FRAME = [
+  {maxHP:1,   frame:'FA37',  shafts:[1.102,1.181]},
+  {maxHP:2,   frame:'FA47',  shafts:[1.181,1.378]},
+  {maxHP:3,   frame:'FA57',  shafts:[1.378,1.575]},
+  {maxHP:5,   frame:'FA67',  shafts:[1.575,1.969]},
+  {maxHP:7.5, frame:'FA77',  shafts:[1.969,2.362]},
+  {maxHP:10,  frame:'FA87',  shafts:[2.362,2.756]},
+  {maxHP:15,  frame:'FA97',  shafts:[2.756,3.150]},
+  {maxHP:20,  frame:'FA107', shafts:[3.150,3.543]},
+  {maxHP:30,  frame:'FA127', shafts:[3.543,3.937]},
+  {maxHP:40,  frame:'FA137', shafts:[3.937,4.331]},
+  {maxHP:60,  frame:'FA147', shafts:[4.331,4.921]},
+  {maxHP:100, frame:'FA157', shafts:[4.921,5.512]},
+];
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function nv(id, def=0) {
+  const v = parseFloat(document.getElementById(id)?.value);
+  return isNaN(v) ? def : v;
+}
+function sv(id) { return document.getElementById(id)?.value ?? ''; }
+function getVal(id) { return sv(id); }
+
+function fmt(v, dec=2) {
+  if (v === null || v === undefined || isNaN(v) || !isFinite(v)) return '—';
+  return Number(v).toFixed(dec);
+}
+
+function badge(text, cls) {
+  return `<span class="badge ${cls}">${text}</span>`;
+}
+
+function resultRow(label, val, unit, extra) {
+  return `<div class="result-row">
+    <span class="label">${label}</span>
+    <span class="val">${val}</span>
+    <span class="unit">${unit}</span>
+    <span>${extra}</span>
+  </div>`;
+}
+
+function checkRow(label, allow, actual, pass) {
+  return `<div class="result-row">
+    <span class="label">${label}</span>
+    <span class="val ${pass ? 'highlight-ok' : 'highlight-fail'}">${actual}</span>
+    <span class="unit"></span>
+    <span>${badge(pass ? 'PASS' : 'FAIL', pass ? 'ok' : 'fail')}</span>
+  </div>`;
+}
+
+function toggleSec(id) {
+  const body = document.getElementById(id);
+  const tog  = document.getElementById('tog-' + id.replace('sec-',''));
+  if (!body) return;
+  const collapsed = body.classList.toggle('collapsed');
+  if (tog) tog.style.transform = collapsed ? '' : 'rotate(90deg)';
+}
+
 function autoFillDischargeWidth() {
   const nScrews = parseInt(document.getElementById('qty_lb_screws')?.value) || 0;
   const dia     = parseInt(document.getElementById('lb_screw_dia_in')?.value) || 0;
@@ -455,290 +371,324 @@ function autoFillDischargeWidth() {
   const entry   = LB_WIDTH_TABLE[key];
   const wField  = document.getElementById('discharge_wid_in');
   if (entry && wField && !wField.dataset.manualOverride) {
-    wField.value = (entry[0] * 12).toFixed(3);  // convert ft → in
+    wField.value = (entry[0] * 12).toFixed(3);
   }
 }
 
-function nv(id, def=0) {
-  const v = parseFloat(document.getElementById(id)?.value);
-  return isNaN(v) ? def : v;
-}
-function sv(id) { return document.getElementById(id)?.value ?? ''; }
-function cb(id) { return document.getElementById(id)?.checked ?? false; }
-
-function set(id, text) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.textContent = (text === null || text === undefined || text === '') ? '—' : String(text);
-}
-
-function setClass(id, cls) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.className = cls;
-}
-
-function fmt(v, dec=2) {
-  if (v === null || isNaN(v) || !isFinite(v)) return '—';
-  return v.toFixed(dec);
-}
-
-// ─── Incline factor R — interpolated from CEMA table (Torsion&Bending sheet14)
-// Table: incline(deg) → R factor (full-pitch shafted, horizontal=1.0)
+// Incline factor R — interpolated from CEMA table
 const R_TABLE = [[0,1.0],[10,0.9],[15,0.7],[20,0.55],[25,0.42],[30,0.3],[35,0.22],[40,0.15],[45,0.10]];
-function inlineR(incline_deg) {
-  if (incline_deg <= 0) return 1.0;
-  for (let i = 1; i < R_TABLE.length; i++) {
-    const [x0, y0] = R_TABLE[i-1], [x1, y1] = R_TABLE[i];
-    if (incline_deg <= x1)
-      return y0 + (incline_deg - x0) / (x1 - x0) * (y1 - y0);
+function inlineR(deg) {
+  if (deg <= 0) return 1.0;
+  for (let i=1; i<R_TABLE.length; i++) {
+    const [x0,y0]=R_TABLE[i-1],[x1,y1]=R_TABLE[i];
+    if (deg <= x1) return y0 + (deg-x0)/(x1-x0)*(y1-y0);
   }
   return R_TABLE[R_TABLE.length-1][1];
 }
 
+// ─── Main calc ────────────────────────────────────────────────────────────────
+
 function calculate() {
-  // ── Project header ──────────────────────────────────────────────────────────
-  set('out_plant',    sv('plant_name'));
-  set('out_engineer', sv('engineer'));
-  set('out_date',     sv('date_field'));
-  set('out_rev',      sv('rev'));
+  const proj_no   = sv('projNo');
+  const customer  = sv('customer');
+  const location  = sv('location');
+  const engineer  = sv('engineer');
+  const proj_date = sv('proj_date');
+  const revision  = sv('revision');
 
-  // ── Raw inputs ──────────────────────────────────────────────────────────────
-  const OAL_in  = nv('oal_in');         // Overall length (in)
-  const OAW_in  = nv('oaw_in');         // Overall width (in)
-  const OAH_in  = nv('oah_in');         // Overall height (in)
-  const slope   = nv('side_slope_deg', 65);  // Side slope (deg from horiz, must >60)
-  const reqVol  = nv('req_volume_yds');  // Required usable volume (yd³)
-  const dLen_in = nv('discharge_len_in'); // Discharge opening length (in)
-  const dWid_in = nv('discharge_wid_in'); // Discharge opening width (in)
+  const OAL_in  = nv('oal_in');
+  const OAW_in  = nv('oaw_in');
+  const OAH_in  = nv('oah_in');
+  const slope   = nv('side_slope_deg', 65);
+  const reqVol  = nv('req_volume_yds');
+  const dLen_in = nv('discharge_len_in');
+  const dWid_in = nv('discharge_wid_in');
   const density = nv('density_lbft3', 60);
-  const flowrate = nv('flowrate_lbhr');   // lb/hr total
-  const angRepos = nv('angle_repose_deg', 38);
+  const flowrate= nv('flowrate_lbhr');
+  const angRepos= nv('angle_repose_deg', 38);
   const X       = nv('qty_lb_screws', 2);
-  const D       = nv('lb_screw_dia_in', 14);  // flight OD (in)
+  const D       = nv('lb_screw_dia_in', 14);
   const NPS     = nv('lb_pipe_nps', 6);
-  const P       = nv('lb_screw_pitch_in', 14); // pitch (in)
-  const L_ft    = nv('discharge_len_in') / 12; // discharge length for HP (ft, same as dLen)
-  const incline = 0;   // LB screws always horizontal
+  const P       = nv('lb_screw_pitch_in', 14);
+  const incline = 0;  // LB screws always horizontal
 
-  // ── VOLUME CHECK ────────────────────────────────────────────────────────────
-  const OAL_ft = OAL_in / 12;
-  const OAW_ft = OAW_in / 12;
-  const OAH_ft = OAH_in / 12;
+  const OAL_ft  = OAL_in  / 12;
+  const OAW_ft  = OAW_in  / 12;
+  const OAH_ft  = OAH_in  / 12;
   const dLen_ft = dLen_in / 12;
   const dWid_ft = dWid_in / 12;
 
-  // Side slope check
+  // ── Slope warning ──────────────────────────────────────────────────────────
   const slopeOK = slope > 60;
-  set('out_slope_check', slopeOK ? 'PASS — slope > 60°' : 'FAIL — must be > 60°');
-  setClass('out_slope_check', slopeOK ? 'pass' : 'fail');
+  const warnEl = document.getElementById('slope-warn');
+  if (warnEl) warnEl.style.display = slopeOK ? 'none' : 'block';
 
-  let v_usable_yds = null, v_total_yds = null, v_pct = null;
-  let v_pyr = null, v_rect = null;
+  // ── Volume check ──────────────────────────────────────────────────────────
+  let v_usable_yds=null, v_total_yds=null, v_pct=null, v_pyr=null, v_rect=null;
+  let H_out=null, I_out=null, Lv_out=null, M_out=null;
 
-  if (OAL_ft > 0 && OAW_ft > 0 && OAH_ft > 0 && dLen_ft >= 0 && dWid_ft >= 0 && slope > 0) {
-    // H = front horiz dist to bend = (OAL - dLen) / 2
-    const H = (OAL_ft - dLen_ft) / 2;
-    // I = side horiz dist to bend = (OAW - dWid) / 2
-    const I = (OAW_ft - dWid_ft) / 2;
-    // L = vertical height of sloped section (governed by narrower horizontal)
-    // slope measured from horizontal: L = I * tan(slope)
-    // Verified: stored scenario I=4.0833, slope=60° → L=7.0725 ✓
-    const slopeRad = slope * Math.PI / 180;
-    const Lv = I * Math.tan(slopeRad);  // vertical sloped section height (ft)
-    const M  = OAH_ft - Lv;             // upper straight section height (ft, may be negative)
-
-    set('out_H_ft', fmt(H, 3));
-    set('out_I_ft', fmt(I, 3));
-    set('out_L_ft', fmt(Lv, 3));
-    set('out_M_ft', fmt(M, 3));
-
-    // Truncated pyramid volume (ft³)
-    // V = (h/3) * (A1 + A2 + sqrt(A1*A2))  where A1=top, A2=bottom
-    const A1 = OAL_ft * OAW_ft;
-    const A2 = dLen_ft * dWid_ft;
-    v_pyr = (Lv / 3) * (A1 + A2 + Math.sqrt(A1 * A2));
-
-    // Upper rectangular volume (ft³) — negative when OAH < sloped height
+  if (OAL_ft>0 && OAW_ft>0 && OAH_ft>0 && dLen_ft>=0 && dWid_ft>=0 && slope>0) {
+    const H   = (OAL_ft - dLen_ft) / 2;
+    const I   = (OAW_ft - dWid_ft) / 2;
+    const sRad= slope * Math.PI / 180;
+    const Lv  = I * Math.tan(sRad);
+    const M   = OAH_ft - Lv;
+    const A1  = OAL_ft * OAW_ft;
+    const A2  = dLen_ft * dWid_ft;
+    v_pyr  = (Lv / 3) * (A1 + A2 + Math.sqrt(A1 * A2));
     v_rect = OAL_ft * OAW_ft * M;
-
-    // Usable volume = pyramid + upper rect (cones are small dead-zone correction, omitted Phase 2)
     const v_usable_ft3 = v_pyr + v_rect;
     v_usable_yds = v_usable_ft3 / 27;
-
-    // Total (air) volume — full OAL×OAW box
-    const v_total_ft3 = OAL_ft * OAW_ft * OAH_ft;
-    v_total_yds = v_total_ft3 / 27;
-    v_pct = v_usable_ft3 / v_total_ft3 * 100;
-
-    set('out_v_pyr',    fmt(v_pyr,  1));
-    set('out_v_rect',   fmt(v_rect, 1));
-    set('out_v_usable', fmt(v_usable_yds, 1));
-    set('out_v_total',  fmt(v_total_yds, 1));
-    set('out_v_pct',    fmt(v_pct, 1));
-  } else {
-    ['out_H_ft','out_I_ft','out_L_ft','out_M_ft',
-     'out_v_pyr','out_v_rect','out_v_usable','out_v_total','out_v_pct'].forEach(id => set(id, ''));
+    v_total_yds  = (OAL_ft * OAW_ft * OAH_ft) / 27;
+    v_pct        = v_usable_ft3 / (OAL_ft * OAW_ft * OAH_ft) * 100;
+    H_out=H; I_out=I; Lv_out=Lv; M_out=M;
   }
 
-  set('out_v_req', reqVol ? fmt(reqVol, 1) : '');
-  if (v_usable_yds !== null && reqVol > 0) {
-    const volOK = v_usable_yds >= reqVol;
-    set('out_v_check', volOK
-      ? `PASS — ${fmt(v_usable_yds,1)} yd³ ≥ ${reqVol} yd³ required`
-      : `FAIL — ${fmt(v_usable_yds,1)} yd³ < ${reqVol} yd³ required`);
-    setClass('out_v_check', volOK ? 'pass' : 'fail');
-  } else {
-    set('out_v_check', '');
-    setClass('out_v_check', '');
-  }
+  const volOK = v_usable_yds !== null && reqVol > 0 ? v_usable_yds >= reqVol : null;
 
-  // ── LB SCREW CAPACITY & SPEED ────────────────────────────────────────────────
-  // Source: Torsion&Bending sheet14 / Capacity sheet8
-  // Verified hand-calc: 14" screw, NPS6, P=14, 2 screws, 60000 lb/hr, density=60
-  //   → v=500 ft³/hr, cap_rev=58.074, N=8.610 rpm ✓
+  // ── LB screw sizing ───────────────────────────────────────────────────────
+  const d = PIPE_OD[NPS] ?? 0;
+  const R = inlineR(incline);
+  const C1=1.0, CF2=1.0;
+  let N_rpm=null, HPf=null, HPm=null, HPi=null, Fo=null;
+  let hp_per_screw=null, hp_total=null, hp_selected=null, Fd=null;
+  let req_torque_inlb=null, sew_frame=null, sew_ratio=null;
 
-  const d = PIPE_OD[NPS] ?? 0;   // pipe OD = flight ID (in) — Lesson #1: verified table
-  set('out_pipe_od', d ? fmt(d, 3) : '');
-
-  const R = inlineR(incline);   // incline factor (LB = horizontal → R=1.0)
-  const C1 = 1.0;   // shaftless mass flow factor: standard shafted = 1.0
-  const CF2 = 1.0;  // special flight factor: full-pitch standard = 1.0
-  set('out_R', fmt(R, 3));
-
-  let N_rpm = null, HPf = null, HPm = null, HPi = null, Fo = null;
-  let hp_per_screw = null, hp_total = null, hp_selected = null;
-
-  if (flowrate > 0 && density > 0 && X > 0 && D > 0 && d > 0 && P > 0) {
-    const m_per_screw = flowrate / X;           // lb/hr per screw
-    const v_per_screw = m_per_screw / density;  // ft³/hr per screw
-    set('out_v_per_screw', fmt(v_per_screw, 2));
-
-    // Capacity per revolution (ft³/hr/rpm)
-    // = 0.7854 * (D² - d²) * P * K/100 * C1 * R * 60 / 1728 / CF2
-    // K=100% for live bottom (full loading)
+  if (flowrate>0 && density>0 && X>0 && D>0 && d>0 && P>0) {
+    const m_per_screw = flowrate / X;
+    const v_per_screw = m_per_screw / density;
     const cap_rev = 0.7854 * (D*D - d*d) * P * 1.0 * C1 * R * 60 / 1728 / CF2;
-    set('out_cap_rev', fmt(cap_rev, 4));
-
     N_rpm = cap_rev > 0 ? v_per_screw / cap_rev : null;
-    set('out_N_rpm', N_rpm !== null ? fmt(N_rpm, 2) : '');
 
-    // ── HP CALC (Weight sheet15 CEMA feeder method) ────────────────────────────
-    // Verified: scenario above → HPf=0.01353, HPm=0.9000, HPi=0.1132, HP/screw=2.179 ✓
-    const L_hp  = dLen_in / 12;   // discharge opening length = feeder length (ft)
-    const Cv    = v_per_screw * X; // total capacity (ft³/hr) — H21 = P31*H8
-    const Fm    = 1.5;             // material factor (hardcoded in spreadsheet H20)
-    const e     = 95;              // drive efficiency % (hardcoded H14)
+    const L_hp = dLen_in / 12;
+    const Cv   = v_per_screw * X;
+    const Fm   = 1.5;
+    const e    = 95;
+    Fd = 0.454707 * D*D - 1.34425 * D + 8.27145;
+    const Fb = 1.0;
+    const Fi = 1.0;  // horizontal
 
-    // Diameter factor Fd = 0.454707*D² - 1.34425*D + 8.27145
-    const Fd = 0.454707 * D * D - 1.34425 * D + 8.27145;
-    const Fb = 1.0;   // bearing factor: roller/ball = 1.0 (H29 SUM of bearing type flags)
-    const Fi = inlineR(incline) === 1.0 ? 1.0 : // incline factor Fi from sheet15 table
-               (() => {
-                 // Fi table: 0→1, 5→1.15, 10→1.25, 15→1.5, 20→1.6, 25→1.7, 30→1.8, 35→1.9, 45→2.0
-                 const FI = [[0,1],[5,1.15],[10,1.25],[15,1.5],[20,1.6],[25,1.7],[30,1.8],[35,1.9],[45,2.0]];
-                 for (let i=1;i<FI.length;i++) {
-                   const [x0,y0]=FI[i-1],[x1,y1]=FI[i];
-                   if (incline<=x1) return y0+(incline-x0)/(x1-x0)*(y1-y0);
-                 }
-                 return 2.0;
-               })();
-
-    set('out_Fd', fmt(Fd, 3));
-
-    // HPf = L * N * Fd * Fb / 1,000,000
-    HPf = L_hp * N_rpm * Fd * Fb / 1_000_000;
-
-    // HPm = (Cv/X) * density * L * Fm / 1,000,000
+    HPf = N_rpm !== null ? L_hp * N_rpm * Fd * Fb / 1_000_000 : null;
     HPm = (Cv / X) * density * L_hp * Fm / 1_000_000;
 
-    // Hpi inlet section — P20 = (AE17/Cv)/AE15
-    // AE10 = ((D+1)*X + (D+1)*X*(1/3)) / 12   outlet dimension (ft)
-    // AE13 = density * AE10 * 1.7 / 1          outlet pressure (psf)
-    // AE15 = AE10 * P                           area term (ft * in)
-    // AE14 = AE13 * AE15                        vertical load
-    // AE17 = AE14 * 1                           (P23=1)
-    // P20  = (AE17 / Cv) / AE15                effective head pressure
-    const AE10 = ((D + 1) * X + (D + 1) * X * (1/3)) / 12;
+    const AE10 = ((D+1)*X + (D+1)*X*(1/3)) / 12;
     const AE13 = density * AE10 * 1.7;
     const AE15 = AE10 * P;
     const AE17 = AE13 * AE15;
     const P20  = Cv > 0 ? (AE17 / Cv) / AE15 : 0;
+    HPi = N_rpm !== null
+      ? Math.tan(angRepos * Math.PI / 180) * P20 * density * D * L_hp * P * N_rpm / 12 / 12 / 33000
+      : null;
 
-    HPi = Math.tan(angRepos * Math.PI / 180) * P20 * density * D * L_hp * P * N_rpm / 12 / 12 / 33000;
+    if (HPf !== null && HPm !== null && HPi !== null) {
+      const HP_sum = HPf + HPm + HPi;
+      const Fo_raw = HP_sum > 0 ? 2.033 - 1.45 * Math.log10(HP_sum) : 2.033;
+      Fo = Math.max(1.0, Fo_raw);
+      hp_per_screw = (HPf + HPm * Fi + HPi) * Fo / e * 100;
+      hp_total     = hp_per_screw * X;
+      hp_selected  = STD_HP.find(h => h >= hp_per_screw) ?? STD_HP[STD_HP.length-1];
 
-    set('out_HPf', fmt(HPf, 5));
-    set('out_HPm', fmt(HPm, 5));
-    set('out_HPi', fmt(HPi, 5));
-
-    const HP_sum = HPf + HPm + HPi;
-    const Fo_raw = HP_sum > 0 ? 2.033 - 1.45 * Math.log10(HP_sum) : 2.033;
-    Fo = Math.max(1.0, Fo_raw);
-    set('out_Fo', fmt(Fo, 4));
-
-    hp_per_screw = (HPf + HPm * Fi + HPi) * Fo / e * 100;
-    hp_total = hp_per_screw * X;
-    hp_selected = STD_HP.find(h => h >= hp_per_screw) ?? STD_HP[STD_HP.length-1];
-
-    set('out_hp_per_screw', fmt(hp_per_screw, 3));
-    set('out_hp_total',     fmt(hp_total, 3));
-    set('out_hp_selected',  hp_selected + ' HP');
-  } else {
-    ['out_v_per_screw','out_cap_rev','out_N_rpm','out_Fd',
-     'out_HPf','out_HPm','out_HPi','out_Fo',
-     'out_hp_per_screw','out_hp_total','out_hp_selected'].forEach(id => set(id, ''));
+      // SEW FAZ recommendation — parallel shaft, B14 flange
+      if (hp_selected && N_rpm) {
+        req_torque_inlb = N_rpm > 0 ? 63025 * hp_per_screw / N_rpm : null;
+        sew_frame = SEW_FAZ_FRAME.find(f =>
+          f.maxHP >= hp_selected &&
+          (req_torque_inlb === null || true)
+        ) || null;
+        // Pick nearest standard ratio to achieve N_rpm from 1750 RPM motor
+        const req_ratio = N_rpm > 0 ? 1750 / N_rpm : null;
+        if (req_ratio) {
+          sew_ratio = SEW_FAZ_RATIOS.reduce((best, r) =>
+            Math.abs(r - req_ratio) < Math.abs(best - req_ratio) ? r : best
+          );
+        }
+      }
+    }
   }
 
-  // ── Structural placeholders (Phase 3) ────────────────────────────────────────
-  set('out_drive_shaft_dia', fmt(nv('lb_drive_shaft_dia', 3.4375), 4));
+  // ── RENDER ────────────────────────────────────────────────────────────────
+  let html = '';
 
-  // ── Summary ─────────────────────────────────────────────────────────────────
-  set('out_title',    'Hopper Design' + (sv('plant_name') ? ' — ' + sv('plant_name') : ''));
-  set('sum_plant',    sv('plant_name'));
-  const loc = [sv('city'), sv('state')].filter(Boolean).join(', ');
-  set('sum_location', loc);
-  set('sum_engineer', sv('engineer'));
-  set('sum_date',     sv('date_field'));
-  set('sum_rev',      sv('rev'));
-  set('sum_qty_hoppers', nv('qty_hoppers', 1));
+  // Project header
+  html += `<div class="project-header">
+    <h2>Hopper Design Sheet</h2>
+    <div class="project-meta">
+      <span><strong>Project No.:</strong> ${proj_no || '—'}</span>
+      <span><strong>Engineer:</strong> ${engineer || '—'}</span>
+      <span><strong>Location:</strong> ${location || '—'}</span>
+      <span><strong>Date:</strong> ${proj_date || '—'}</span>
+      <span><strong>Customer:</strong> ${customer || '—'}</span>
+      <span><strong>Revision:</strong> ${revision || '—'}</span>
+    </div>
+  </div>`;
 
-  const oal = nv('oal_in'), oaw = nv('oaw_in'), oah = nv('oah_in');
-  set('sum_dims', oal && oaw && oah ? `${oal} × ${oaw} × ${oah}` : '');
-  set('sum_mat',  sv('mat_construction'));
-  set('sum_lb_screws', `${nv('qty_lb_screws',2)} × ${nv('lb_screw_dia_in',14)} in`);
-  set('sum_req_vol', reqVol ? reqVol + ' yd³' : '');
-  set('sum_v_usable', v_usable_yds !== null ? fmt(v_usable_yds,1) + ' yd³' : '');
-  set('sum_N',    N_rpm !== null ? fmt(N_rpm,2) + ' rpm' : '');
-  set('sum_hp',   hp_per_screw !== null ? `${fmt(hp_per_screw,2)} / ${fmt(hp_total,2)} HP` : '');
-  set('sum_hp_sel', hp_selected ? hp_selected + ' HP' : '');
+  // Row 1: Volume Check + Hopper Summary side by side
+  html += `<div class="two-col">
+  <div class="result-box">
+  <h2>1. Volume Check</h2>
+  ${resultRow('OAL × OAW × OAH', OAL_in && OAW_in && OAH_in ? `${OAL_in}" × ${OAW_in}" × ${OAH_in}"` : '—', '', '')}
+  ${resultRow('H (front bend dist)', H_out !== null ? fmt(H_out,3) : '—', 'ft', '')}
+  ${resultRow('I (side bend dist)', I_out !== null ? fmt(I_out,3) : '—', 'ft', '')}
+  ${resultRow('L (sloped height)', Lv_out !== null ? fmt(Lv_out,3) : '—', 'ft', '')}
+  ${resultRow('M (straight height)', M_out !== null ? fmt(M_out,3) : '—', 'ft', '')}
+  ${resultRow('Pyramid Vol.', v_pyr !== null ? fmt(v_pyr,1) : '—', 'ft³', '')}
+  ${resultRow('Rect. Vol.', v_rect !== null ? fmt(v_rect,1) : '—', 'ft³', '')}
+  ${resultRow('Usable Volume', v_usable_yds !== null ? fmt(v_usable_yds,1) : '—', 'yd³', '')}
+  ${resultRow('Total (Air) Vol.', v_total_yds !== null ? fmt(v_total_yds,1) : '—', 'yd³', '')}
+  ${resultRow('% Utilization', v_pct !== null ? fmt(v_pct,1)+'%' : '—', '', '')}
+  <hr style="border:none;border-top:1px solid #d0d4dc;margin:6px 0">
+  ${checkRow('Side Slope &gt; 60°', '', fmt(slope,1)+'°', slopeOK)}
+  ${volOK !== null ? checkRow('Volume ≥ Required', fmt(reqVol,0)+' yd³ req.', fmt(v_usable_yds,1)+' yd³', volOK) : resultRow('Volume Check', '—', '', '')}
+  </div>
+
+  <div class="result-box">
+  <h2>2. Hopper Config</h2>
+  ${resultRow('Qty Hoppers', nv('qty_hoppers',1), '#', '')}
+  ${resultRow('Material', sv('mat_construction'), '', '')}
+  ${resultRow('Qty LB Screws', X, '#', '')}
+  ${resultRow('LB Screw Dia', D+'"', '', '')}
+  ${resultRow('Discharge Length', dLen_in ? dLen_in+'"' : '—', '', '')}
+  ${resultRow('Discharge Width', dWid_in ? fmt(dWid_in,2)+'"' : '—', '', '')}
+  ${resultRow('Qty Dist. Screws', nv('qty_dist_screws',2), '#', '')}
+  ${resultRow('Inlets per Screw', nv('inlets_per_screw',4), '#', '')}
+  ${resultRow('Flowrate', flowrate ? fmt(flowrate,0) : '—', 'lb/hr', '')}
+  ${resultRow('Density', density, 'lb/ft³', '')}
+  ${resultRow('Angle of Repose', angRepos+'°', '', '')}
+  ${resultRow('Area Class', sv('area_class') || '—', '', '')}
+  </div>
+  </div>`;
+
+  // Row 2: LB Screw Capacity + HP side by side
+  html += `<div class="two-col">
+  <div class="result-box">
+  <h2>3. LB Screw Sizing</h2>
+  ${resultRow('Pipe OD (d)', d ? fmt(d,3) : '—', 'in', '')}
+  ${resultRow('Incline Factor R', fmt(R,3), '—', '')}
+  ${resultRow('Cap. per Rev.', flowrate && N_rpm !== null ? fmt(flowrate/X/N_rpm,4) : '—', 'ft³/rev', '')}
+  <div class="result-row"><span class="label" style="font-weight:700">Speed N</span><span class="val" style="color:#003366">${N_rpm !== null ? fmt(N_rpm,2) : '—'}</span><span class="unit">rpm</span><span>${N_rpm !== null && N_rpm < 20 ? badge('OK','ok') : N_rpm !== null ? badge('CHECK','warn') : ''}</span></div>
+  ${resultRow('Diam. Factor Fd', Fd !== null ? fmt(Fd,3) : '—', '—', '')}
+  </div>
+
+  <div class="result-box">
+  <h2>4. HP &amp; Motor</h2>
+  ${resultRow('HPf (friction)', HPf !== null ? fmt(HPf,5) : '—', 'HP', '')}
+  ${resultRow('HPm (material)', HPm !== null ? fmt(HPm,5) : '—', 'HP', '')}
+  ${resultRow('HPi (inlet)', HPi !== null ? fmt(HPi,5) : '—', 'HP', '')}
+  ${resultRow('Overload Factor Fo', Fo !== null ? fmt(Fo,4) : '—', '—', '')}
+  <hr style="border:none;border-top:1px solid #d0d4dc;margin:6px 0">
+  <div class="result-row"><span class="label" style="font-weight:700">HP / Screw</span><span class="val" style="color:#003366">${hp_per_screw !== null ? fmt(hp_per_screw,3) : '—'}</span><span class="unit">HP</span><span></span></div>
+  ${resultRow('Total HP (all screws)', hp_total !== null ? fmt(hp_total,3) : '—', 'HP', '')}
+  <div class="result-row"><span class="label" style="font-weight:700">Selected Motor</span><span class="val" style="color:#003366;font-size:15px">${hp_selected ?? '—'}</span><span class="unit">HP</span><span>${hp_selected ? badge('STD','ok') : ''}</span></div>
+  </div>
+  </div>`;
+
+  // Structural — Phase 3 stub
+  html += `<div class="result-box">
+  <h2>5. Structural — Shaft &amp; Torsional Ratings</h2>
+  <div class="stub-note">Phase 3 — Not yet implemented. Will calculate: min drive shaft diameter at rated and yield stress, pipe torque rating, drive shaft torque rating, full motor torque. Sources: Live Bottom Sizing (sheet17) and Torsion &amp; Bending (sheet14).</div>
+  ${resultRow('Provided Drive Shaft Ø', fmt(nv('lb_drive_shaft_dia',3.4375),4), 'in', badge('pending','na'))}
+  ${resultRow('Provided Driven Shaft Ø', fmt(nv('lb_driven_shaft_dia',3.4375),4), 'in', badge('pending','na'))}
+  </div>`;
+
+  // SEW FAZ recommendation — full width
+  html += `<div class="result-box" style="border-left:3px solid #003366">
+  <h2>SEW-Eurodrive Gearmotor Recommendation (FA Series)</h2>`;
+  if (sew_frame && sew_ratio && hp_selected) {
+    html += `<div class="sew-grid" style="margin-top:4px">
+    <div>
+      ${resultRow('Recommended Frame', `<strong>${sew_frame.frame}</strong>`, '', '')}
+      ${resultRow('Catalog HP', sew_frame.maxHP+' HP', '', '')}
+      ${resultRow('Nearest Std Ratio', fmt(sew_ratio,2)+':1', '', '')}
+      ${resultRow('Output Speed', N_rpm !== null ? fmt(1750/sew_ratio,1) : '—', 'RPM', '')}
+    </div>
+    <div>
+      ${resultRow('Required HP', hp_selected+' HP (≥'+fmt(hp_per_screw,2)+')', '', '')}
+      ${resultRow('Required Speed', N_rpm !== null ? fmt(N_rpm,1) : '—', 'RPM', '')}
+      ${resultRow('Required Ratio', N_rpm !== null ? fmt(1750/N_rpm,1)+':1' : '—', '', '')}
+    </div>
+    </div>
+    <div class="note" style="margin-top:6px">Parallel shaft B14 flange mount (FA/FAZ series). Confirm ratio and f<sub>B</sub> ≥ 1.4 in SEW DriveSelect (60Hz US). Verify hollow bore vs. drive shaft (${fmt(nv('lb_drive_shaft_dia',3.4375),4)}").</div>`;
+  } else {
+    html += `<div class="note">Enter flowrate, screw configuration, and discharge length to generate SEW recommendation.</div>`;
+  }
+  html += `<div style="font-size:11px;color:#888;margin-top:6px;font-style:italic">Frame is approximate — verify in SEW DriveSelect or catalog.<br>
+  <a href="https://www.seweurodrive.com/home.html" target="_blank" rel="noopener" style="color:#003366;font-style:normal;font-weight:600">→ SEW-EURODRIVE</a>
+  &nbsp;|&nbsp;
+  <a href="https://www.seweurodrive.com/os/ecs/?language=en_US" target="_blank" rel="noopener" style="color:#003366;font-style:normal;font-weight:600">→ SEW DriveSelect</a>
+  </div></div>`;
+
+  // Pricing / Cost — Phase 4 stub
+  html += `<div class="result-box">
+  <h2>6. Pricing &amp; Cost Output</h2>
+  <div class="stub-note">Phase 4 — Pricing CSVs not yet committed to <code>pricing/</code>. See <code>pricing/README.md</code> for schema and refresh workflow. Cost line items: engineering, hopper steel, passivation, slide gates, LB screws, bearings/seals/shafts, controls, accessories, freight.</div>
+  </div>`;
+
+  // Footer
+  html += `<div class="footer-bar">HOPPER DESIGN SHEET &nbsp;|&nbsp; LIVE-BOTTOM BIOSOLIDS &nbsp;|&nbsp; REV. ${revision || '—'} &nbsp;|&nbsp; ${proj_date || '—'}</div>`;
+
+  document.getElementById('output-panel').innerHTML = html;
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+
+function onMaterialChange() {
+  const mat = sv('material');
+  const densityMap = {
+    'Biosolids (Wet Cake)': 60,
+    'Biosolids (Dry)':      45,
+    'Lime':                 60,
+    'Grit':                 80,
+    'Screenings':           45,
+    'Other':                60,
+  };
+  const reposMap = {
+    'Biosolids (Wet Cake)': 38,
+    'Biosolids (Dry)':      38,
+    'Lime':                 40,
+    'Grit':                 35,
+    'Screenings':           40,
+    'Other':                38,
+  };
+  const d = densityMap[mat];
+  const r = reposMap[mat];
+  if (d) { const el=document.getElementById('density_lbft3'); if(el) el.value=d; }
+  if (r) { const el=document.getElementById('angle_repose_deg'); if(el) el.value=r; }
+  calculate();
 }
 
 function resetToDefaults() {
-  document.getElementById('qty_hoppers').value        = 1;
-  document.getElementById('side_slope_deg').value     = 65;
-  document.getElementById('angle_repose_deg').value   = 38;
-  document.getElementById('density_lbft3').value      = 60;
-  document.getElementById('qty_dist_screws').value    = 2;
-  document.getElementById('inlets_per_screw').value   = 4;
-  document.getElementById('qty_lb_screws').value      = 2;
-  document.getElementById('lb_screw_dia_in').value    = 14;
-  document.getElementById('lb_pipe_nps').value        = 6;
-  document.getElementById('lb_screw_pitch_in').value  = 14;
-  document.getElementById('lb_drive_shaft_dia').value = 3.4375;
-  document.getElementById('lb_driven_shaft_dia').value= 3.4375;
-  document.getElementById('stiff_top_spacing').value  = 48;
+  document.getElementById('qty_hoppers').value         = 1;
+  document.getElementById('side_slope_deg').value      = 65;
+  document.getElementById('qty_lb_screws').value       = 2;
+  document.getElementById('lb_screw_dia_in').value     = 14;
+  document.getElementById('lb_screw_pitch_in').value   = 14;
+  document.getElementById('lb_pipe_nps').value         = 6;
+  document.getElementById('lb_drive_shaft_dia').value  = 3.4375;
+  document.getElementById('lb_driven_shaft_dia').value = 3.4375;
+  document.getElementById('qty_dist_screws').value     = 2;
+  document.getElementById('inlets_per_screw').value    = 4;
   document.getElementById('stiff_spacing_straight').value = 36;
   document.getElementById('stiff_spacing_angled').value   = 24;
-  document.getElementById('qty_legs').value           = 4;
-  document.getElementById('shop_assembled').checked   = true;
+  document.getElementById('qty_legs').value            = 4;
+  document.getElementById('material').value            = 'Biosolids (Wet Cake)';
   const dw = document.getElementById('discharge_wid_in');
   if (dw) delete dw.dataset.manualOverride;
+  onMaterialChange();
   autoFillDischargeWidth();
   calculate();
 }
 
-autoFillDischargeWidth();
-calculate();
+document.addEventListener('DOMContentLoaded', () => {
+  // Set today's date
+  const d = new Date();
+  const iso = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const dateEl = document.getElementById('proj_date');
+  if (dateEl && !dateEl.value) dateEl.value = iso;
+
+  resetToDefaults();
+  autoFillDischargeWidth();
+  calculate();
+});
 </script>
 </body>
 </html>
