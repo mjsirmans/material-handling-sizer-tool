@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bio-Hopper Design Calculator</title>
+<title>Hopper Design Calculator</title>
 <style>
 :root {
   --navy: #1a2744;
@@ -74,7 +74,7 @@ details { margin-bottom: 6px; }
 <!-- ===== LEFT PANEL: INPUT FORM ===== -->
 <div class="form-panel">
   <div class="dev-banner">⚠ DEV — Phase 2 calcs live (volume, LB sizing, HP). Structural/cost modules pending.</div>
-  <h1>Bio-Hopper Design</h1>
+  <h1>Hopper Design</h1>
   <div class="btn-bar">
     <button class="btn btn-primary" onclick="window.print()">Print / Save as PDF</button>
     <button class="btn btn-secondary" onclick="resetToDefaults()">Reset to Defaults</button>
@@ -283,7 +283,7 @@ details { margin-bottom: 6px; }
 
   <!-- Project Header -->
   <div class="project-header">
-    <h2 id="out_title">Bio-Hopper Design</h2>
+    <h2 id="out_title">Hopper Design</h2>
     <div class="project-meta">
       <span>Plant: <strong id="out_plant">—</strong></span>
       <span>Engineer: <strong id="out_engineer">—</strong></span>
@@ -419,7 +419,7 @@ details { margin-bottom: 6px; }
     <tr><td>Selected Motor HP</td><td id="sum_hp_sel">—</td></tr>
   </table>
 
-  <div class="footer-bar">Bio-HOPPER Design Calculator — JMS Equipment | Phase 2 — Volume &amp; LB Screw Sizing</div>
+  <div class="footer-bar">Hopper Design Calculator | Phase 2 — Volume &amp; LB Screw Sizing</div>
 </div><!-- /output-panel -->
 
 </div><!-- /app -->
@@ -436,7 +436,7 @@ const PIPE_OD = {
 // Standard motor HP sizes
 const STD_HP = [1, 1.5, 2, 3, 5, 7.5, 10, 15, 20, 25, 30, 40, 50, 60, 75, 100, 125, 150, 200];
 
-// LB screw discharge width lookup — from JMS Hopper Volume Calculator Table sheet
+// LB screw discharge width lookup — from Hopper Volume Calculator Table sheet
 // Key: numScrews * 100 + screwDiaIn  →  [dischargeWidth_ft, troughHeight_ft]
 // e.g., 2 screws × 16in dia → key 216 → [3.75, 2.25]
 const LB_WIDTH_TABLE = {
@@ -693,7 +693,7 @@ function calculate() {
   set('out_drive_shaft_dia', fmt(nv('lb_drive_shaft_dia', 3.4375), 4));
 
   // ── Summary ─────────────────────────────────────────────────────────────────
-  set('out_title',    'Bio-Hopper Design' + (sv('plant_name') ? ' — ' + sv('plant_name') : ''));
+  set('out_title',    'Hopper Design' + (sv('plant_name') ? ' — ' + sv('plant_name') : ''));
   set('sum_plant',    sv('plant_name'));
   const loc = [sv('city'), sv('state')].filter(Boolean).join(', ');
   set('sum_location', loc);
