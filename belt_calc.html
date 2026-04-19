@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JMS Belt Conveyor Design Calculator</title>
+<title>Belt Conveyor Design Calculator</title>
 <style>
 :root {
   --navy: #1a2744;
@@ -46,6 +46,9 @@ details { margin-bottom: 6px; }
 .form-panel h1 { font-size: 14px; color: var(--navy); margin: 0 0 10px; font-weight: 700; border-bottom: 2px solid var(--navy); padding-bottom: 6px; }
 .footer-bar { background: var(--navy); color: white; padding: 6px 14px; font-size: 11px; font-weight: 600; text-align: center; margin-top: 12px; letter-spacing: 0.5px; }
 .warn { color: #856404; font-size: 11px; }
+.spec-tag { font-size: 9px; font-weight: 600; color: #868e96; letter-spacing: 0.4px; text-transform: uppercase; margin-left: 4px; vertical-align: middle; }
+label.spec { color: #868e96; }
+label.spec input, label.spec select { border-color: #e0e0e0; color: #555; background: #fafafa; }
 .fixit-table { background: #fff8e1; border: 1px solid #ffe082; border-radius: 4px; padding: 8px; margin-top: 8px; font-size: 11px; }
 .fixit-table h4 { margin: 0 0 6px; color: #5f4300; font-size: 12px; }
 .home-link { display: inline-block; font-size: 11px; color: var(--navy); text-decoration: none; margin-bottom: 8px; }
@@ -65,7 +68,7 @@ details { margin-bottom: 6px; }
 <!-- ===== LEFT PANEL: INPUT FORM ===== -->
 <div class="form-panel">
   <a class="home-link" href="index.html">← Back to Tool Index</a>
-  <h1>JMS Belt Conveyor Design</h1>
+  <h1>Belt Conveyor Design</h1>
   <div class="btn-bar">
     <button class="btn btn-primary" onclick="window.print()">Print / Save as PDF</button>
     <button class="btn btn-secondary" onclick="resetToDefaults()">Reset to Defaults</button>
@@ -145,7 +148,6 @@ details { margin-bottom: 6px; }
       </select>
     </label>
     <label>Belt Rating (PIW)<input type="number" id="belt_rating_piw" step="10" min="100" max="2000" oninput="calculate()" onchange="calculate()"></label>
-    <label>Belt Thickness (in)<input type="number" id="belt_thick_in" step="0.03125" min="0.1875" oninput="calculate()" onchange="calculate()"></label>
     <label>Lagging on Head Pulley?
       <select id="lagging" onchange="calculate()">
         <option value="Yes">Yes</option>
@@ -158,12 +160,6 @@ details { margin-bottom: 6px; }
   <!-- 5. Idlers -->
   <details open>
     <summary>5. Idlers</summary>
-    <label>Idler Type
-      <select id="idler_type" onchange="calculate()">
-        <option value="TROUGHING">Troughing</option>
-        <option value="FLAT">Flat</option>
-      </select>
-    </label>
     <label>Idler Roll Diameter (in)
       <select id="idler_roll_dia" onchange="calculate()">
         <option value="5" selected>5"</option>
@@ -171,23 +167,14 @@ details { margin-bottom: 6px; }
       </select>
     </label>
     <label>Carrying Idler Spacing (ft)<input type="number" id="carry_spacing_ft" step="0.5" min="1" max="8" oninput="calculate()" onchange="calculate()"></label>
-    <label>Return Idler Spacing (ft)<input type="number" id="return_spacing_ft" step="1" min="2" max="15" oninput="calculate()" onchange="calculate()"></label>
-    <label>Impact Idler Spacing (ft)<input type="number" id="impact_spacing_ft" step="0.5" min="0.5" oninput="calculate()" onchange="calculate()"></label>
     <label># of Impact Zones<input type="number" id="num_impact_zones" step="1" min="0" oninput="calculate()" onchange="calculate()"></label>
     <label>Length of Impact Zones (ft)<input type="number" id="impact_zone_len_ft" step="1" min="0" oninput="calculate()" onchange="calculate()"></label>
     <label>Height of Material Fall (in)<input type="number" id="fall_height_in" step="1" min="0" oninput="calculate()" onchange="calculate()"></label>
   </details>
 
-  <!-- 6. Pulleys & Drive -->
-  <details>
-    <summary>6. Pulleys &amp; Drive</summary>
-    <label>Head Pulley Diameter (in)<input type="number" id="head_pulley_dia" step="2" min="6" oninput="calculate()" onchange="calculate()"></label>
-    <label>Take-Up Type
-      <select id="takeup_type" onchange="calculate()">
-        <option value="Manual">Manual / Screw</option>
-        <option value="Gravity">Gravity</option>
-      </select>
-    </label>
+  <!-- 6. Drive & Pulleys -->
+  <details open>
+    <summary>6. Drive &amp; Pulleys</summary>
     <label>Drive Arrangement
       <select id="drive_arrangement" onchange="calculate()">
         <option value="Shaft Mounted Drive">Shaft Mounted Drive</option>
@@ -196,8 +183,14 @@ details { margin-bottom: 6px; }
         <option value="V-Belt">V-Belt</option>
       </select>
     </label>
+    <label>Take-Up Type
+      <select id="takeup_type" onchange="calculate()">
+        <option value="Manual">Manual / Screw</option>
+        <option value="Gravity">Gravity</option>
+      </select>
+    </label>
     <label>Motor HP (selected)<input type="number" id="motor_hp" step="1" min="1" oninput="calculate()" onchange="calculate()"></label>
-    <label>Drive Wrap Angle (deg)<input type="number" id="wrap_deg" step="5" min="150" max="240" oninput="calculate()" onchange="calculate()"></label>
+    <label>Head Pulley Diameter (in)<input type="number" id="head_pulley_dia" step="2" min="6" oninput="calculate()" onchange="calculate()"></label>
     <label>Head Pulley Shaft Diameter (in)<input type="number" id="shaft_dia_in" step="0.0625" min="1" oninput="calculate()" onchange="calculate()"></label>
     <label>Shaft Material
       <select id="shaft_material" onchange="calculate()">
@@ -210,42 +203,52 @@ details { margin-bottom: 6px; }
     </label>
     <label>Gearbox Weight (lb)<input type="number" id="gearbox_weight_lb" step="10" min="0" oninput="calculate()" onchange="calculate()"></label>
     <label>Pulley Weight (lb)<input type="number" id="pulley_weight_lb" step="10" min="0" oninput="calculate()" onchange="calculate()"></label>
-    <label>Angle Between Tension &amp; Overhung Load (deg)<input type="number" id="angle_tension_oh_deg" step="5" min="0" max="360" oninput="calculate()" onchange="calculate()"></label>
   </details>
 
-  <!-- 7. Skirtboard & Accessories -->
-  <details>
-    <summary>7. Skirtboard &amp; Accessories</summary>
+  <!-- 7. Accessories (all feed Te directly) -->
+  <details open>
+    <summary>7. Accessories</summary>
     <label>Skirtboard Length — one side (ft)<input type="number" id="skirt_length_ft" step="1" min="0" oninput="calculate()" onchange="calculate()"></label>
     <label>Skirtboard Friction Factor<input type="number" id="skirt_friction" step="0.01" min="0.05" max="0.5" oninput="calculate()" onchange="calculate()"></label>
-    <label>Quantity of Plows
-      <select id="num_plows" onchange="calculate()">
-        <option value="0">0 — None</option>
-        <option value="1">1 — Full V</option>
-        <option value="2">2 — Partial V</option>
-      </select>
-    </label>
     <label>Plow Type
-      <select id="plow_type" onchange="calculate()">
+      <select id="plow_type" onchange="onPlowChange()">
+        <option value="None">None</option>
         <option value="Full V">Full V</option>
         <option value="Partial V">Partial V</option>
-        <option value="None">None</option>
+      </select>
+    </label>
+    <label>Quantity of Plows
+      <select id="num_plows" onchange="calculate()">
+        <option value="0">0</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
       </select>
     </label>
     <label>Quantity of Scrapers<input type="number" id="num_scrapers" step="1" min="0" oninput="calculate()" onchange="calculate()"></label>
   </details>
 
-  <!-- 8. Service & Environment -->
+  <!-- 8. Specifications — scope/spec fields, don't affect calc numbers -->
   <details>
-    <summary>8. Service &amp; Environment</summary>
-    <label>Service Duty
+    <summary>8. Specifications <span class="spec-tag">scope only</span></summary>
+    <label class="spec">Idler Type <span class="spec-tag">spec</span>
+      <select id="idler_type" onchange="calculate()">
+        <option value="TROUGHING">Troughing</option>
+        <option value="FLAT">Flat</option>
+      </select>
+    </label>
+    <label class="spec">Return Idler Spacing (ft) <span class="spec-tag">spec</span><input type="number" id="return_spacing_ft" step="1" min="2" max="15" oninput="calculate()" onchange="calculate()"></label>
+    <label class="spec">Impact Idler Spacing (ft) <span class="spec-tag">spec</span><input type="number" id="impact_spacing_ft" step="0.5" min="0.5" oninput="calculate()" onchange="calculate()"></label>
+    <label class="spec">Belt Thickness (in) <span class="spec-tag">spec</span><input type="number" id="belt_thick_in" step="0.03125" min="0.1875" oninput="calculate()" onchange="calculate()"></label>
+    <label class="spec">Drive Wrap Angle (deg) <span class="spec-tag">spec</span><input type="number" id="wrap_deg" step="5" min="150" max="240" oninput="calculate()" onchange="calculate()"></label>
+    <label class="spec">Angle — Tension vs Overhung Load (deg) <span class="spec-tag">spec</span><input type="number" id="angle_tension_oh_deg" step="5" min="0" max="360" oninput="calculate()" onchange="calculate()"></label>
+    <label class="spec">Service Duty <span class="spec-tag">spec</span>
       <select id="service_duty" onchange="calculate()">
         <option>Light</option>
         <option selected>Standard</option>
         <option>Heavy</option>
       </select>
     </label>
-    <label>Area Classification
+    <label class="spec">Area Classification <span class="spec-tag">spec</span>
       <select id="area_classification" onchange="calculate()">
         <option>NO</option>
         <option>Class 1 Div 1</option>
@@ -254,7 +257,7 @@ details { margin-bottom: 6px; }
         <option>Class 2 Div 2</option>
       </select>
     </label>
-    <label>Drive Notes<input type="text" id="drive_notes"></label>
+    <label class="spec">Drive Notes <span class="spec-tag">spec</span><input type="text" id="drive_notes"></label>
   </details>
 
 </div><!-- end form-panel -->
@@ -309,6 +312,24 @@ const DRIVE_EFF = {
   "V-Belt": 0.93,
 };
 
+// SEW KA series (helical-bevel) shaft-mount gearmotors — US 60Hz NEMA catalog
+// Source: SEW-EURODRIVE DriveSelect, US catalog (60Hz, 1750 RPM base), confirmed ANSI bore sizes
+// Columns: frame, max_hp (at 1750 RPM), max_torque_inlb, bore_in (hollow shaft, standard ANSI)
+const SEW_KA = [
+  { frame: "KA37",  max_hp:  0.5,  max_torque_inlb:   530,  bore_in: 0.75  },
+  { frame: "KA47",  max_hp:  1.0,  max_torque_inlb:  1060,  bore_in: 1.000 },
+  { frame: "KA57",  max_hp:  2.0,  max_torque_inlb:  2120,  bore_in: 1.250 },
+  { frame: "KA67",  max_hp:  3.0,  max_torque_inlb:  3540,  bore_in: 1.375 },
+  { frame: "KA77",  max_hp:  5.0,  max_torque_inlb:  5900,  bore_in: 1.625 },
+  { frame: "KA87",  max_hp:  7.5,  max_torque_inlb:  8850,  bore_in: 1.875 },
+  { frame: "KA97",  max_hp: 10.0,  max_torque_inlb: 11800,  bore_in: 2.125 },
+  { frame: "KA107", max_hp: 15.0,  max_torque_inlb: 17700,  bore_in: 2.375 },
+  { frame: "KA127", max_hp: 20.0,  max_torque_inlb: 28300,  bore_in: 2.875 },
+  { frame: "KA157", max_hp: 30.0,  max_torque_inlb: 44300,  bore_in: 3.375 },
+  { frame: "KA167", max_hp: 40.0,  max_torque_inlb: 63000,  bore_in: 3.750 },
+  { frame: "KA187", max_hp: 60.0,  max_torque_inlb: 88500,  bore_in: 4.500 },
+];
+
 // Idler Ai (force to rotate) — List!AG3:AH4
 // Spot-check: 5" roll dia → Ai = 1.5; 6" → Ai = 1.8
 const IDLER_AI = {5: 1.5, 6: 1.8};
@@ -357,9 +378,9 @@ const DEFAULTS = {
   project_no: "EXAMPLE-001",
   location: "Wastewater Treatment Plant",
   customer: "Example Municipality",
-  engineer: "JMS Engineering",
+  engineer: "",
   description: "Belt Press Discharge - Dewatered Biosolids Conveyor",
-  by: "JMS",
+  by: "",
   date: "2026-04-19",
   revision: "0",
   horiz_length_ft: 60,
@@ -658,6 +679,14 @@ function calculate() {
   const drum_rpm = (speed_fpm * 12) / (Math.PI * drum_dia_lagged);
   const req_torque = drum_rpm > 0 ? 63025 * HPmin / drum_rpm : null;
 
+  // SEW KA gearmotor recommendation
+  // Select smallest frame where max_hp >= HP_std AND max_torque_inlb >= req_torque
+  const ka_frame = SEW_KA.find(f =>
+    f.max_hp >= HP_std &&
+    (req_torque === null || f.max_torque_inlb >= req_torque)
+  ) || null;
+  const ka_output_rpm = ka_frame && drum_rpm > 0 ? drum_rpm : null;
+
   // ===========================================================================
   // BELT SAG CHECK
   // y = ((Si^2 * WmWb) / (8 * To)) * 12   [Design!AU38 in inches]
@@ -770,7 +799,7 @@ function calculate() {
 
   // Project header
   html += `<div class="project-header">
-    <h2>JMS BELT CONVEYOR DESIGN SHEET</h2>
+    <h2>BELT CONVEYOR DESIGN SHEET</h2>
     <div class="project-meta">
       <span><strong>Project No.:</strong> ${proj_no}</span>
       <span><strong>By:</strong> ${by}</span>
@@ -884,6 +913,26 @@ function calculate() {
     html += `</div>`;
   }
 
+  // SEW KA gearmotor recommendation block
+  html += `<div class="section-title">4b. SEW GEARMOTOR RECOMMENDATION (KA Series)</div>`;
+  if (ka_frame) {
+    html += `<table><thead><tr><th>Parameter</th><th>Value</th></tr></thead><tbody>
+      <tr><td>Recommended Frame</td><td><strong>${ka_frame.frame}</strong></td></tr>
+      <tr><td>Catalog HP (max)</td><td>${ka_frame.max_hp} HP</td></tr>
+      <tr><td>Catalog Torque (max)</td><td>${fmt(ka_frame.max_torque_inlb,0)} in-lb</td></tr>
+      <tr><td>Hollow Bore (standard)</td><td>${ka_frame.bore_in}" ANSI</td></tr>
+      <tr><td>Required Motor HP</td><td>${fmt(HP_std,0)} HP (next std ≥ ${fmt(HPmin,2)} HP)</td></tr>
+      <tr><td>Required Output Torque</td><td>${req_torque !== null ? fmt(req_torque,0) + " in-lb" : "—"}</td></tr>
+      <tr><td>Required Output Speed</td><td>${fmt(drum_rpm,1)} RPM</td></tr>
+    </tbody></table>
+    <div style="font-size:11px;color:#495057;margin-top:6px;padding:6px 8px;background:#f8f9fa;border:1px solid #dee2e6;border-radius:4px;">
+      Confirm ratio availability and f<sub>B</sub> ≥ 1.4 in SEW DriveSelect (60Hz US catalog, KA series, shaft-mount).
+      Bore size shown is standard ANSI — confirm compatibility with head pulley shaft (${fmt(shaft_dia,4)}").
+    </div>`;
+  } else {
+    html += `<div class="fixit-table">No KA frame found in table for ${fmt(HP_std,0)} HP / ${req_torque !== null ? fmt(req_torque,0) + " in-lb" : "—"} torque. Consult SEW DriveSelect directly.</div>`;
+  }
+
   // 5. Belt Sag
   html += `<div class="section-title">5. BELT SAG</div>
   <table><thead><tr><th>Variable</th><th>Description</th><th>Value</th><th>Unit</th></tr></thead><tbody>
@@ -943,7 +992,7 @@ function calculate() {
   </tbody></table>`;
 
   // Footer
-  html += `<div class="footer-bar">JMS BELT CONVEYOR DESIGN SHEET &nbsp;|&nbsp; CEMA 6th Ed. &nbsp;|&nbsp; REV. ${revision} &nbsp;|&nbsp; ${date}</div>`;
+  html += `<div class="footer-bar">BELT CONVEYOR DESIGN SHEET &nbsp;|&nbsp; CEMA 6th Ed. &nbsp;|&nbsp; REV. ${revision} &nbsp;|&nbsp; ${date}</div>`;
 
   document.getElementById("output-panel").innerHTML = html;
 }
@@ -989,6 +1038,17 @@ function onMaterialChange() {
 function resetToDefaults() {
   for (const [key, val] of Object.entries(DEFAULTS)) {
     setField(key, val);
+  }
+  calculate();
+}
+
+function onPlowChange() {
+  const plow = document.getElementById("plow_type").value;
+  const numEl = document.getElementById("num_plows");
+  if (plow === "None") {
+    numEl.value = "0";
+  } else if (numEl.value === "0") {
+    numEl.value = "1";
   }
   calculate();
 }

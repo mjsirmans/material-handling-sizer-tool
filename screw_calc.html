@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JMS Screw Conveyor Design Calculator</title>
+<title>Screw Conveyor Design Calculator</title>
 <style>
 :root {
   --navy: #1a2744;
@@ -63,7 +63,7 @@ details { margin-bottom: 6px; }
 
 <!-- ===== LEFT PANEL: INPUT FORM ===== -->
 <div class="form-panel">
-  <h1>JMS Screw Conveyor Design</h1>
+  <h1>Screw Conveyor Design</h1>
   <div class="btn-bar">
     <button class="btn btn-primary" onclick="window.print()">Print / Save as PDF</button>
     <button class="btn btn-secondary" onclick="resetToDefaults()">Reset to Defaults</button>
@@ -467,9 +467,9 @@ const DEFAULTS = {
   project_no: "EXAMPLE-001",
   location: "Wastewater Treatment Plant",
   customer: "Example Municipality",
-  engineer: "JMS Engineering",
+  engineer: "",
   description: "Belt Press Discharge - Dewatered Sludge Conveyor",
-  by: "JMS",
+  by: "",
   date: "2025-04-15",
   revision: "0",
   length_ft: 25,
@@ -831,7 +831,7 @@ function calculate() {
 
   // --- Header block ---
   html += `<div class="project-header">
-    <h2>JMS SCREW CONVEYOR DESIGN SHEET</h2>
+    <h2>SCREW CONVEYOR DESIGN SHEET</h2>
     <div class="project-meta">
       <span><strong>Project No.:</strong> ${proj_no}</span>
       <span><strong>By:</strong> ${by}</span>
@@ -985,7 +985,7 @@ function calculate() {
   </tbody></table>`;
 
   // --- Footer ---
-  html += `<div class="footer-bar">JMS SCREW CONVEYOR DESIGN SHEET &nbsp;|&nbsp; REV. ${revision} &nbsp;|&nbsp; ${date}</div>`;
+  html += `<div class="footer-bar">SCREW CONVEYOR DESIGN SHEET &nbsp;|&nbsp; REV. ${revision} &nbsp;|&nbsp; ${date}</div>`;
 
   document.getElementById("output-panel").innerHTML = html;
 }
