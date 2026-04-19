@@ -26,7 +26,7 @@ h3{font-size:13px;font-weight:600;color:#555;margin:8px 0 4px}
 .header{background:#003366;color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
 .header h1{color:#fff}
 .header .rev{font-size:11px;opacity:.7}
-.main{display:grid;grid-template-columns:460px 1fr;gap:0;min-height:calc(100vh - 42px)}
+.main{display:grid;grid-template-columns:2fr 3fr;gap:0;min-height:calc(100vh - 42px)}
 @media(max-width:860px){.main{grid-template-columns:1fr}}
 .left{background:#fff;border-right:1px solid #d0d4dc;padding:12px;overflow-y:auto;max-height:calc(100vh - 42px)}
 .right{background:#f8f9fc;padding:12px;overflow-y:auto;max-height:calc(100vh - 42px)}
@@ -43,11 +43,35 @@ h3{font-size:13px;font-weight:600;color:#555;margin:8px 0 4px}
 /* equipment block */
 .equip-block{margin:0 0 6px;border:1px solid #dde;border-radius:4px;overflow:hidden}
 .equip-header{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#eef2f8;cursor:pointer;user-select:none}
-.equip-header label{font-size:13px;font-weight:700;color:#003366;cursor:pointer;flex:1}
-.equip-header input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:#003366}
+.equip-header .equip-name{font-size:13px;font-weight:700;color:#003366;flex:1}
+.equip-header .equip-type-tag{font-size:10px;color:#669;font-weight:400;margin-left:4px}
 .equip-toggle{font-size:11px;color:#669;margin-left:auto}
 .equip-body{padding:10px;display:none;background:#fff}
 .equip-body.open{display:block}
+.equip-remove{font-size:11px;color:#c55;padding:2px 6px;border:1px solid #c55;border-radius:3px;background:none;cursor:pointer;margin-left:4px}
+.equip-remove:hover{background:#c55;color:#fff}
+/* project file bar */
+.proj-file-bar{background:#f0f4fa;border:1px solid #d0d8e8;border-radius:4px;padding:8px 10px;margin-bottom:8px}
+.proj-file-bar .proj-file-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.proj-file-bar select{flex:1;min-width:120px;padding:4px 6px;border:1px solid #bbb;border-radius:3px;font-size:12px}
+.saved-badge{font-size:10px;color:#2e7d32;background:#e8f5e9;border-radius:3px;padding:2px 6px;display:none}
+.unsaved-badge{font-size:10px;color:#b45309;background:#fff8e1;border-radius:3px;padding:2px 6px;display:none}
+
+/* project manager modal */
+#pm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:8000}
+#pm-box{background:#fff;border-radius:6px;padding:24px;width:680px;max-width:96vw;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.3)}
+#pm-box h2{font-size:16px;color:#003366;border:none;text-transform:none;letter-spacing:0;margin-bottom:14px}
+#pm-table{width:100%;border-collapse:collapse;font-size:13px;overflow-y:auto}
+#pm-table th{background:#eef2f8;color:#003366;font-weight:700;padding:7px 10px;text-align:left;border:1px solid #dde;font-size:11px;position:sticky;top:0}
+#pm-table th[data-pmcol]:hover{background:#dde7f5}
+#pm-table td{padding:6px 10px;border:1px solid #e4e8ee;vertical-align:middle}
+#pm-table tr:hover td{background:#f5f7ff}
+#pm-table .pm-actions{display:flex;gap:5px;white-space:nowrap}
+#pm-table .pm-actions button{font-size:11px;padding:2px 8px}
+.pm-del-btn{color:#c55!important;border-color:#c55!important}
+.pm-del-btn:hover{background:#c55!important;color:#fff!important}
+#pm-empty{padding:20px;text-align:center;color:#888;font-size:13px}
+#pm-scroll{overflow-y:auto;flex:1;border:1px solid #dde;border-radius:3px}
 
 /* field rows */
 .field-row{display:grid;grid-template-columns:150px 1fr auto;align-items:center;gap:4px;margin-bottom:4px}
@@ -100,13 +124,18 @@ button.primary:hover{background:#002244}
 .note{font-size:10px;color:#777;margin-top:4px;padding:3px 6px;background:#fffbe6;border-left:2px solid #f0a800;border-radius:0 2px 2px 0}
 
 @media print{
-  .left,.header .btn-row{display:none!important}
-  .main{display:block}
-  .right{padding:8px;overflow:visible;max-height:unset}
-  .result-box{break-inside:avoid}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .left,.btn-row{display:none!important}
   button{display:none!important}
   #gate{display:none!important}
   #app{display:block!important}
+  .main{display:block;min-height:unset}
+  .right{padding:8px;overflow:visible;max-height:unset}
+  .result-box{break-inside:avoid;page-break-inside:avoid;border:1px solid #ccc;margin-bottom:6px}
+  .result-box h2,.result-row{font-size:11px}
+  [id^="bk-"]{display:none!important}
+  span[onclick*="bk-"]{display:none!important}
+  @page{margin:15mm 12mm;size:letter portrait}
 }
 </style>
 </head>
@@ -141,6 +170,25 @@ button.primary:hover{background:#002244}
 <!-- ===== LEFT: INPUTS ===== -->
 <div class="left">
 
+<!-- Project Files -->
+<div class="section">
+<div class="sec-header" onclick="toggleSec('sec-files')">
+  <h2>Project Files</h2><span class="sec-toggle" id="tog-files" style="transform:rotate(90deg)">▸</span>
+</div>
+<div class="sec-body" id="sec-files">
+<div style="height:6px"></div>
+<div class="proj-file-bar">
+  <div style="display:flex;gap:6px;align-items:center">
+    <button onclick="saveProject()" class="primary" style="flex:1">Save Project</button>
+    <button onclick="openProjManager()">Manage Projects</button>
+    <button onclick="newProject()">New</button>
+    <span class="saved-badge" id="save-badge">Saved</span>
+    <span class="unsaved-badge" id="unsaved-badge">Unsaved changes</span>
+  </div>
+</div>
+</div>
+</div>
+
 <!-- Project Info -->
 <div class="section">
 <div class="sec-header" onclick="toggleSec('sec-project')">
@@ -158,14 +206,28 @@ button.primary:hover{background:#002244}
 </div>
 </div>
 
-<!-- Equipment Selector -->
+<!-- Equipment -->
 <div class="section">
 <div class="sec-header" onclick="toggleSec('sec-equip')">
   <h2>Equipment</h2><span class="sec-toggle" id="tog-equip" style="transform:rotate(90deg)">▸</span>
 </div>
 <div class="sec-body" id="sec-equip">
 <div style="height:6px"></div>
-<p class="note" style="margin-bottom:8px">Check each equipment type on this project. All three pricing tiers shown automatically in results.</p>
+<div style="display:flex;gap:6px;margin-bottom:8px;align-items:center;flex-wrap:wrap">
+  <select id="add-equip-type" style="flex:1;padding:4px 6px;border:1px solid #bbb;border-radius:3px;font-size:12px">
+    <option value="">— select type —</option>
+    <option value="screw">Screw Conveyor</option>
+    <option value="belt">Belt Conveyor</option>
+    <option value="hopper">Hopper</option>
+    <option value="diverter">Diverter</option>
+    <option value="silo">Silo</option>
+    <option value="chute">Chute</option>
+    <option value="support">Support Structure</option>
+    <option value="other">Other</option>
+  </select>
+  <input id="add-equip-name" type="text" placeholder="Tag / Name (e.g. BC-01)" style="flex:1;padding:4px 6px;border:1px solid #bbb;border-radius:3px;font-size:12px">
+  <button onclick="addEquipInstance()" class="primary" style="white-space:nowrap">+ Add</button>
+</div>
 <div id="equip-blocks"></div>
 </div>
 </div>
@@ -200,6 +262,42 @@ button.primary:hover{background:#002244}
 <div class="field-row"><label>Assembly</label><input id="lr-asm" type="number" value="119" oninput="render()"><span class="unit">$/hr</span></div>
 <div class="field-row"><label>Finishing</label><input id="lr-fin" type="number" value="110" oninput="render()"><span class="unit">$/hr</span></div>
 <div class="field-row"><label>Processing</label><input id="lr-proc" type="number" value="110" oninput="render()"><span class="unit">$/hr</span></div>
+<div class="field-row"><label>Field Service</label><input id="lr-fs" type="number" value="110" oninput="render()"><span class="unit">$/hr</span></div>
+</div>
+</div>
+
+<!-- Expenses (project-level) -->
+<div class="section">
+<div class="sec-header" onclick="toggleSec('sec-expenses')">
+  <h2>Expenses</h2><span class="sec-toggle" id="tog-expenses">▸</span>
+</div>
+<div class="sec-body collapsed" id="sec-expenses">
+<div style="height:6px"></div>
+<p class="note" style="margin-bottom:8px">Project-level travel expenses. Formula: (Trips × $/trip) + (Days × $/day) + Additional.</p>
+<div class="field-row"><label>Trips</label><input id="exp-trips" type="number" min="0" value="" placeholder="0" oninput="render()"><span class="unit">trips</span></div>
+<div class="field-row"><label>Days</label><input id="exp-days" type="number" min="0" value="" placeholder="0" oninput="render()"><span class="unit">days</span></div>
+<div class="field-row"><label>Additional</label><input id="exp-additional" type="number" min="0" value="" placeholder="0" oninput="render()"><span class="unit">$</span></div>
+<div class="field-row"><label>Rate / Trip</label><input id="exp-rate-trip" type="number" min="0" value="800" oninput="render()"><span class="unit">$/trip</span></div>
+<div class="field-row"><label>Rate / Day</label><input id="exp-rate-day" type="number" min="0" value="389" oninput="render()"><span class="unit">$/day</span></div>
+</div>
+</div>
+
+<!-- Freight (project-level) -->
+<div class="section">
+<div class="sec-header" onclick="toggleSec('sec-freight')">
+  <h2>Freight</h2><span class="sec-toggle" id="tog-freight">▸</span>
+</div>
+<div class="sec-body collapsed" id="sec-freight">
+<div style="height:6px"></div>
+<p class="note" style="margin-bottom:8px">Mileage-based freight. Cost = Miles × Loads × $/mi. for each leg.</p>
+<div class="sub-label" style="margin-top:4px">Vendor / Mfg → JMS</div>
+<div class="field-row"><label>Miles</label><input id="fr-v2j-mi" type="number" min="0" value="" placeholder="0" oninput="render()"><span class="unit">mi</span></div>
+<div class="field-row"><label>Loads</label><input id="fr-v2j-loads" type="number" min="0" value="" placeholder="0" oninput="render()"><span class="unit">loads</span></div>
+<div class="field-row"><label>Rate</label><input id="fr-v2j-rate" type="number" min="0" step="0.01" value="3.00" oninput="render()"><span class="unit">$/mi</span></div>
+<div class="sub-label" style="margin-top:8px">JMS → Jobsite</div>
+<div class="field-row"><label>Miles</label><input id="fr-j2s-mi" type="number" min="0" value="" placeholder="0" oninput="render()"><span class="unit">mi</span></div>
+<div class="field-row"><label>Loads</label><input id="fr-j2s-loads" type="number" min="0" value="" placeholder="0" oninput="render()"><span class="unit">loads</span></div>
+<div class="field-row"><label>Rate</label><input id="fr-j2s-rate" type="number" min="0" step="0.01" value="3.00" oninput="render()"><span class="unit">$/mi</span></div>
 </div>
 </div>
 
@@ -216,12 +314,15 @@ button.primary:hover{background:#002244}
 <script>
 // ── Password ───────────────────────────────────────────────────────────────
 const CORRECT_PW = 'JMS';
+const LS_PREFIX  = 'ept_proj_';
 
 function checkPw() {
   const val = document.getElementById('gate-pw').value;
   if (val === CORRECT_PW) {
     document.getElementById('gate').style.display = 'none';
     document.getElementById('app').style.display = 'block';
+    buildTierOverrideRows();
+    refreshProjectList();
     render();
   } else {
     document.getElementById('gate-err').style.display = 'block';
@@ -230,43 +331,51 @@ function checkPw() {
   }
 }
 
-// ── Pricing Tiers (from Excel) ─────────────────────────────────────────────
+// ── Pricing Tiers ─────────────────────────────────────────────────────────
 const TIERS = [
-  { id:'low',  name:'Low',         gmac:30.0, comm:4.0 },
-  { id:'med',  name:'Medium',      gmac:33.0, comm:6.0 },
-  { id:'high', name:'High',        gmac:36.0, comm:8.0 },
-  { id:'br',   name:'Buy/Resell',  gmac:36.0, comm:8.0 },
+  { id:'low',  name:'Low',        gmac:30.0, comm:4.0 },
+  { id:'med',  name:'Medium',     gmac:33.0, comm:6.0 },
+  { id:'high', name:'High',       gmac:36.0, comm:8.0 },
+  { id:'br',   name:'Buy/Resell', gmac:36.0, comm:8.0 },
 ];
 
-// ── Equipment Types ────────────────────────────────────────────────────────
-const EQUIP_TYPES = [
-  { id:'screw',    label:'Screw Conveyor'          },
-  { id:'belt',     label:'Belt Conveyor'           },
-  { id:'hopper',   label:'Hopper (Enclosed Storage)' },
-  { id:'diverter', label:'Diverter'                },
-  { id:'silo',     label:'Silo'                    },
-  { id:'chute',    label:'Chute'                   },
-  { id:'support',  label:'Support Structure'       },
-];
+const EQUIP_LABELS = {
+  screw:'Screw Conveyor', belt:'Belt Conveyor', hopper:'Hopper',
+  diverter:'Diverter', silo:'Silo', chute:'Chute', support:'Support Structure', other:'Other',
+};
 
-// ── State ─────────────────────────────────────────────────────────────────
-const equip = {};
-EQUIP_TYPES.forEach(e => {
-  equip[e.id] = {
-    enabled: false,
-    qty: 1,
+// ── Equipment instances (array, each has uid) ─────────────────────────────
+let instances = [];   // [{uid, type, name, ...costFields}]
+let _uid = 0;
+function nextUid() { return 'e'+(++_uid); }
+
+const DEFAULT_LABOR = {
+  //                    eng   asm   fin  proc  freight  fs_days
+  screw:   { eng_hrs:16, asm_hrs:80,  fin_hrs:16, proc_hrs:8,  freight:500,  fs_days:2 },
+  belt:    { eng_hrs:16, asm_hrs:60,  fin_hrs:12, proc_hrs:8,  freight:800,  fs_days:2 },
+  hopper:  { eng_hrs:16, asm_hrs:100, fin_hrs:20, proc_hrs:8,  freight:600,  fs_days:3 },
+  diverter:{ eng_hrs:8,  asm_hrs:40,  fin_hrs:8,  proc_hrs:4,  freight:300,  fs_days:1 },
+  silo:    { eng_hrs:16, asm_hrs:80,  fin_hrs:16, proc_hrs:8,  freight:1000, fs_days:3 },
+  chute:   { eng_hrs:4,  asm_hrs:24,  fin_hrs:4,  proc_hrs:2,  freight:200,  fs_days:0 },
+  support: { eng_hrs:4,  asm_hrs:24,  fin_hrs:4,  proc_hrs:2,  freight:200,  fs_days:0 },
+  other:   { eng_hrs:8,  asm_hrs:40,  fin_hrs:8,  proc_hrs:4,  freight:400,  fs_days:1 },
+};
+
+function blankInstance(type, name) {
+  const defaults = DEFAULT_LABOR[type] || DEFAULT_LABOR.other;
+  return {
+    uid: nextUid(),
+    type,
+    name: name || '',
     mats_offsite:   buildLines(5),
     mats_raw:       buildLines(5),
     mats_nonmetal:  buildLines(3),
     purchased_sys:  buildLines(3),
     purchased_comp: buildLines(3),
-    eng_hrs:   0,
-    asm_hrs:   0,
-    fin_hrs:   0,
-    proc_hrs:  0,
-    freight:   0,
+    ...defaults,
+    notes: '',
   };
-});
+}
 
 function buildLines(n) {
   const rows = [];
@@ -274,147 +383,152 @@ function buildLines(n) {
   return rows;
 }
 
-// ── Init ───────────────────────────────────────────────────────────────────
-function init() {
-  buildTierOverrideRows();
-  buildEquipBlocks();
+// ── Add / Remove equipment instances ─────────────────────────────────────
+function addEquipInstance() {
+  const type = document.getElementById('add-equip-type').value;
+  const name = document.getElementById('add-equip-name').value.trim();
+  if (!type) { alert('Select an equipment type first.'); return; }
+  const inst = blankInstance(type, name || (EQUIP_LABELS[type] + '-' + (instances.filter(i=>i.type===type).length+1)));
+  instances.push(inst);
+  document.getElementById('add-equip-type').value = '';
+  document.getElementById('add-equip-name').value = '';
+  appendEquipBlock(inst);
+  markUnsaved();
+  render();
 }
 
-function buildTierOverrideRows() {
-  const tbody = document.getElementById('tier-override-rows');
-  tbody.innerHTML = TIERS.map(t => `
-    <tr>
-      <td style="padding:3px 6px;border:1px solid #e4e8ee;font-weight:600;color:#444">${t.name}</td>
-      <td style="padding:3px 4px;border:1px solid #e4e8ee">
-        <input type="number" id="gmac-${t.id}" value="${t.gmac}" step="0.5" min="0" max="99"
-          style="width:100%;border:none;background:transparent;font-size:12px;text-align:right;padding:1px 3px"
-          oninput="render()">
-      </td>
-      <td style="padding:3px 4px;border:1px solid #e4e8ee">
-        <input type="number" id="comm-${t.id}" value="${t.comm}" step="0.5" min="0" max="99"
-          style="width:100%;border:none;background:transparent;font-size:12px;text-align:right;padding:1px 3px"
-          oninput="render()">
-      </td>
-    </tr>`).join('');
+function removeEquipInstance(uid) {
+  instances = instances.filter(i => i.uid !== uid);
+  const el = document.getElementById('eb-'+uid);
+  if (el) el.remove();
+  markUnsaved();
+  render();
 }
 
-function activeTiers() {
-  return TIERS.map(t => ({
-    ...t,
-    gmac: parseFloat(document.getElementById('gmac-'+t.id)?.value) ?? t.gmac,
-    comm: parseFloat(document.getElementById('comm-'+t.id)?.value) ?? t.comm,
-  }));
-}
-
+// ── Build DOM for one equipment block ────────────────────────────────────
 function buildEquipBlocks() {
-  const container = document.getElementById('equip-blocks');
-  container.innerHTML = EQUIP_TYPES.map(e => `
-    <div class="equip-block" id="eb-${e.id}">
-      <div class="equip-header" onclick="toggleEquip('${e.id}')">
-        <input type="checkbox" id="chk-${e.id}" onclick="event.stopPropagation();toggleEquipCheck('${e.id}')">
-        <label for="chk-${e.id}" onclick="event.stopPropagation();toggleEquipCheck('${e.id}')">${e.label}</label>
-        <span class="equip-toggle" id="etog-${e.id}">▸</span>
-      </div>
-      <div class="equip-body" id="ebody-${e.id}">
-        ${buildEquipBody(e.id)}
-      </div>
-    </div>`).join('');
+  document.getElementById('equip-blocks').innerHTML = '';
+  instances.forEach(inst => appendEquipBlock(inst));
 }
 
-function buildEquipBody(id) {
+function appendEquipBlock(inst) {
+  const uid = inst.uid;
+  const label = EQUIP_LABELS[inst.type] || inst.type;
+  const div = document.createElement('div');
+  div.className = 'equip-block';
+  div.id = 'eb-'+uid;
+  div.innerHTML = `
+    <div class="equip-header" onclick="toggleEquipBody('${uid}')">
+      <span class="equip-name">${esc(inst.name)} <span class="equip-type-tag">${label}</span></span>
+      <button class="equip-remove" onclick="event.stopPropagation();removeEquipInstance('${uid}')" title="Remove">✕</button>
+      <span class="equip-toggle" id="etog-${uid}">▸</span>
+    </div>
+    <div class="equip-body open" id="ebody-${uid}">
+      ${buildEquipBody(uid)}
+    </div>`;
+  document.getElementById('equip-blocks').appendChild(div);
+}
+
+function toggleEquipBody(uid) {
+  document.getElementById('ebody-'+uid).classList.toggle('open');
+}
+
+function buildEquipBody(uid) {
+  const inst = instances.find(i=>i.uid===uid);
+  const notes = inst ? esc(inst.notes||'') : '';
   return `
-    <div class="field-row"><label>Quantity</label><input type="number" value="1" min="1" id="qty-${id}" oninput="updateEquip('${id}','qty',this.value);render()" style="width:70px"><span class="unit">ea</span></div>
-
+    <div class="field-row" style="margin-bottom:8px">
+      <label>Notes</label>
+      <input type="text" placeholder="e.g. BC-01 — 24&quot; belt, biosolids, 100ft" value="${notes}"
+        oninput="updateInstStr('${uid}','notes',this.value)"
+        style="font-size:13px">
+      <span class="unit"></span>
+    </div>
     <div class="sub-label">Materials — Off-Site Purchased</div>
-    ${buildLineTable(id,'mats_offsite')}
-
+    ${buildLineTable(uid,'mats_offsite')}
     <div class="sub-label">Materials — Raw / Metallic</div>
-    ${buildLineTable(id,'mats_raw')}
-
+    ${buildLineTable(uid,'mats_raw')}
     <div class="sub-label">Materials — Non-Metallic</div>
-    ${buildLineTable(id,'mats_nonmetal')}
-
+    ${buildLineTable(uid,'mats_nonmetal')}
     <div class="sub-label">Purchased Systems</div>
-    ${buildLineTable(id,'purchased_sys')}
-
+    ${buildLineTable(uid,'purchased_sys')}
     <div class="sub-label">Purchased Components</div>
-    ${buildLineTable(id,'purchased_comp')}
-
+    ${buildLineTable(uid,'purchased_comp')}
     <div class="sub-label">Labor Hours</div>
-    <div class="field-row"><label>Engineering</label><input type="number" min="0" value="0" id="eng-${id}" oninput="updateEquip('${id}','eng_hrs',this.value);render()"><span class="unit">hrs</span></div>
-    <div class="field-row"><label>Assembly</label><input type="number" min="0" value="0" id="asm-${id}" oninput="updateEquip('${id}','asm_hrs',this.value);render()"><span class="unit">hrs</span></div>
-    <div class="field-row"><label>Finishing</label><input type="number" min="0" value="0" id="fin-${id}" oninput="updateEquip('${id}','fin_hrs',this.value);render()"><span class="unit">hrs</span></div>
-    <div class="field-row"><label>Processing</label><input type="number" min="0" value="0" id="proc-${id}" oninput="updateEquip('${id}','proc_hrs',this.value);render()"><span class="unit">hrs</span></div>
-    <div class="field-row"><label>Freight</label><input type="number" min="0" value="0" id="freight-${id}" oninput="updateEquip('${id}','freight',this.value);render()"><span class="unit">$</span></div>
+    <div class="field-row"><label>Engineering</label><input type="number" min="0" value="${inst?inst.eng_hrs:0}" id="eng-${uid}" oninput="updateInst('${uid}','eng_hrs',this.value)"><span class="unit">hrs</span></div>
+    <div class="field-row"><label>Assembly</label><input type="number" min="0" value="${inst?inst.asm_hrs:0}" id="asm-${uid}" oninput="updateInst('${uid}','asm_hrs',this.value)"><span class="unit">hrs</span></div>
+    <div class="field-row"><label>Finishing</label><input type="number" min="0" value="${inst?inst.fin_hrs:0}" id="fin-${uid}" oninput="updateInst('${uid}','fin_hrs',this.value)"><span class="unit">hrs</span></div>
+    <div class="field-row"><label>Processing</label><input type="number" min="0" value="${inst?inst.proc_hrs:0}" id="proc-${uid}" oninput="updateInst('${uid}','proc_hrs',this.value)"><span class="unit">hrs</span></div>
+    <div class="field-row"><label>Freight</label><input type="number" min="0" value="${inst?inst.freight:0}" id="freight-${uid}" oninput="updateInst('${uid}','freight',this.value)"><span class="unit">$</span></div>
+    <div class="sub-label">Field Service</div>
+    <p class="note" style="margin-bottom:6px">Days × 8 hrs × field service rate</p>
+    <div class="field-row"><label>Days On-Site</label><input type="number" min="0" value="${inst?inst.fs_days:0}" id="fs-days-${uid}" oninput="updateInst('${uid}','fs_days',this.value)"><span class="unit">days</span></div>
   `;
 }
 
-function buildLineTable(eid, section) {
-  const sid = eid+'_'+section;
+function buildLineTable(uid, section) {
+  const sid = uid+'_'+section;
+  const inst = instances.find(i=>i.uid===uid);
+  const rows = inst ? inst[section].map((_,i)=>lineRow(uid,section,i)).join('') : '';
   return `
     <table class="line-table" id="tbl-${sid}">
       <thead><tr>
-        <th style="width:34%">Description</th>
-        <th style="width:22%">Vendor</th>
-        <th style="width:10%">Qty</th>
-        <th style="width:18%">Unit Cost</th>
-        <th style="width:16%">Total</th>
+        <th style="width:34%">Description</th><th style="width:22%">Vendor</th>
+        <th style="width:10%">Qty</th><th style="width:18%">Unit Cost</th><th style="width:16%">Total</th>
       </tr></thead>
-      <tbody id="tbody-${sid}">
-        ${equip[eid][section].map((_,i)=>lineRow(eid,section,i)).join('')}
-      </tbody>
+      <tbody id="tbody-${sid}">${rows}</tbody>
       <tfoot><tr class="total-row">
         <td colspan="4" style="text-align:right;font-size:11px;padding:3px 6px">Section Total</td>
         <td class="total-cell" id="sec-total-${sid}">$0</td>
       </tr></tfoot>
     </table>
-    <button class="add-row-btn" onclick="addLine('${eid}','${section}')">+ Add Row</button>
-  `;
+    <button class="add-row-btn" onclick="addLine('${uid}','${section}')">+ Add Row</button>`;
 }
 
-function lineRow(eid, section, i) {
-  const sid = eid+'_'+section;
-  const r = equip[eid][section][i];
+function lineRow(uid, section, i) {
+  const sid = uid+'_'+section;
+  const inst = instances.find(x=>x.uid===uid);
+  const r = inst ? inst[section][i] : {desc:'',vendor:'',qty:0,unit_cost:0};
   return `<tr id="row-${sid}-${i}">
-    <td><input value="${r.desc}" oninput="setLine('${eid}','${section}',${i},'desc',this.value)"></td>
-    <td><input value="${r.vendor}" oninput="setLine('${eid}','${section}',${i},'vendor',this.value)"></td>
-    <td><input type="number" min="0" value="${r.qty||''}" oninput="setLine('${eid}','${section}',${i},'qty',this.value);render()"></td>
-    <td><input type="number" min="0" step="0.01" value="${r.unit_cost||''}" oninput="setLine('${eid}','${section}',${i},'unit_cost',this.value);render()"></td>
+    <td><input value="${esc(r.desc)}" oninput="setLine('${uid}','${section}',${i},'desc',this.value)"></td>
+    <td><input value="${esc(r.vendor)}" oninput="setLine('${uid}','${section}',${i},'vendor',this.value)"></td>
+    <td><input type="number" min="0" value="${r.qty||''}" oninput="setLine('${uid}','${section}',${i},'qty',this.value);render()"></td>
+    <td><input type="number" min="0" step="0.01" value="${r.unit_cost||''}" oninput="setLine('${uid}','${section}',${i},'unit_cost',this.value);render()"></td>
     <td class="total-cell" id="lt-${sid}-${i}">$0</td>
   </tr>`;
 }
 
-// ── State mutators ─────────────────────────────────────────────────────────
-function toggleEquipCheck(id) {
-  equip[id].enabled = !equip[id].enabled;
-  document.getElementById('chk-'+id).checked = equip[id].enabled;
-  const body = document.getElementById('ebody-'+id);
-  if (equip[id].enabled) body.classList.add('open');
-  else body.classList.remove('open');
+// ── State mutators ────────────────────────────────────────────────────────
+function updateInst(uid, key, val) {
+  const inst = instances.find(i=>i.uid===uid);
+  if (inst) { inst[key] = parseFloat(val)||0; markUnsaved(); render(); }
+}
+
+function updateInstStr(uid, key, val) {
+  const inst = instances.find(i=>i.uid===uid);
+  if (inst) { inst[key] = val; markUnsaved(); render(); }
+}
+
+function setLine(uid, section, i, key, val) {
+  const inst = instances.find(x=>x.uid===uid);
+  if (!inst) return;
+  inst[section][i][key] = (key==='desc'||key==='vendor') ? val : (parseFloat(val)||0);
+  markUnsaved();
   render();
 }
 
-function toggleEquip(id) {
-  document.getElementById('ebody-'+id).classList.toggle('open');
-}
-
-function updateEquip(id, key, val) {
-  equip[id][key] = parseFloat(val)||0;
-}
-
-function setLine(eid, section, i, key, val) {
-  equip[eid][section][i][key] = (key==='desc'||key==='vendor') ? val : (parseFloat(val)||0);
-}
-
-function addLine(eid, section) {
-  equip[eid][section].push({desc:'',vendor:'',qty:0,unit_cost:0});
-  const sid = eid+'_'+section;
+function addLine(uid, section) {
+  const inst = instances.find(x=>x.uid===uid);
+  if (!inst) return;
+  inst[section].push({desc:'',vendor:'',qty:0,unit_cost:0});
+  const sid = uid+'_'+section;
   const tbody = document.getElementById('tbody-'+sid);
-  const i = equip[eid][section].length - 1;
-  tbody.insertAdjacentHTML('beforeend', lineRow(eid, section, i));
+  const i = inst[section].length - 1;
+  tbody.insertAdjacentHTML('beforeend', lineRow(uid, section, i));
+  markUnsaved();
 }
 
-// ── Pricing engine (SalePrice from Excel VBA) ──────────────────────────────
+// ── Pricing engine ────────────────────────────────────────────────────────
 function salePrice(cost, gmacPct, commPct) {
   if (cost <= 0) return 0;
   const gm_target = gmacPct / 100;
@@ -434,24 +548,28 @@ function salePrice(cost, gmacPct, commPct) {
 }
 
 // ── Cost helpers ──────────────────────────────────────────────────────────
-function sectionTotal(eid, section) {
-  return equip[eid][section].reduce((s,r) => s + (r.qty||0)*(r.unit_cost||0), 0);
+function sectionTotal(inst, section) {
+  return inst[section].reduce((s,r) => s + (r.qty||0)*(r.unit_cost||0), 0);
 }
 
-function equipCost(eid) {
-  const e = equip[eid];
+function instCost(inst) {
   const lr = laborRates();
-  const mat = sectionTotal(eid,'mats_offsite')
-             + sectionTotal(eid,'mats_raw')
-             + sectionTotal(eid,'mats_nonmetal')
-             + sectionTotal(eid,'purchased_sys')
-             + sectionTotal(eid,'purchased_comp');
-  const labor = e.eng_hrs  * lr.eng
-              + e.asm_hrs  * lr.asm
-              + e.fin_hrs  * lr.fin
-              + e.proc_hrs * lr.proc;
-  const freight = e.freight || 0;
-  return { mat, labor, freight, total: mat + labor + freight };
+  const offsite   = sectionTotal(inst,'mats_offsite');
+  const raw       = sectionTotal(inst,'mats_raw');
+  const nonmetal  = sectionTotal(inst,'mats_nonmetal');
+  const purSys    = sectionTotal(inst,'purchased_sys');
+  const purComp   = sectionTotal(inst,'purchased_comp');
+  const mat = offsite + raw + nonmetal + purSys + purComp;
+  const engL  = inst.eng_hrs  * lr.eng;
+  const asmL  = inst.asm_hrs  * lr.asm;
+  const finL  = inst.fin_hrs  * lr.fin;
+  const procL = inst.proc_hrs * lr.proc;
+  const labor    = engL + asmL + finL + procL;
+  const freight  = inst.freight  || 0;
+  const fieldSvc = (inst.fs_days || 0) * 8 * lr.fs;
+  return { mat, offsite, raw, nonmetal, purSys, purComp,
+           labor, engL, asmL, finL, procL,
+           freight, fieldSvc, total: mat+labor+freight+fieldSvc };
 }
 
 function laborRates() {
@@ -460,30 +578,65 @@ function laborRates() {
     asm:  parseFloat(document.getElementById('lr-asm').value)  || 119,
     fin:  parseFloat(document.getElementById('lr-fin').value)  || 110,
     proc: parseFloat(document.getElementById('lr-proc').value) || 110,
+    fs:   parseFloat(document.getElementById('lr-fs').value)   || 110,
   };
 }
 
-// ── Tier price table HTML ─────────────────────────────────────────────────
-function tierTableHtml(cost, qty) {
-  qty = qty || 1;
+function projectExpenses() {
+  const trips = parseFloat(document.getElementById('exp-trips').value)      || 0;
+  const days  = parseFloat(document.getElementById('exp-days').value)       || 0;
+  const addl  = parseFloat(document.getElementById('exp-additional').value) || 0;
+  const rTrip = parseFloat(document.getElementById('exp-rate-trip').value)  || 800;
+  const rDay  = parseFloat(document.getElementById('exp-rate-day').value)   || 389;
+  return (trips * rTrip) + (days * rDay) + addl;
+}
+
+function projectFreight() {
+  const v2j_mi    = parseFloat(document.getElementById('fr-v2j-mi').value)    || 0;
+  const v2j_loads = parseFloat(document.getElementById('fr-v2j-loads').value) || 0;
+  const v2j_rate  = parseFloat(document.getElementById('fr-v2j-rate').value)  || 3;
+  const j2s_mi    = parseFloat(document.getElementById('fr-j2s-mi').value)    || 0;
+  const j2s_loads = parseFloat(document.getElementById('fr-j2s-loads').value) || 0;
+  const j2s_rate  = parseFloat(document.getElementById('fr-j2s-rate').value)  || 3;
+  return (v2j_mi * v2j_loads * v2j_rate) + (j2s_mi * j2s_loads * j2s_rate);
+}
+
+function activeTiers() {
+  return TIERS.map(t => ({
+    ...t,
+    gmac: parseFloat(document.getElementById('gmac-'+t.id)?.value) ?? t.gmac,
+    comm: parseFloat(document.getElementById('comm-'+t.id)?.value) ?? t.comm,
+  }));
+}
+
+function buildTierOverrideRows() {
+  const tbody = document.getElementById('tier-override-rows');
+  tbody.innerHTML = TIERS.map(t => `
+    <tr>
+      <td style="padding:3px 6px;border:1px solid #e4e8ee;font-weight:600;color:#444">${t.name}</td>
+      <td style="padding:3px 4px;border:1px solid #e4e8ee">
+        <input type="number" id="gmac-${t.id}" value="${t.gmac}" step="0.5" min="0" max="99"
+          style="width:100%;border:none;background:transparent;font-size:12px;text-align:right;padding:1px 3px" oninput="render()">
+      </td>
+      <td style="padding:3px 4px;border:1px solid #e4e8ee">
+        <input type="number" id="comm-${t.id}" value="${t.comm}" step="0.5" min="0" max="99"
+          style="width:100%;border:none;background:transparent;font-size:12px;text-align:right;padding:1px 3px" oninput="render()">
+      </td>
+    </tr>`).join('');
+}
+
+// ── Tier table HTML ───────────────────────────────────────────────────────
+function tierTableHtml(cost) {
   const rows = activeTiers().map(t => {
-    const unitSP  = salePrice(cost, t.gmac, t.comm);
-    const totalSP = unitSP * qty;
-    const gm      = unitSP - cost;
+    const sp = salePrice(cost, t.gmac, t.comm);
     return `<tr class="tier-${t.id}">
       <td class="tier-name-cell">${t.name}</td>
       <td>${pct(t.gmac)}/${pct(t.comm)}</td>
-      <td class="price-cell">${fmt(unitSP)}</td>
-      ${qty > 1 ? `<td class="price-cell">${fmt(totalSP)}</td>` : ''}
+      <td class="price-cell">${fmt(sp)}</td>
     </tr>`;
   }).join('');
   return `<table class="tier-grid">
-    <thead><tr>
-      <th>Tier</th>
-      <th>GMaC/Comm</th>
-      <th>Unit Price</th>
-      ${qty > 1 ? '<th>Total Price</th>' : ''}
-    </tr></thead>
+    <thead><tr><th>Tier</th><th>GMaC/Comm</th><th>Sale Price</th></tr></thead>
     <tbody>${rows}</tbody>
   </table>`;
 }
@@ -496,28 +649,23 @@ function grandTierTableHtml(grandCost) {
       <td class="tier-name-cell">${t.name}</td>
       <td>${pct(t.gmac)}/${pct(t.comm)}</td>
       <td class="price-cell">${fmt(sp)}</td>
-      <td>${pct2(gm, sp)}</td>
+      <td>${pct2(gm,sp)}</td>
     </tr>`;
   }).join('');
   return `<table class="tier-grid">
-    <thead><tr>
-      <th>Tier</th><th>GMaC/Comm</th><th>Sale Price</th><th>GM%</th>
-    </tr></thead>
+    <thead><tr><th>Tier</th><th>GMaC/Comm</th><th>Sale Price</th><th>GM%</th></tr></thead>
     <tbody>${rows}</tbody>
   </table>`;
 }
 
-// ── Render ─────────────────────────────────────────────────────────────────
+// ── Render ────────────────────────────────────────────────────────────────
 function render() {
-  const activeEquip = EQUIP_TYPES.filter(e => equip[e.id].enabled);
-
-  // update line-item totals in DOM
-  EQUIP_TYPES.forEach(e => {
-    if (!equip[e.id].enabled) return;
+  // update line totals in DOM
+  instances.forEach(inst => {
     ['mats_offsite','mats_raw','mats_nonmetal','purchased_sys','purchased_comp'].forEach(sec => {
-      const sid = e.id+'_'+sec;
+      const sid = inst.uid+'_'+sec;
       let secSum = 0;
-      equip[e.id][sec].forEach((r,i) => {
+      inst[sec].forEach((r,i) => {
         const t = (r.qty||0)*(r.unit_cost||0);
         secSum += t;
         const el = document.getElementById('lt-'+sid+'-'+i);
@@ -529,10 +677,8 @@ function render() {
   });
 
   const out = document.getElementById('summary-out');
-  const proj = v('projNo'), cust = v('customer');
-  const eng  = v('engineer'), dt = v('proj-date');
-  const loc  = v('location'), desc = v('desc');
-  const rev  = v('revision');
+  const proj=v('projNo'), cust=v('customer'), eng=v('engineer');
+  const loc=v('location'), desc=v('desc'), dt=v('proj-date'), rev=v('revision');
 
   let html = `<div class="result-box">
     <h3>Project Summary</h3>
@@ -545,33 +691,66 @@ function render() {
     ${rev  ? `<div class="result-row"><span class="lbl">Revision</span><span class="val" style="grid-column:2/4">${esc(rev)}</span></div>` : ''}
   </div>`;
 
-  if (activeEquip.length === 0) {
-    html += `<div class="result-box"><p style="color:#888;font-size:13px">Select equipment types on the left to begin estimating.</p></div>`;
+  if (instances.length === 0) {
+    html += `<div class="result-box"><p style="color:#888;font-size:13px">Add equipment on the left to begin estimating.</p></div>`;
     out.innerHTML = html;
     return;
   }
 
-  let grandCost = 0;
-
-  activeEquip.forEach(e => {
-    const ec  = equipCost(e.id);
-    const qty = equip[e.id].qty || 1;
-    grandCost += ec.total * qty;
-
+  let grandEquipCost = 0;
+  instances.forEach(inst => {
+    const ec = instCost(inst);
+    grandEquipCost += ec.total;
+    const label = EQUIP_LABELS[inst.type] || inst.type;
+    const bkRows = [
+      ec.offsite  ? `<tr><td style="padding:2px 6px;color:#555;font-size:11px">Purchased (off-site)</td><td style="padding:2px 6px;text-align:right;font-size:11px">${fmt(ec.offsite)}</td></tr>` : '',
+      ec.raw      ? `<tr><td style="padding:2px 6px;color:#555;font-size:11px">Raw / Metallic</td><td style="padding:2px 6px;text-align:right;font-size:11px">${fmt(ec.raw)}</td></tr>` : '',
+      ec.nonmetal ? `<tr><td style="padding:2px 6px;color:#555;font-size:11px">Non-Metallic</td><td style="padding:2px 6px;text-align:right;font-size:11px">${fmt(ec.nonmetal)}</td></tr>` : '',
+      ec.purSys   ? `<tr><td style="padding:2px 6px;color:#555;font-size:11px">Purchased Systems</td><td style="padding:2px 6px;text-align:right;font-size:11px">${fmt(ec.purSys)}</td></tr>` : '',
+      ec.purComp  ? `<tr><td style="padding:2px 6px;color:#555;font-size:11px">Purchased Components</td><td style="padding:2px 6px;text-align:right;font-size:11px">${fmt(ec.purComp)}</td></tr>` : '',
+      ec.engL     ? `<tr><td style="padding:2px 6px;color:#555;font-size:11px">Engineering Labor</td><td style="padding:2px 6px;text-align:right;font-size:11px">${fmt(ec.engL)}</td></tr>` : '',
+      ec.asmL     ? `<tr><td style="padding:2px 6px;color:#555;font-size:11px">Assembly Labor</td><td style="padding:2px 6px;text-align:right;font-size:11px">${fmt(ec.asmL)}</td></tr>` : '',
+      ec.finL     ? `<tr><td style="padding:2px 6px;color:#555;font-size:11px">Finishing Labor</td><td style="padding:2px 6px;text-align:right;font-size:11px">${fmt(ec.finL)}</td></tr>` : '',
+      ec.procL    ? `<tr><td style="padding:2px 6px;color:#555;font-size:11px">Processing Labor</td><td style="padding:2px 6px;text-align:right;font-size:11px">${fmt(ec.procL)}</td></tr>` : '',
+      ec.fieldSvc ? `<tr><td style="padding:2px 6px;color:#555;font-size:11px">Field Service</td><td style="padding:2px 6px;text-align:right;font-size:11px">${fmt(ec.fieldSvc)}</td></tr>` : '',
+      ec.freight  ? `<tr><td style="padding:2px 6px;color:#555;font-size:11px">Freight</td><td style="padding:2px 6px;text-align:right;font-size:11px">${fmt(ec.freight)}</td></tr>` : '',
+    ].filter(Boolean).join('');
+    const uid_bk = 'bk-'+inst.uid;
     html += `<div class="result-box">
-      <h3>${esc(e.label)}${qty > 1 ? ' <span style="font-weight:400;color:#888">(×'+qty+')</span>' : ''}</h3>
+      <h3>${esc(inst.name)} <span style="font-weight:400;color:#888;font-size:12px">${label}</span></h3>
+      ${inst.notes ? `<div style="font-size:11px;color:#555;margin-bottom:6px;font-style:italic">${esc(inst.notes)}</div>` : ''}
       <div class="result-row"><span class="lbl">Materials</span><span class="val">${fmt(ec.mat)}</span><span class="unit"></span></div>
       <div class="result-row"><span class="lbl">Labor</span><span class="val">${fmt(ec.labor)}</span><span class="unit"></span></div>
-      ${ec.freight ? `<div class="result-row"><span class="lbl">Freight</span><span class="val">${fmt(ec.freight)}</span><span class="unit"></span></div>` : ''}
-      <div class="result-row"><span class="lbl"><strong>Unit Cost</strong></span><span class="val" style="color:#003366;font-size:14px">${fmt(ec.total)}</span><span class="unit"></span></div>
+      ${ec.freight  ? `<div class="result-row"><span class="lbl">Freight</span><span class="val">${fmt(ec.freight)}</span><span class="unit"></span></div>` : ''}
+      ${ec.fieldSvc ? `<div class="result-row"><span class="lbl">Field Service</span><span class="val">${fmt(ec.fieldSvc)}</span><span class="unit"></span></div>` : ''}
+      <div class="result-row"><span class="lbl"><strong>Total Cost</strong></span><span class="val" style="color:#003366;font-size:14px">${fmt(ec.total)}</span><span class="unit"></span></div>
+      ${bkRows ? `<div style="margin-top:4px">
+        <span onclick="document.getElementById('${uid_bk}').style.display=document.getElementById('${uid_bk}').style.display==='none'?'':'none'"
+          style="font-size:10px;color:#669;cursor:pointer;user-select:none">▸ Cost breakdown</span>
+        <table id="${uid_bk}" style="display:none;width:100%;border-collapse:collapse;margin-top:4px;border:1px solid #eee">${bkRows}</table>
+      </div>` : ''}
       <hr class="result-divider">
-      ${tierTableHtml(ec.total, qty)}
+      ${tierTableHtml(ec.total)}
     </div>`;
   });
 
-  // Grand total
+  const expenses = projectExpenses();
+  const freight  = projectFreight();
+  const grandCost = grandEquipCost + expenses + freight;
+
+  if (expenses > 0 || freight > 0) {
+    html += `<div class="result-box">
+      <h3>Project-Level Costs</h3>
+      ${expenses ? `<div class="result-row"><span class="lbl">Expenses</span><span class="val">${fmt(expenses)}</span><span class="unit"></span></div>` : ''}
+      ${freight  ? `<div class="result-row"><span class="lbl">Freight</span><span class="val">${fmt(freight)}</span><span class="unit"></span></div>` : ''}
+    </div>`;
+  }
+
   html += `<div class="result-box" style="border-color:#003366;border-width:2px">
     <h3 style="font-size:15px;color:#003366">Project Total</h3>
+    <div class="result-row"><span class="lbl">Equipment Cost</span><span class="val">${fmt(grandEquipCost)}</span><span class="unit"></span></div>
+    ${expenses ? `<div class="result-row"><span class="lbl">Expenses</span><span class="val">${fmt(expenses)}</span><span class="unit"></span></div>` : ''}
+    ${freight  ? `<div class="result-row"><span class="lbl">Freight</span><span class="val">${fmt(freight)}</span><span class="unit"></span></div>` : ''}
     <div class="result-row"><span class="lbl"><strong>Total Cost</strong></span><span class="val" style="font-size:15px">${fmt(grandCost)}</span><span class="unit"></span></div>
     <hr class="result-divider">
     ${grandTierTableHtml(grandCost)}
@@ -580,12 +759,324 @@ function render() {
   out.innerHTML = html;
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────────
-function v(id)  { return document.getElementById(id)?.value?.trim()||''; }
-function fmt(n) { return '$'+(n||0).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}); }
-function pct(n) { return n+'%'; }
-function pct2(a,b) { return b ? Math.round(a/b*100)+'%' : '—'; }
-function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+// ── Project save / load ───────────────────────────────────────────────────
+function projectSnapshot() {
+  return {
+    projNo:    v('projNo'),
+    customer:  v('customer'),
+    engineer:  v('engineer'),
+    location:  v('location'),
+    desc:      v('desc'),
+    date:      v('proj-date'),
+    revision:  v('revision'),
+    laborRates: {
+      eng:  document.getElementById('lr-eng').value,
+      asm:  document.getElementById('lr-asm').value,
+      fin:  document.getElementById('lr-fin').value,
+      proc: document.getElementById('lr-proc').value,
+      fs:   document.getElementById('lr-fs').value,
+    },
+    expenses: {
+      trips:     document.getElementById('exp-trips').value,
+      days:      document.getElementById('exp-days').value,
+      additional:document.getElementById('exp-additional').value,
+      rateTrip:  document.getElementById('exp-rate-trip').value,
+      rateDay:   document.getElementById('exp-rate-day').value,
+    },
+    freight: {
+      v2jMi:    document.getElementById('fr-v2j-mi').value,
+      v2jLoads: document.getElementById('fr-v2j-loads').value,
+      v2jRate:  document.getElementById('fr-v2j-rate').value,
+      j2sMi:    document.getElementById('fr-j2s-mi').value,
+      j2sLoads: document.getElementById('fr-j2s-loads').value,
+      j2sRate:  document.getElementById('fr-j2s-rate').value,
+    },
+    tiers: TIERS.map(t => ({
+      id: t.id,
+      gmac: document.getElementById('gmac-'+t.id)?.value,
+      comm: document.getElementById('comm-'+t.id)?.value,
+    })),
+    instances: JSON.parse(JSON.stringify(instances)),
+    savedAt: new Date().toISOString(),
+  };
+}
+
+function saveProject() {
+  const projNo = v('projNo').trim();
+  if (!projNo) { alert('Enter a Project No. before saving.'); return; }
+  const key = LS_PREFIX + projNo;
+  localStorage.setItem(key, JSON.stringify(projectSnapshot()));
+  refreshProjectList(projNo);
+  showSavedBadge();
+}
+
+function loadProject(data) {
+  if (!data) return;
+  setField('projNo',   data.projNo);
+  setField('customer', data.customer);
+  setField('engineer', data.engineer);
+  setField('location', data.location);
+  setField('desc',     data.desc);
+  setField('proj-date',data.date);
+  setField('revision', data.revision);
+
+  if (data.laborRates) {
+    setField('lr-eng',  data.laborRates.eng);
+    setField('lr-asm',  data.laborRates.asm);
+    setField('lr-fin',  data.laborRates.fin);
+    setField('lr-proc', data.laborRates.proc);
+    setField('lr-fs',   data.laborRates.fs);
+  }
+  if (data.expenses) {
+    setField('exp-trips',      data.expenses.trips);
+    setField('exp-days',       data.expenses.days);
+    setField('exp-additional', data.expenses.additional);
+    setField('exp-rate-trip',  data.expenses.rateTrip);
+    setField('exp-rate-day',   data.expenses.rateDay);
+  }
+  if (data.freight) {
+    setField('fr-v2j-mi',    data.freight.v2jMi);
+    setField('fr-v2j-loads', data.freight.v2jLoads);
+    setField('fr-v2j-rate',  data.freight.v2jRate);
+    setField('fr-j2s-mi',    data.freight.j2sMi);
+    setField('fr-j2s-loads', data.freight.j2sLoads);
+    setField('fr-j2s-rate',  data.freight.j2sRate);
+  }
+  if (data.tiers) {
+    data.tiers.forEach(t => {
+      setField('gmac-'+t.id, t.gmac);
+      setField('comm-'+t.id, t.comm);
+    });
+  }
+
+  instances = (data.instances || []).map(inst => ({...inst, uid: nextUid()}));
+  buildEquipBlocks();
+  // re-populate numeric fields in each block after DOM is built
+  const fieldMap = {eng_hrs:'eng',asm_hrs:'asm',fin_hrs:'fin',proc_hrs:'proc',freight:'freight',fs_days:'fs-days'};
+  instances.forEach(inst => {
+    Object.entries(fieldMap).forEach(([key, prefix]) => {
+      const el = document.getElementById(prefix+'-'+inst.uid);
+      if (el) el.value = inst[key] ?? 0;
+    });
+  });
+  render();
+}
+
+
+function newProject() {
+  if (!confirm('Start a new project? Unsaved changes will be lost.')) return;
+  instances = [];
+  ['projNo','customer','engineer','location','desc','proj-date','revision',
+   'exp-trips','exp-days','exp-additional','fr-v2j-mi','fr-v2j-loads','fr-j2s-mi','fr-j2s-loads']
+    .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  const defaults = {'exp-rate-trip':800,'exp-rate-day':389,'fr-v2j-rate':3,'fr-j2s-rate':3,'lr-fs':110,
+                    'lr-eng':110,'lr-asm':119,'lr-fin':110,'lr-proc':110};
+  Object.entries(defaults).forEach(([id,val]) => { const el=document.getElementById(id); if(el) el.value=val; });
+  // Reset pricing tier overrides to defaults
+  TIERS.forEach(t => {
+    setField('gmac-'+t.id, t.gmac);
+    setField('comm-'+t.id, t.comm);
+  });
+  buildEquipBlocks();
+  clearBadges();
+  render();
+}
+
+function refreshProjectList(selectKey) {
+  // no-op: project list now lives in the project manager modal
+}
+
+let _pmSort = { col: 'saved', dir: -1 }; // default: newest first
+
+function pmSortBy(col) {
+  if (_pmSort.col === col) _pmSort.dir *= -1;
+  else { _pmSort.col = col; _pmSort.dir = 1; }
+  _pmRenderTable();
+}
+
+function _pmBuildRows() {
+  return Object.keys(localStorage).filter(k=>k.startsWith(LS_PREFIX)).map(k => {
+    const data = JSON.parse(localStorage.getItem(k) || '{}');
+    const pn = k.replace(LS_PREFIX,'');
+    const cust = data.customer || '';
+    const insts = data.instances || [];
+    const equip = insts.length;
+    const savedTs = data.savedAt ? new Date(data.savedAt).getTime() : 0;
+    const savedStr = data.savedAt ? new Date(data.savedAt).toLocaleDateString() : '—';
+    const lr = data.laborRates || {};
+    const rEng = parseFloat(lr.eng) || 110;
+    const rAsm = parseFloat(lr.asm) || 119;
+    const rFin = parseFloat(lr.fin) || 110;
+    const rProc= parseFloat(lr.proc)|| 110;
+    const rFs  = parseFloat(lr.fs)  || 110;
+    const secSum = (inst, sec) => (inst[sec]||[]).reduce((s,r)=>s+(r.qty||0)*(r.unit_cost||0),0);
+    const equipCost = insts.reduce((sum, inst) => {
+      const mat = secSum(inst,'mats_offsite')+secSum(inst,'mats_raw')+secSum(inst,'mats_nonmetal')+secSum(inst,'purchased_sys')+secSum(inst,'purchased_comp');
+      const labor = (inst.eng_hrs||0)*rEng+(inst.asm_hrs||0)*rAsm+(inst.fin_hrs||0)*rFin+(inst.proc_hrs||0)*rProc;
+      const fs = (inst.fs_days||0)*8*rFs;
+      return sum + mat + labor + (inst.freight||0) + fs;
+    }, 0);
+    return { k, pn, cust, equip, cost: equipCost, savedTs, savedStr };
+  });
+}
+
+function _pmRenderTable() {
+  const rows = _pmBuildRows();
+  const tbody = document.getElementById('pm-tbody');
+  const empty = document.getElementById('pm-empty');
+  // Update sort indicators
+  ['pn','cust','equip','cost','saved'].forEach(col => {
+    const el = document.getElementById('pmsrt-'+col);
+    if (el) el.textContent = _pmSort.col === col ? (_pmSort.dir === 1 ? ' ▲' : ' ▼') : '';
+  });
+  if (!rows.length) { tbody.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+  const sorted = rows.slice().sort((a, b) => {
+    let av = a[_pmSort.col === 'saved' ? 'savedTs' : _pmSort.col];
+    let bv = b[_pmSort.col === 'saved' ? 'savedTs' : _pmSort.col];
+    if (typeof av === 'string') av = av.toLowerCase();
+    if (typeof bv === 'string') bv = bv.toLowerCase();
+    return av < bv ? -_pmSort.dir : av > bv ? _pmSort.dir : 0;
+  });
+  tbody.innerHTML = sorted.map(r => {
+    const kSafe = r.k.replace(/'/g, "\\'");
+    const costStr = r.cost > 0 ? fmt(r.cost) : '—';
+    return `<tr>
+      <td><strong>${r.pn}</strong></td>
+      <td>${r.cust || '—'}</td>
+      <td style="text-align:center">${r.equip}</td>
+      <td style="text-align:right;font-weight:600;color:#003366">${costStr}</td>
+      <td style="text-align:center;font-size:11px;color:#666">${r.savedStr}</td>
+      <td><div class="pm-actions">
+        <button onclick="pmLoad('${kSafe}')">Load</button>
+        <button onclick="pmDuplicate('${kSafe}')">Duplicate</button>
+        <button onclick="pmExportOne('${kSafe}')">Export</button>
+        <button class="pm-del-btn" onclick="pmDelete('${kSafe}')">Delete</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function openProjManager() {
+  _pmRenderTable();
+  document.getElementById('pm-overlay').style.display = 'flex';
+}
+
+function closeProjManager() {
+  document.getElementById('pm-overlay').style.display = 'none';
+}
+
+function _triggerDownload(filename, jsonStr) {
+  const blob = new Blob([jsonStr], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function pmExportOne(key) {
+  const data = localStorage.getItem(key);
+  if (!data) return;
+  const pn = key.replace(LS_PREFIX,'').replace(/[^a-zA-Z0-9_\-]/g,'_');
+  _triggerDownload(`project_${pn}.json`, data);
+}
+
+function pmExportAll() {
+  const keys = Object.keys(localStorage).filter(k=>k.startsWith(LS_PREFIX)).sort();
+  if (!keys.length) { alert('No saved projects to export.'); return; }
+  const bundle = {};
+  keys.forEach(k => {
+    try { bundle[k.replace(LS_PREFIX,'')] = JSON.parse(localStorage.getItem(k)); } catch(e) {}
+  });
+  const date = new Date().toISOString().slice(0,10);
+  _triggerDownload(`ept_projects_${date}.json`, JSON.stringify(bundle, null, 2));
+}
+
+function pmImport(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      let imported = 0, skipped = 0;
+      // Support both single-project {projNo,instances,...} and bundle {projNo: {...}, ...}
+      const isBundle = !parsed.projNo && typeof parsed === 'object';
+      const entries = isBundle ? Object.entries(parsed) : [[parsed.projNo || 'imported', parsed]];
+      entries.forEach(([pn, data]) => {
+        const key = LS_PREFIX + pn;
+        if (localStorage.getItem(key) && !confirm(`Project "${pn}" already exists. Overwrite?`)) {
+          skipped++;
+          return;
+        }
+        localStorage.setItem(key, JSON.stringify({...data, projNo: pn}));
+        imported++;
+      });
+      input.value = '';
+      _pmRenderTable();
+      alert(`Imported ${imported} project${imported!==1?'s':''}${skipped?' ('+skipped+' skipped)':''}.`);
+    } catch(err) {
+      alert('Could not read file — make sure it is a valid project JSON export.');
+      input.value = '';
+    }
+  };
+  reader.readAsText(file);
+}
+
+function pmLoad(key) {
+  const data = JSON.parse(localStorage.getItem(key) || 'null');
+  if (!data) return;
+  closeProjManager();
+  loadProject(data);
+}
+
+function pmDuplicate(key) {
+  const data = JSON.parse(localStorage.getItem(key) || 'null');
+  if (!data) return;
+  const srcNo = key.replace(LS_PREFIX,'');
+  let newNo = prompt(`Duplicate "${srcNo}" — enter new project number:`, srcNo + '-V2');
+  if (!newNo) return;
+  newNo = newNo.trim();
+  if (!newNo) return;
+  if (localStorage.getItem(LS_PREFIX + newNo)) {
+    alert(`Project "${newNo}" already exists. Choose a different name.`);
+    return;
+  }
+  const copy = { ...data, projNo: newNo };
+  localStorage.setItem(LS_PREFIX + newNo, JSON.stringify(copy));
+  _pmRenderTable(); // refresh table
+}
+
+function pmDelete(key) {
+  const projNo = key.replace(LS_PREFIX,'');
+  if (!confirm(`Delete saved project "${projNo}"? This cannot be undone.`)) return;
+  localStorage.removeItem(key);
+  _pmRenderTable(); // refresh table
+}
+
+function markUnsaved() {
+  document.getElementById('save-badge').style.display = 'none';
+  document.getElementById('unsaved-badge').style.display = 'inline';
+}
+
+function showSavedBadge() {
+  document.getElementById('unsaved-badge').style.display = 'none';
+  document.getElementById('save-badge').style.display = 'inline';
+  setTimeout(() => { document.getElementById('save-badge').style.display='none'; }, 3000);
+}
+
+function clearBadges() {
+  document.getElementById('save-badge').style.display = 'none';
+  document.getElementById('unsaved-badge').style.display = 'none';
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function v(id)        { return document.getElementById(id)?.value?.trim()||''; }
+function setField(id,val) { const el=document.getElementById(id); if(el&&val!=null) el.value=val; }
+function fmt(n)       { return '$'+(n||0).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+function pct(n)       { return n+'%'; }
+function pct2(a,b)    { return b ? Math.round(a/b*100)+'%' : '—'; }
+function esc(s)       { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function toggleSec(id) {
   const body = document.getElementById(id);
@@ -594,26 +1085,128 @@ function toggleSec(id) {
   tog.style.transform = collapsed ? '' : 'rotate(90deg)';
 }
 
-function resetAll() {
-  ['projNo','customer','engineer','location','desc','proj-date','revision'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
-  EQUIP_TYPES.forEach(e => {
-    equip[e.id].enabled = false;
-    equip[e.id].qty = 1;
-    equip[e.id].mats_offsite  = buildLines(5);
-    equip[e.id].mats_raw      = buildLines(5);
-    equip[e.id].mats_nonmetal = buildLines(3);
-    equip[e.id].purchased_sys = buildLines(3);
-    equip[e.id].purchased_comp= buildLines(3);
-    equip[e.id].eng_hrs = equip[e.id].asm_hrs = equip[e.id].fin_hrs = equip[e.id].proc_hrs = equip[e.id].freight = 0;
-  });
-  buildEquipBlocks();
-  render();
+// legacy alias kept for Reset button
+function resetAll() { newProject(); }
+
+// ── costs.json loader ─────────────────────────────────────────────────────
+function applyRatesFromCosts(costs) {
+  const lab = costs?.labor;
+  if (lab) {
+    if (lab.engineering_per_hr  != null) setField('lr-eng',  lab.engineering_per_hr);
+    if (lab.assembly_per_hr     != null) setField('lr-asm',  lab.assembly_per_hr);
+    if (lab.finishing_per_hr    != null) setField('lr-fin',  lab.finishing_per_hr);
+    if (lab.processing_per_hr   != null) setField('lr-proc', lab.processing_per_hr);
+    if (lab.field_service_per_hr!= null) setField('lr-fs',   lab.field_service_per_hr);
+  }
+  const fr = costs?.freight;
+  if (fr?.rate_per_mile != null) {
+    setField('fr-v2j-rate', fr.rate_per_mile);
+    setField('fr-j2s-rate', fr.rate_per_mile);
+  }
 }
 
-init();
+// ── Incoming from calc tools ──────────────────────────────────────────────
+function checkIncoming() {
+  const raw = localStorage.getItem('ept_incoming');
+  if (!raw) return;
+  localStorage.removeItem('ept_incoming');
+  try {
+    const { projNo, instance, loadExisting, bypass } = JSON.parse(raw);
+
+    // Bypass password gate when arriving from a calc tool
+    if (bypass) {
+      document.getElementById('gate').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      buildTierOverrideRows();
+      refreshProjectList();
+    }
+
+    // Load existing project if it was selected in the modal
+    if (loadExisting && projNo) {
+      const saved = localStorage.getItem(LS_PREFIX + projNo);
+      if (saved) {
+        loadProject(JSON.parse(saved));
+        // loadProject sets projNo field — no need to re-set
+      } else {
+        setField('projNo', projNo);
+      }
+    } else if (projNo) {
+      setField('projNo', projNo);
+    }
+
+    // Append the incoming equipment
+    const inst = { ...instance, uid: nextUid() };
+    instances.push(inst);
+    appendEquipBlock(inst);
+    markUnsaved();
+    render();
+
+    // Scroll to the new equipment block
+    setTimeout(() => {
+      const el = document.getElementById('eb-' + inst.uid);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 150);
+  } catch(e) { console.error('checkIncoming error:', e); }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+// checkIncoming handles bypass (gate skip) + project load when arriving from a calc tool.
+// Only call buildTierOverrideRows/refreshProjectList here if NOT bypassing.
+const _hasIncoming = !!localStorage.getItem('ept_incoming');
+if (!_hasIncoming) {
+  buildTierOverrideRows();
+  refreshProjectList();
+}
+checkIncoming();
+if (!_hasIncoming) render();
+
+(function initCosts() {
+  const override = localStorage.getItem('jms_costs_override');
+  if (override) {
+    try { applyRatesFromCosts(JSON.parse(override)); } catch(e) {}
+    render();
+    return;
+  }
+  fetch('costs.json')
+    .then(r => r.json())
+    .then(costs => { applyRatesFromCosts(costs); render(); })
+    .catch(() => {
+      const w = document.createElement('div');
+      w.style.cssText = 'background:#fff3cd;border-left:3px solid #f0a800;padding:5px 10px;font-size:11px;color:#856404;margin-bottom:6px';
+      w.textContent = '⚠ costs.json not loaded — using default rates. Open Cost Library to upload pricing data.';
+      document.querySelector('.left')?.prepend(w);
+      render();
+    });
+})();
 </script>
+
+<!-- ── Project Manager Modal ── -->
+<div id="pm-overlay" onclick="if(event.target===this)closeProjManager()">
+  <div id="pm-box">
+    <h2>Saved Projects</h2>
+    <div id="pm-scroll">
+      <table id="pm-table">
+        <thead><tr>
+          <th data-pmcol="pn" onclick="pmSortBy('pn')" style="cursor:pointer;user-select:none">Project No. <span id="pmsrt-pn"></span></th>
+          <th data-pmcol="cust" onclick="pmSortBy('cust')" style="cursor:pointer;user-select:none">Customer <span id="pmsrt-cust"></span></th>
+          <th data-pmcol="equip" onclick="pmSortBy('equip')" style="cursor:pointer;user-select:none">Equipment <span id="pmsrt-equip"></span></th>
+          <th data-pmcol="cost" onclick="pmSortBy('cost')" style="cursor:pointer;user-select:none">Est. Cost <span id="pmsrt-cost"></span></th>
+          <th data-pmcol="saved" onclick="pmSortBy('saved')" style="cursor:pointer;user-select:none">Saved <span id="pmsrt-saved"></span></th>
+          <th>Actions</th>
+        </tr></thead>
+        <tbody id="pm-tbody"></tbody>
+      </table>
+      <div id="pm-empty" style="display:none">No saved projects yet.</div>
+    </div>
+    <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <div style="display:flex;gap:6px">
+        <button onclick="pmExportAll()" title="Export all projects to a single JSON backup file">Export All →</button>
+        <button onclick="document.getElementById('pm-import-input').click()" title="Import projects from a JSON backup file">Import JSON</button>
+        <input id="pm-import-input" type="file" accept=".json" style="display:none" onchange="pmImport(this)">
+      </div>
+      <button onclick="closeProjManager()">Close</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>

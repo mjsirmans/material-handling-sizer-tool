@@ -34,6 +34,9 @@ input[disabled],select[disabled]{background:#f0f0f0;color:#888;cursor:not-allowe
 .input-primary input,.input-primary select{background:#cce5ff}
 .input-secondary input,.input-secondary select{background:#ddeeff}
 .input-calculated input,.input-calculated select{background:#f0f0f0;color:#555;font-style:italic}
+.field-empty input,.field-empty select{border:1px solid #e57373!important;background:#fff8f8!important}
+.field-filled input,.field-filled select{border:1px solid #81c784!important}
+.field-pricing input,.field-pricing select{border:1px solid #ffd54f!important;background:#fffff8!important}
 
 .section{margin-bottom:8px}
 .sec-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;margin-bottom:0;padding-bottom:3px;border-bottom:1px solid #ccd}
@@ -81,12 +84,14 @@ button.primary:hover{background:#002244}
 
 @media print{
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .left,.header button,.btn-row{display:none!important}
+  .left,.btn-row{display:none!important}
+  button{display:none!important}
   .header{padding:6px 12px}
   .main{display:block;min-height:unset}
   .right{padding:8px;overflow:visible;max-height:unset}
-  .result-box{break-inside:avoid;border:1px solid #999;margin-bottom:6px}
-  button{display:none!important}
+  .result-box{break-inside:avoid;page-break-inside:avoid;border:1px solid #ccc;margin-bottom:6px}
+  .result-box h2,.result-row{font-size:11px}
+  @page{margin:15mm 12mm;size:letter portrait}
 }
 </style>
 </head>
@@ -180,16 +185,40 @@ button.primary:hover{background:#002244}
 </div>
 <div class="sec-body" id="sec-screw">
 <div style="height:6px"></div>
-<div class="field-row input-primary"><label>Qty LB Screws</label><input id="qty_lb_screws" type="number" min="1" step="1" oninput="autoFillDischargeWidth();calculate()" onchange="autoFillDischargeWidth();calculate()"><span class="std">#</span></div>
-<div class="field-row input-primary"><label>LB Screw Dia</label>
+<div class="field-row" style="margin-bottom:4px">
+  <label style="font-size:11px;color:#495057">Mixed Diameters</label>
+  <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer">
+    <input type="checkbox" id="mixed_dia_enabled" onchange="toggleMixedDia();autoFillDischargeWidth();calculate()">
+    Two screw sizes (outer + inner/center)
+  </label>
+</div>
+<div style="font-size:10px;color:#888;margin:-2px 0 6px 154px">Enable for hoppers with different outer and center screw diameters</div>
+
+<div style="font-size:10px;font-weight:700;color:#1a2744;margin:4px 0 2px 0;letter-spacing:.4px" id="grp-a-label">Group A — Outer Screws</div>
+<div class="field-row input-primary"><label>Qty (Group A)</label><input id="qty_lb_screws" type="number" min="1" step="1" oninput="autoFillDischargeWidth();calculate()" onchange="autoFillDischargeWidth();calculate()"><span class="std">#</span></div>
+<div class="field-row input-primary"><label>Dia (Group A)</label>
 <select id="lb_screw_dia_in" oninput="autoFillDischargeWidth();calculate()" onchange="autoFillDischargeWidth();calculate()">
 <option value="">— select —</option>
 <option value="9">9"</option><option value="12">12"</option><option value="14">14"</option>
 <option value="16">16"</option><option value="18">18"</option><option value="20">20"</option>
 <option value="22">22"</option><option value="24">24"</option>
 </select><span class="std">in</span></div>
-<div class="field-row input-primary"><label>LB Screw Pitch</label><input id="lb_screw_pitch_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
-<div class="field-row input-secondary"><label>LB Pipe NPS</label><input id="lb_pipe_nps" type="number" step="0.5" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+<div class="field-row input-primary"><label>Pitch (Group A)</label><input id="lb_screw_pitch_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+<div class="field-row input-secondary"><label>Pipe NPS (Group A)</label><input id="lb_pipe_nps" type="number" step="0.5" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+
+<div id="grp-b-block" style="display:none">
+<div style="font-size:10px;font-weight:700;color:#1a2744;margin:8px 0 2px 0;letter-spacing:.4px">Group B — Inner / Center Screws</div>
+<div class="field-row input-primary"><label>Qty (Group B)</label><input id="qty_lb_screws_b" type="number" min="1" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
+<div class="field-row input-primary"><label>Dia (Group B)</label>
+<select id="lb_screw_dia_in_b" oninput="calculate()" onchange="calculate()">
+<option value="">— select —</option>
+<option value="9">9"</option><option value="12">12"</option><option value="14">14"</option>
+<option value="16">16"</option><option value="18">18"</option><option value="20">20"</option>
+<option value="22">22"</option><option value="24">24"</option>
+</select><span class="std">in</span></div>
+<div class="field-row input-primary"><label>Pitch (Group B)</label><input id="lb_screw_pitch_in_b" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+<div class="field-row input-secondary"><label>Pipe NPS (Group B)</label><input id="lb_pipe_nps_b" type="number" step="0.5" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+</div>
 <div class="field-row input-secondary"><label>LB Pipe Schedule</label><input id="lb_pipe_sched" type="text" oninput="calculate()" onchange="calculate()"><span class="std"></span></div>
 <div class="field-row input-secondary"><label>Drive Shaft Ø</label><input id="lb_drive_shaft_dia" type="number" step="0.0625" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
 <div class="field-row input-secondary"><label>Driven Shaft Ø</label><input id="lb_driven_shaft_dia" type="number" step="0.0625" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
@@ -323,6 +352,9 @@ const SEW_FAZ_FRAME = [
   {maxHP:100, frame:'FA157', shafts:[4.921,5.512]},
 ];
 
+// ─── Pricing data ─────────────────────────────────────────────────────────────
+let HOPPER_COSTS = null;
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function nv(id, def=0) {
@@ -331,6 +363,10 @@ function nv(id, def=0) {
 }
 function sv(id) { return document.getElementById(id)?.value ?? ''; }
 function getVal(id) { return sv(id); }
+function esc(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 
 function fmt(v, dec=2) {
   if (v === null || v === undefined || isNaN(v) || !isFinite(v)) return '—';
@@ -367,15 +403,32 @@ function toggleSec(id) {
   if (tog) tog.style.transform = collapsed ? '' : 'rotate(90deg)';
 }
 
+function toggleMixedDia() {
+  const on = document.getElementById('mixed_dia_enabled')?.checked;
+  document.getElementById('grp-b-block').style.display = on ? 'block' : 'none';
+  document.getElementById('grp-a-label').style.display = on ? 'block' : 'none';
+  // Reset group-B fields when turning off
+  if (!on) {
+    ['qty_lb_screws_b','lb_screw_dia_in_b','lb_screw_pitch_in_b','lb_pipe_nps_b'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+  }
+}
+
 function autoFillDischargeWidth() {
+  const mixed   = document.getElementById('mixed_dia_enabled')?.checked;
+  const wField  = document.getElementById('discharge_wid_in');
+  if (!wField || wField.dataset.manualOverride) return;
+  if (mixed) {
+    // Can't auto-fill for mixed — too many combinations; leave as-is
+    return;
+  }
   const nScrews = parseInt(document.getElementById('qty_lb_screws')?.value) || 0;
   const dia     = parseInt(document.getElementById('lb_screw_dia_in')?.value) || 0;
   const key     = nScrews * 100 + dia;
   const entry   = LB_WIDTH_TABLE[key];
-  const wField  = document.getElementById('discharge_wid_in');
-  if (entry && wField && !wField.dataset.manualOverride) {
-    wField.value = (entry[0] * 12).toFixed(3);
-  }
+  if (entry) wField.value = (entry[0] * 12).toFixed(3);
 }
 
 // Incline factor R — interpolated from CEMA table
@@ -387,6 +440,132 @@ function inlineR(deg) {
     if (deg <= x1) return y0 + (deg-x0)/(x1-x0)*(y1-y0);
   }
   return R_TABLE[R_TABLE.length-1][1];
+}
+
+// ─── Pricing layer ────────────────────────────────────────────────────────────
+
+function hopperPricingHtml(qty_lb, hp_selected, sew_frame, oal_in, oaw_in) {
+  const fmtD = n => n != null ? '$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}) : '—';
+  const quoteBadge = '<span style="background:#fff3cd;color:#856404;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700">QUOTE REQ\'D</span>';
+
+  if (!HOPPER_COSTS) {
+    return `<div class="result-box">
+      <h2>Pricing</h2>
+      <p class="note">costs.json not loaded — open <a href="cost-library.html">Cost Library</a> to upload pricing data.</p>
+    </div>`;
+  }
+
+  const purf = HOPPER_COSTS.purchased_components?.hopper_500_costs_purf || [];
+
+  // Helper: find lowest-cost item matching keyword(s) with a valid unit_cost
+  function findPart(keywords) {
+    const kw = keywords.map(k => k.toUpperCase());
+    const matches = purf.filter(x =>
+      kw.every(k => x.description?.toUpperCase().includes(k)) &&
+      x.unit_cost != null && x.unit_cost > 0
+    );
+    if (!matches.length) return { found: false, item: null };
+    return { found: true, item: matches.reduce((a,b) => a.unit_cost <= b.unit_cost ? a : b) };
+  }
+
+  // Steel plate estimate: rough area from OAL × OAW (two sides + ends, 1/4" plate @ ~10 lb/ft²)
+  // costs.json contains SS pricing only — CS/A36 requires a separate Phoenix Metals quote
+  const steel = HOPPER_COSTS.steel?.plate_and_sheet || [];
+  const rough_sqft = oal_in > 0 && oaw_in > 0 ? ((oal_in/12) * (oaw_in/12) * 2 + (oal_in/12) * 1 * 2) : null;
+  const rough_lb   = rough_sqft !== null ? rough_sqft * 10.2 : null;
+  const steelCost  = null; // CS/A36 not in cost library — always quote
+
+  // SEW motor — match by frame if known
+  const sewPart = sew_frame
+    ? findPart([sew_frame.frame])
+    : { found: false, item: null };
+
+  // Drive drum (smallest available as reference)
+  const drumPart = findPart(['DRUM PULLEY']);
+
+  // Chain coupling
+  const chainPart = findPart(['CHAIN COUPLING']);
+
+  // Sprocket (smallest)
+  const sprocketPart = findPart(['SPROCKET', 'HUB']);
+
+  // Pillow block bearing
+  const bearingPart = findPart(['PILLOW BLOCK', 'BEARING']);
+
+  // Build rows: [label, qty, unit, found, item, note]
+  const rows = [
+    { label: 'Steel Plate (1/4", est.)', qty: rough_lb != null ? rough_lb.toFixed(0)+' lb' : '—', found: false, cost: null, note: 'CS/A36 not in library — get Phoenix Metals quote', quoteNote: 'CS/A36 not in library — get Phoenix Metals quote' },
+    { label: `SEW Drive Motor (${sew_frame?.frame || '—'})`, qty: qty_lb > 0 ? qty_lb+' ea' : '—', found: sewPart.found, cost: sewPart.found ? sewPart.item.unit_cost * (qty_lb||1) : null, item: sewPart.item, note: sewPart.found ? sewPart.item.description : '', quoteNote: sew_frame ? 'No exact match — confirm via SEW DriveSelect' : 'Run calc to size motor first' },
+    { label: 'Drive Drum Pulley', qty: '1 ea', found: drumPart.found, cost: drumPart.found ? drumPart.item.unit_cost : null, item: drumPart.item, note: drumPart.found ? drumPart.item.description : '', quoteNote: 'Get quote from vendor' },
+    { label: 'Chain Coupling', qty: qty_lb > 0 ? qty_lb+' ea' : '—', found: chainPart.found, cost: chainPart.found ? chainPart.item.unit_cost * (qty_lb||1) : null, item: chainPart.item, note: chainPart.found ? chainPart.item.description : '', quoteNote: 'Get quote from vendor' },
+    { label: 'Drive Sprocket', qty: '2 ea', found: sprocketPart.found, cost: sprocketPart.found ? sprocketPart.item.unit_cost * 2 : null, item: sprocketPart.item, note: sprocketPart.found ? sprocketPart.item.description : '', quoteNote: 'Get quote from vendor' },
+    { label: 'Pillow Block Bearing', qty: qty_lb > 0 ? (qty_lb*2)+' ea' : '—', found: bearingPart.found, cost: bearingPart.found ? bearingPart.item.unit_cost * (qty_lb||1) * 2 : null, item: bearingPart.item, note: bearingPart.found ? bearingPart.item.description : '', quoteNote: 'Get quote from vendor' },
+  ];
+
+  let tableRows = '';
+  let subtotal = 0;
+  rows.forEach(r => {
+    const costCell = r.found && r.cost != null
+      ? `<strong>${fmtD(r.cost)}</strong>`
+      : quoteBadge;
+    if (r.found && r.cost != null) subtotal += r.cost;
+    tableRows += `<tr>
+      <td style="padding:3px 6px;border:1px solid #e4e8ee;font-size:11px">${r.label}</td>
+      <td style="padding:3px 6px;border:1px solid #e4e8ee;font-size:11px;color:#666">${r.qty}</td>
+      <td style="padding:3px 6px;border:1px solid #e4e8ee;font-size:11px;color:#666">${r.note || (r.quoteNote||'')}</td>
+      <td style="padding:3px 6px;border:1px solid #e4e8ee;font-size:11px;text-align:right">${costCell}</td>
+    </tr>`;
+  });
+
+  return `<div class="result-box">
+    <h2>Pricing <span style="font-size:10px;font-weight:400;color:#888">— reference from costs.json · QUOTE REQ'D items need manual entry</span></h2>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:8px">
+      <thead><tr>
+        <th style="padding:3px 6px;background:#eef2f8;border:1px solid #dde;color:#003366;font-size:10px;text-align:left">Item</th>
+        <th style="padding:3px 6px;background:#eef2f8;border:1px solid #dde;color:#003366;font-size:10px;text-align:left">Qty</th>
+        <th style="padding:3px 6px;background:#eef2f8;border:1px solid #dde;color:#003366;font-size:10px;text-align:left">Description / Note</th>
+        <th style="padding:3px 6px;background:#eef2f8;border:1px solid #dde;color:#003366;font-size:10px;text-align:right">Cost</th>
+      </tr></thead>
+      <tbody>${tableRows}</tbody>
+      <tfoot><tr>
+        <td colspan="3" style="padding:3px 6px;border:1px solid #dde;font-size:11px;font-weight:700;text-align:right">Subtotal (costed items only)</td>
+        <td style="padding:3px 6px;border:1px solid #dde;font-size:12px;font-weight:700;text-align:right;color:#003366">${fmtD(subtotal)}</td>
+      </tr></tfoot>
+    </table>
+    <p class="note" style="margin-bottom:8px">Prices from costs.json (lowest-cost match). QUOTE REQ'D items need vendor quotes — enter manually in Estimator.</p>
+    <button class="primary" onclick="openSendModal()" style="width:100%">Send to Equipment Pricing Tool →</button>
+  </div>`;
+}
+
+// payload builder used by confirmSend()
+function _buildHopperPayload(tag) {
+  const qty_lb_a = parseInt(document.getElementById('qty_lb_screws')?.value) || 0;
+  const mixed_b  = document.getElementById('mixed_dia_enabled')?.checked || false;
+  const qty_lb_b = mixed_b ? (parseInt(document.getElementById('qty_lb_screws_b')?.value) || 0) : 0;
+  const qty_lb   = qty_lb_a + qty_lb_b;
+  const purf = HOPPER_COSTS?.purchased_components?.hopper_500_costs_purf || [];
+  function findPart(keywords) {
+    const kw = keywords.map(k => k.toUpperCase());
+    const matches = purf.filter(x => kw.every(k => (x.description||'').toUpperCase().includes(k)) && x.unit_cost != null && x.unit_cost > 0);
+    if (!matches.length) return null;
+    return matches.reduce((a,b) => a.unit_cost <= b.unit_cost ? a : b);
+  }
+  const drumPart  = findPart(['DRUM PULLEY']);
+  const chainPart = findPart(['CHAIN COUPLING']);
+  const sprocket  = findPart(['SPROCKET', 'HUB']);
+  const bearing   = findPart(['PILLOW BLOCK', 'BEARING']);
+  const mkRow = (p, qty=1) => p ? {desc:p.description, vendor:p.vendor||'', qty, unit_cost:p.unit_cost} : {desc:'[QUOTE REQ\'D]', vendor:'', qty:0, unit_cost:0};
+  const oal = sv('oal_in'), oaw = sv('oaw_in');
+  return {
+    type:'hopper', name: tag,
+    notes: `${oal}×${oaw}" hopper, ${qty_lb} LB screws`,
+    mats_offsite:[{desc:'',vendor:'',qty:0,unit_cost:0},{desc:'',vendor:'',qty:0,unit_cost:0},{desc:'',vendor:'',qty:0,unit_cost:0},{desc:'',vendor:'',qty:0,unit_cost:0},{desc:'',vendor:'',qty:0,unit_cost:0}],
+    mats_raw:[{desc:'Steel Plate A36 1/4" (est.)',vendor:'',qty:0,unit_cost:0},{desc:'',vendor:'',qty:0,unit_cost:0},{desc:'',vendor:'',qty:0,unit_cost:0},{desc:'',vendor:'',qty:0,unit_cost:0},{desc:'',vendor:'',qty:0,unit_cost:0}],
+    mats_nonmetal:[{desc:'',vendor:'',qty:0,unit_cost:0},{desc:'',vendor:'',qty:0,unit_cost:0},{desc:'',vendor:'',qty:0,unit_cost:0}],
+    purchased_sys:[{desc:'SEW Drive Motor (see design sheet)',vendor:'SEW-EURODRIVE',qty:qty_lb,unit_cost:0},{desc:'',vendor:'',qty:0,unit_cost:0},{desc:'',vendor:'',qty:0,unit_cost:0}],
+    purchased_comp:[mkRow(drumPart,1),mkRow(chainPart,qty_lb),mkRow(sprocket,2),mkRow(bearing,qty_lb*2),{desc:'',vendor:'',qty:0,unit_cost:0}],
+    eng_hrs:0, asm_hrs:0, fin_hrs:0, proc_hrs:0, freight:0, fs_days:0,
+  };
 }
 
 // ─── Main calc ────────────────────────────────────────────────────────────────
@@ -414,6 +593,12 @@ function calculate() {
   const D       = nv('lb_screw_dia_in');
   const NPS     = nv('lb_pipe_nps');
   const P       = nv('lb_screw_pitch_in');
+  const mixed   = document.getElementById('mixed_dia_enabled')?.checked || false;
+  const X_b     = mixed ? (nv('qty_lb_screws_b') || 0) : 0;
+  const D_b     = mixed ? (nv('lb_screw_dia_in_b') || 0) : 0;
+  const NPS_b   = mixed ? (nv('lb_pipe_nps_b') || 0) : 0;
+  const P_b     = mixed ? (nv('lb_screw_pitch_in_b') || 0) : 0;
+  const X_total = X + X_b;
   const incline = 0;  // LB screws always horizontal
 
   const OAL_ft  = OAL_in  / 12;
@@ -451,55 +636,68 @@ function calculate() {
   const volOK = v_usable_yds !== null && reqVol > 0 ? v_usable_yds >= reqVol : null;
 
   // ── LB screw sizing ───────────────────────────────────────────────────────
-  const d = PIPE_OD[NPS] ?? 0;
   const R = inlineR(incline);
-  const C1=1.0, CF2=1.0;
-  let N_rpm=null, HPf=null, HPm=null, HPi=null, Fo=null;
-  let hp_per_screw=null, hp_total=null, hp_selected=null, Fd=null;
-  let req_torque_inlb=null, sew_frame=null, sew_ratio=null;
+  const C1=1.0, CF2=1.0, Fm=1.5, e=95, Fb=1.0, Fi=1.0;
 
-  if (flowrate>0 && density>0 && X>0 && D>0 && d>0 && P>0 && angRepos>0) {
-    const m_per_screw = flowrate / X;
-    const v_per_screw = m_per_screw / density;
-    const cap_rev = 0.7854 * (D*D - d*d) * P * 1.0 * C1 * R * 60 / 1728 / CF2;
-    N_rpm = cap_rev > 0 ? v_per_screw / cap_rev : null;
-
+  // Compute one screw group's HP and RPM given qty, dia, NPS, pitch, share of flowrate
+  function calcScrewGroup(Xg, Dg, NPSg, Pg, flow_share) {
+    const dg = PIPE_OD[NPSg] ?? 0;
+    if (Xg<=0 || Dg<=0 || dg<=0 || Pg<=0 || flow_share<=0 || density<=0 || angRepos<=0) return null;
+    const v_per_screw = (flow_share / density) / Xg;
+    const cap_rev = 0.7854 * (Dg*Dg - dg*dg) * Pg * C1 * R * 60 / 1728 / CF2;
+    if (cap_rev <= 0) return null;
+    const rpm = v_per_screw / cap_rev;
     const L_hp = dLen_in / 12;
-    const Cv   = v_per_screw * X;
-    const Fm   = 1.5;
-    const e    = 95;
-    Fd = 0.454707 * D*D - 1.34425 * D + 8.27145;
-    const Fb = 1.0;
-    const Fi = 1.0;  // horizontal
-
-    HPf = N_rpm !== null ? L_hp * N_rpm * Fd * Fb / 1_000_000 : null;
-    HPm = (Cv / X) * density * L_hp * Fm / 1_000_000;
-
-    const AE10 = ((D+1)*X + (D+1)*X*(1/3)) / 12;
+    const Cv_g = (flow_share / density) / 1;  // ft³/min for whole group
+    const Fd_g = 0.454707 * Dg*Dg - 1.34425 * Dg + 8.27145;
+    const HPf_g = L_hp * rpm * Fd_g * Fb / 1_000_000;
+    const HPm_g = (Cv_g / Xg) * density * L_hp * Fm / 1_000_000;
+    const AE10 = ((Dg+1)*Xg + (Dg+1)*Xg*(1/3)) / 12;
     const AE13 = density * AE10 * 1.7;
-    const AE15 = AE10 * P;
+    const AE15 = AE10 * Pg;
     const AE17 = AE13 * AE15;
-    const P20  = Cv > 0 ? (AE17 / Cv) / AE15 : 0;
-    HPi = N_rpm !== null
-      ? Math.tan(angRepos * Math.PI / 180) * P20 * density * D * L_hp * P * N_rpm / 12 / 12 / 33000
-      : null;
+    const Cv_check = (flow_share / density);
+    const P20  = Cv_check > 0 ? (AE17 / Cv_check) / AE15 : 0;
+    const HPi_g = Math.tan(angRepos * Math.PI / 180) * P20 * density * Dg * L_hp * Pg * rpm / 12 / 12 / 33000;
+    return { rpm, HPf: HPf_g, HPm: HPm_g, HPi: HPi_g, Fd: Fd_g };
+  }
 
-    if (HPf !== null && HPm !== null && HPi !== null) {
+  const d = PIPE_OD[NPS] ?? 0;  // group A pipe OD for display
+  let N_rpm=null, HPf=null, HPm=null, HPi=null, Fo=null, Fd=null;
+  let hp_per_screw=null, hp_total=null, hp_selected=null;
+  let req_torque_inlb=null, sew_frame=null, sew_ratio=null;
+  let grpB_result=null;
+
+  const readyA = flowrate>0 && density>0 && X>0 && D>0 && NPS>0 && P>0 && angRepos>0;
+  const readyB = mixed && X_b>0 && D_b>0 && NPS_b>0 && P_b>0;
+
+  if (readyA) {
+    // Split flowrate proportionally by screw count
+    const flow_a = readyB ? flowrate * X / X_total : flowrate;
+    const flow_b = readyB ? flowrate * X_b / X_total : 0;
+
+    const gA = calcScrewGroup(X, D, NPS, P, flow_a);
+    const gB = readyB ? calcScrewGroup(X_b, D_b, NPS_b, P_b, flow_b) : null;
+
+    if (gA) {
+      N_rpm = gA.rpm;
+      HPf   = gA.HPf + (gB ? gB.HPf : 0);
+      HPm   = gA.HPm + (gB ? gB.HPm : 0);
+      HPi   = gA.HPi + (gB ? gB.HPi : 0);
+      Fd    = gA.Fd;
+      grpB_result = gB;
+
       const HP_sum = HPf + HPm + HPi;
       const Fo_raw = HP_sum > 0 ? 2.033 - 1.45 * Math.log10(HP_sum) : 2.033;
       Fo = Math.max(1.0, Fo_raw);
-      hp_per_screw = (HPf + HPm * Fi + HPi) * Fo / e * 100;
-      hp_total     = hp_per_screw * X;
+      hp_per_screw = (HPf + HPm * Fi + HPi) * Fo / e * 100 / X_total;
+      hp_total     = hp_per_screw * X_total;
       hp_selected  = STD_HP.find(h => h >= hp_per_screw) ?? STD_HP[STD_HP.length-1];
 
       // SEW FAZ recommendation — parallel shaft, B14 flange
       if (hp_selected && N_rpm) {
         req_torque_inlb = N_rpm > 0 ? 63025 * hp_per_screw / N_rpm : null;
-        sew_frame = SEW_FAZ_FRAME.find(f =>
-          f.maxHP >= hp_selected &&
-          (req_torque_inlb === null || true)
-        ) || null;
-        // Pick nearest standard ratio to achieve N_rpm from 1750 RPM motor
+        sew_frame = SEW_FAZ_FRAME.find(f => f.maxHP >= hp_selected) || null;
         const req_ratio = N_rpm > 0 ? 1750 / N_rpm : null;
         if (req_ratio) {
           sew_ratio = SEW_FAZ_RATIOS.reduce((best, r) =>
@@ -517,14 +715,14 @@ function calculate() {
   html += `<div class="project-header">
     <h2>Hopper Design Sheet</h2>
     <div class="project-meta">
-      <span><strong>Project No.:</strong> ${proj_no || '—'}</span>
-      <span><strong>Engineer:</strong> ${engineer || '—'}</span>
-      <span><strong>Customer:</strong> ${customer || '—'}</span>
-      <span><strong>Date:</strong> ${proj_date || '—'}</span>
-      <span><strong>Location:</strong> ${location || '—'}</span>
-      <span><strong>Revision:</strong> ${revision || '—'}</span>
+      <span><strong>Project No.:</strong> ${esc(proj_no) || '—'}</span>
+      <span><strong>Engineer:</strong> ${esc(engineer) || '—'}</span>
+      <span><strong>Customer:</strong> ${esc(customer) || '—'}</span>
+      <span><strong>Date:</strong> ${esc(proj_date) || '—'}</span>
+      <span><strong>Location:</strong> ${esc(location) || '—'}</span>
+      <span><strong>Revision:</strong> ${esc(revision) || '—'}</span>
     </div>
-    <div style="font-size:11px;margin-top:4px;"><strong>Description:</strong> ${desc || '—'}</div>
+    <div style="font-size:11px;margin-top:4px;"><strong>Description:</strong> ${esc(desc) || '—'}</div>
   </div>`;
 
   // Row 1: Volume Check + Hopper Summary side by side
@@ -564,24 +762,29 @@ function calculate() {
   </div>`;
 
   // Row 2: LB Screw Capacity + HP side by side
+  const mixedNote = mixed && grpB_result
+    ? `<div style="font-size:10px;color:#888;margin:4px 0 2px 0">Mixed config: Grp A (${X}×${D}") + Grp B (${X_b}×${D_b}") · Speed shown for Grp A</div>`
+    : '';
   html += `<div class="two-col">
   <div class="result-box">
   <h2>3. LB Screw Sizing</h2>
+  ${mixedNote}
   ${resultRow('Pipe OD (d)', d ? fmt(d,3) : '—', 'in', '')}
   ${resultRow('Incline Factor R', fmt(R,3), '—', '')}
-  ${resultRow('Cap. per Rev.', flowrate && N_rpm !== null ? fmt(flowrate/X/N_rpm,4) : '—', 'ft³/rev', '')}
-  <div class="result-row"><span class="label" style="font-weight:700">Speed N</span><span class="val" style="color:#003366">${N_rpm !== null ? fmt(N_rpm,2) : '—'}</span><span class="unit">rpm</span><span>${N_rpm !== null && N_rpm < 20 ? badge('OK','ok') : N_rpm !== null ? badge('CHECK','warn') : ''}</span></div>
-  ${resultRow('Diam. Factor Fd', Fd !== null ? fmt(Fd,3) : '—', '—', '')}
+  ${resultRow('Cap. per Rev. (Grp A)', flowrate && N_rpm !== null ? fmt((flowrate*(mixed?X/X_total:1))/X/N_rpm,4) : '—', 'ft³/rev', '')}
+  <div class="result-row"><span class="label" style="font-weight:700">Speed N (Grp A)</span><span class="val" style="color:#003366">${N_rpm !== null ? fmt(N_rpm,2) : '—'}</span><span class="unit">rpm</span><span>${N_rpm !== null && N_rpm < 20 ? badge('OK','ok') : N_rpm !== null ? badge('CHECK','warn') : ''}</span></div>
+  ${grpB_result ? resultRow('Speed N (Grp B)', fmt(grpB_result.rpm,2), 'rpm', '') : ''}
+  ${resultRow('Diam. Factor Fd (Grp A)', Fd !== null ? fmt(Fd,3) : '—', '—', '')}
   </div>
 
   <div class="result-box">
   <h2>4. HP &amp; Motor</h2>
-  ${resultRow('HPf (friction)', HPf !== null ? fmt(HPf,5) : '—', 'HP', '')}
-  ${resultRow('HPm (material)', HPm !== null ? fmt(HPm,5) : '—', 'HP', '')}
-  ${resultRow('HPi (inlet)', HPi !== null ? fmt(HPi,5) : '—', 'HP', '')}
+  ${resultRow('HPf (friction, total)', HPf !== null ? fmt(HPf,5) : '—', 'HP', '')}
+  ${resultRow('HPm (material, total)', HPm !== null ? fmt(HPm,5) : '—', 'HP', '')}
+  ${resultRow('HPi (inlet, total)', HPi !== null ? fmt(HPi,5) : '—', 'HP', '')}
   ${resultRow('Overload Factor Fo', Fo !== null ? fmt(Fo,4) : '—', '—', '')}
   <hr style="border:none;border-top:1px solid #d0d4dc;margin:6px 0">
-  <div class="result-row"><span class="label" style="font-weight:700">HP / Screw</span><span class="val" style="color:#003366">${hp_per_screw !== null ? fmt(hp_per_screw,3) : '—'}</span><span class="unit">HP</span><span></span></div>
+  <div class="result-row"><span class="label" style="font-weight:700">HP / Screw (avg)</span><span class="val" style="color:#003366">${hp_per_screw !== null ? fmt(hp_per_screw,3) : '—'}</span><span class="unit">HP</span><span></span></div>
   ${resultRow('Total HP (all screws)', hp_total !== null ? fmt(hp_total,3) : '—', 'HP', '')}
   <div class="result-row"><span class="label" style="font-weight:700">Selected Motor</span><span class="val" style="color:#003366;font-size:15px">${hp_selected ?? '—'}</span><span class="unit">HP</span><span>${hp_selected ? badge('STD','ok') : ''}</span></div>
   </div>
@@ -632,9 +835,34 @@ function calculate() {
   html += `<div class="result-box" style="font-size:11px;color:#555">
     <strong>Standards &amp; References:</strong> Volume calc per JMS Bio-Hopper worksheet. LB screw capacity per CEMA 350 Rev 20 (Ch. 2). HP per CEMA 350 (Ch. 3) — HPf/HPm/HPi method. Motor HP = next standard size ≥ HP/screw; no 1.4× multiplier (AGMA Class II SF = 1.4 is gearbox duty rating). SEW FA series per SEW-EURODRIVE catalog (60Hz US). Side slope &gt; 60° per JMS internal standard for biosolids flow. Structural (Phase 3) — shaft torsion per CEMA 350-21, bending per ASME shaft formula.
   </div>`;
+  // Pricing
+  const oal_in = nv('oal_in');
+  const oaw_in = nv('oaw_in');
+  html += hopperPricingHtml(X_total || X, hp_selected, sew_frame, oal_in, oaw_in);
+
   html += `<div class="footer-bar">HOPPER DESIGN SHEET &nbsp;|&nbsp; LIVE-BOTTOM BIOSOLIDS &nbsp;|&nbsp; REV. ${revision || '—'} &nbsp;|&nbsp; ${proj_date || '—'}</div>`;
 
   document.getElementById('output-panel').innerHTML = html;
+  validateFields();
+}
+
+function validateFields() {
+  document.querySelectorAll('.input-primary').forEach(row => {
+    const el = row.querySelector('input, select');
+    if (!el) return;
+    const empty = el.value === '' || (el.tagName === 'SELECT' && el.selectedIndex === 0 && el.options[0]?.value === '');
+    row.classList.toggle('field-empty',  empty);
+    row.classList.toggle('field-filled', !empty);
+    row.classList.remove('field-pricing');
+  });
+  document.querySelectorAll('.input-secondary').forEach(row => {
+    const el = row.querySelector('input, select');
+    if (!el) return;
+    const empty = el.value === '';
+    row.classList.toggle('field-pricing', empty);
+    row.classList.remove('field-empty', 'field-filled');
+  });
+  window._pricingReady = document.querySelectorAll('.input-primary.field-empty').length === 0;
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
@@ -686,7 +914,7 @@ function resetToDefaults() {
     if (el) el.selectedIndex = 0;
   });
   const dw = document.getElementById('discharge_wid_in');
-  if (dw) delete dw.dataset.manualOverride;
+  if (dw) { dw.value = ''; delete dw.dataset.manualOverride; }
   calculate();
 }
 
@@ -695,8 +923,101 @@ document.addEventListener('DOMContentLoaded', () => {
   const iso = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   const dateEl = document.getElementById('proj_date');
   if (dateEl) dateEl.value = iso;
-  calculate();
+
+  const override = localStorage.getItem('jms_costs_override');
+  if (override) {
+    try { HOPPER_COSTS = JSON.parse(override); } catch(e) {}
+    calculate();
+  } else {
+    fetch('costs.json')
+      .then(r => r.json())
+      .then(c => { HOPPER_COSTS = c; calculate(); })
+      .catch(() => calculate());
+  }
 });
+
+// ── Send-to-Estimator modal ───────────────────────────────────────────────
+function nextAvailableTag(prefix, projNo) {
+  if (!projNo) return prefix + '-01';
+  const data = JSON.parse(localStorage.getItem('ept_proj_' + projNo) || '{}');
+  const used = (data.instances || []).map(i => i.name);
+  for (let n = 1; n <= 99; n++) {
+    const tag = prefix + '-' + String(n).padStart(2,'0');
+    if (!used.includes(tag)) return tag;
+  }
+  return prefix + '-01';
+}
+
+function openSendModal() {
+  if (!window._pricingReady) {
+    alert('Please fill all required fields (highlighted in red) before sending to the estimator.');
+    return;
+  }
+  const keys = Object.keys(localStorage).filter(k => k.startsWith('ept_proj_')).sort();
+  document.getElementById('send-modal-proj').innerHTML =
+    `<option value="">— New project —</option>` +
+    keys.map(k => { const pn=k.replace('ept_proj_',''); return `<option value="${pn}">${pn}</option>`; }).join('');
+  const curProj = sv('projNo') || '';
+  if (curProj) { const opt = [...document.getElementById('send-modal-proj').options].find(o=>o.value===curProj); if(opt) opt.selected=true; }
+  const selProj = document.getElementById('send-modal-proj').value;
+  document.getElementById('send-modal-tag').value = nextAvailableTag('H', selProj);
+  updateSendModal();
+  document.getElementById('send-modal-overlay').style.display = 'flex';
+  document.getElementById('send-modal-tag').focus();
+}
+function updateSendModal(projChanged) {
+  const proj = document.getElementById('send-modal-proj').value;
+  document.getElementById('send-modal-newproj-row').style.display = proj==='' ? '' : 'none';
+  const tagEl = document.getElementById('send-modal-tag');
+  if (projChanged) tagEl.value = nextAvailableTag('H', proj);
+  const tag = tagEl.value.trim();
+  const newProj = document.getElementById('send-modal-newproj').value.trim();
+  const hint = document.getElementById('send-modal-tags-hint');
+  if (proj) {
+    const data = JSON.parse(localStorage.getItem('ept_proj_' + proj) || '{}');
+    const tags = (data.instances || []).map(i => i.name).filter(Boolean);
+    hint.textContent = tags.length ? 'Used: ' + tags.join(', ') : '';
+    const isDupe = tags.includes(tag);
+    hint.style.color = isDupe ? '#c55' : '#888';
+    document.getElementById('send-modal-btn').disabled = !(tag && (proj || newProj)) || isDupe;
+  } else {
+    hint.textContent = '';
+    document.getElementById('send-modal-btn').disabled = !(tag && (proj || newProj));
+  }
+}
+function confirmSend() {
+  const selProj = document.getElementById('send-modal-proj').value;
+  const newProj = document.getElementById('send-modal-newproj').value.trim();
+  const projNo  = selProj || newProj;
+  const tag     = document.getElementById('send-modal-tag').value.trim();
+  if (!projNo || !tag) return;
+  closeSendModal();
+  const instance = _buildHopperPayload(tag);
+  localStorage.setItem('ept_incoming', JSON.stringify({ projNo, instance, loadExisting: selProj!=='', bypass:true }));
+  window.location.href = 'estimator.html';
+}
+function closeSendModal() { document.getElementById('send-modal-overlay').style.display='none'; }
 </script>
+
+<!-- Send-to-Estimator modal -->
+<div id="send-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:8px;padding:28px 32px;width:360px;box-shadow:0 8px 32px rgba(0,0,0,.3)">
+    <h2 style="margin:0 0 6px;font-size:16px;color:#003366">Send to Equipment Pricing Tool</h2>
+    <p style="font-size:12px;color:#888;margin-bottom:18px">Select an existing project or create a new one. Equipment will be appended without overwriting other items.</p>
+    <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Project</label>
+    <select id="send-modal-proj" onchange="updateSendModal(true)" style="width:100%;padding:6px 8px;border:1px solid #bbb;border-radius:4px;font-size:13px;margin-bottom:10px"></select>
+    <div id="send-modal-newproj-row">
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">New Project No.</label>
+      <input id="send-modal-newproj" type="text" placeholder="e.g. 25-001" oninput="updateSendModal()" style="width:100%;padding:6px 8px;border:1px solid #bbb;border-radius:4px;font-size:13px;margin-bottom:10px">
+    </div>
+    <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Equipment Tag</label>
+    <input id="send-modal-tag" type="text" placeholder="e.g. H-01" oninput="updateSendModal()" style="width:100%;padding:6px 8px;border:1px solid #bbb;border-radius:4px;font-size:13px;margin-bottom:4px">
+    <div id="send-modal-tags-hint" style="font-size:11px;color:#888;min-height:16px;margin-bottom:12px"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button onclick="closeSendModal()" style="padding:7px 16px;border:1px solid #bbb;border-radius:4px;background:#fff;font-size:13px;cursor:pointer">Cancel</button>
+      <button id="send-modal-btn" onclick="confirmSend()" disabled style="padding:7px 16px;background:#003366;color:#fff;border:none;border-radius:4px;font-size:13px;font-weight:600;cursor:pointer">Send →</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>

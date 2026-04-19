@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cost Library — Material Handling Sizer Tool</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;font-size:14px;background:#f0f2f5;color:#1a1a1a}
+.header{background:#003366;color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.header h1{font-size:17px;font-weight:700;color:#fff}
+.header .rev{font-size:11px;opacity:.7}
+.container{max-width:1200px;margin:0 auto;padding:20px 16px}
+
+/* tabs */
+.tab-bar{display:flex;gap:0;border-bottom:2px solid #003366;margin-bottom:16px;flex-wrap:wrap}
+.tab{padding:7px 18px;font-size:13px;font-weight:600;color:#666;cursor:pointer;border:1px solid transparent;border-bottom:none;border-radius:4px 4px 0 0;background:#f0f2f5;margin-bottom:-2px}
+.tab:hover{background:#e8edf5;color:#003366}
+.tab.active{background:#fff;color:#003366;border-color:#003366;border-bottom-color:#fff}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* upload zone */
+.upload-zone{border:2px dashed #b0bcd4;border-radius:6px;padding:32px;text-align:center;background:#f8f9fc;cursor:pointer;transition:border-color .15s,background .15s}
+.upload-zone:hover,.upload-zone.drag-over{border-color:#003366;background:#eef2f8}
+.upload-zone p{font-size:13px;color:#666;margin-top:8px}
+.upload-zone .icon{font-size:32px;color:#99a}
+.upload-zone input[type=file]{display:none}
+
+/* status banner */
+.status-bar{padding:8px 12px;border-radius:4px;font-size:12px;margin:10px 0;display:none}
+.status-bar.ok{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;display:block}
+.status-bar.err{background:#ffebee;color:#c62828;border:1px solid #ef9a9a;display:block}
+.status-bar.info{background:#e3f2fd;color:#1565c0;border:1px solid #90caf9;display:block}
+
+/* meta bar */
+.meta-bar{background:#fff;border:1px solid #d0d4dc;border-radius:4px;padding:10px 14px;margin-bottom:14px;display:flex;gap:24px;flex-wrap:wrap;font-size:12px}
+.meta-bar .meta-item{display:flex;flex-direction:column;gap:2px}
+.meta-bar .meta-label{font-weight:700;color:#003366;text-transform:uppercase;font-size:10px;letter-spacing:.5px}
+.meta-bar .meta-val{color:#333}
+
+/* tables */
+.cost-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+.cost-table th{background:#eef2f8;color:#003366;font-weight:700;padding:5px 8px;text-align:left;border:1px solid #dde;font-size:11px;position:sticky;top:0}
+.cost-table td{padding:4px 8px;border:1px solid #e4e8ee;white-space:nowrap}
+.cost-table tr:nth-child(even) td{background:#f8f9fc}
+.cost-table tr:hover td{background:#eef2f8}
+.cost-table td.num{text-align:right;font-variant-numeric:tabular-nums}
+.cost-table td.grade-304{color:#1a6e1a}
+.cost-table td.grade-304L{color:#0055aa}
+.cost-table td.grade-316{color:#7700aa}
+
+.section-head{font-size:13px;font-weight:700;color:#003366;margin:18px 0 6px;padding-bottom:4px;border-bottom:2px solid #003366;display:flex;align-items:center;justify-content:space-between}
+.section-head .count{font-size:11px;font-weight:400;color:#888}
+.scroll-wrap{max-height:400px;overflow-y:auto;border:1px solid #d0d4dc;border-radius:4px}
+.search-row{display:flex;gap:8px;margin-bottom:6px;align-items:center}
+.search-row input{flex:1;padding:5px 8px;border:1px solid #bbb;border-radius:3px;font-size:12px}
+.search-row input:focus{outline:none;border-color:#003366}
+
+/* csv format guide */
+.format-box{background:#fff;border:1px solid #d0d4dc;border-radius:4px;padding:14px;margin-top:14px}
+.format-box h3{font-size:13px;font-weight:700;color:#003366;margin-bottom:8px}
+.format-box code{display:block;font-size:11px;background:#f0f2f5;padding:8px 10px;border-radius:3px;margin:6px 0;font-family:monospace;white-space:pre;overflow-x:auto}
+.format-box p{font-size:12px;color:#555;margin-top:6px;line-height:1.5}
+
+/* badges */
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.4px;margin-left:4px}
+.badge-stee{background:#e3f2fd;color:#1565c0}
+.badge-nonm{background:#f3e5f5;color:#6a1b9a}
+.badge-purf{background:#e8f5e9;color:#2e7d32}
+.badge-cont{background:#fff3e0;color:#e65100}
+.badge-moto{background:#fce4ec;color:#880e4f}
+
+button{padding:5px 14px;font-size:12px;border:1px solid #003366;border-radius:3px;cursor:pointer;background:#fff;color:#003366}
+button:hover{background:#003366;color:#fff}
+button.primary{background:#003366;color:#fff}
+button.primary:hover{background:#002244}
+.btn-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <a href="index.html" style="font-size:11px;color:#aac;text-decoration:none;display:block;margin-bottom:2px">← Back to Tool Index</a>
+    <h1>Cost Library</h1>
+    <span class="rev">Pricing data for all sizing tools</span>
+  </div>
+  <div class="btn-row" style="margin:0">
+    <button onclick="exportJson()" class="primary">Export costs.json</button>
+    <button onclick="document.getElementById('file-input').click()">Import CSV / JSON</button>
+    <input type="file" id="file-input" accept=".csv,.json" style="display:none" onchange="handleFileUpload(this)">
+  </div>
+</div>
+
+<div class="container">
+
+  <div id="status-bar" class="status-bar"></div>
+
+  <!-- Meta bar -->
+  <div class="meta-bar" id="meta-bar">
+    <div class="meta-item"><span class="meta-label">Steel Vendor</span><span class="meta-val" id="meta-vendor">—</span></div>
+    <div class="meta-item"><span class="meta-label">Quote Date</span><span class="meta-val" id="meta-date">—</span></div>
+    <div class="meta-item"><span class="meta-label">Steel Entries</span><span class="meta-val" id="meta-steel-count">—</span></div>
+    <div class="meta-item"><span class="meta-label">Components</span><span class="meta-val" id="meta-comp-count">—</span></div>
+    <div class="meta-item"><span class="meta-label">Last Updated</span><span class="meta-val" id="meta-updated">—</span></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tab-bar">
+    <div class="tab active" onclick="showTab('steel')">Steel Pricing</div>
+    <div class="tab" onclick="showTab('components')">Components</div>
+    <div class="tab" onclick="showTab('rates')">Labor &amp; Rates</div>
+    <div class="tab" onclick="showTab('upload')">Upload / Update</div>
+  </div>
+
+  <!-- ── Steel Tab ── -->
+  <div class="tab-panel active" id="tab-steel">
+    <div style="font-size:11px;color:#888;margin-bottom:8px" id="steel-updated-ts"></div>
+    <div class="section-head">Plate &amp; Sheet <span class="count" id="steel-plate-count"></span></div>
+    <div class="scroll-wrap">
+      <table class="cost-table" id="tbl-plate">
+        <thead><tr>
+          <th>Grade</th><th>Form</th><th>Thickness</th><th>Gauge</th>
+          <th>ASTM</th><th>Finish</th><th>$/lb</th><th>Vendor</th><th>Quote Date</th>
+        </tr></thead>
+        <tbody id="tbody-plate"></tbody>
+      </table>
+    </div>
+
+    <div class="section-head" style="margin-top:20px">Structural &amp; Angles <span class="count" id="steel-angle-count"></span></div>
+    <div class="scroll-wrap">
+      <table class="cost-table" id="tbl-angle">
+        <thead><tr>
+          <th>Part No.</th><th>Description</th><th>Unit</th><th>$/unit</th><th>Vendor</th><th>Order Date</th>
+        </tr></thead>
+        <tbody id="tbody-angle"></tbody>
+      </table>
+    </div>
+
+    <div class="section-head" style="margin-top:20px">Rubber Belt <span class="count" id="steel-belt-count"></span></div>
+    <div class="scroll-wrap">
+      <table class="cost-table" id="tbl-belt">
+        <thead><tr>
+          <th>Width</th><th>Type</th><th>$/ft</th>
+        </tr></thead>
+        <tbody id="tbody-belt"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── Components Tab ── -->
+  <div class="tab-panel" id="tab-components">
+    <div style="font-size:11px;color:#888;margin-bottom:8px" id="comp-updated-ts"></div>
+    <div class="search-row">
+      <input type="text" id="comp-search" placeholder="Search part number or description..." oninput="filterComponents()">
+      <select id="comp-class-filter" onchange="filterComponents()" style="padding:5px 8px;border:1px solid #bbb;border-radius:3px;font-size:12px">
+        <option value="">All Classes</option>
+        <option value="PURF">PURF — Purchased</option>
+        <option value="NONM">NONM — Non-Metallic</option>
+        <option value="CONT">CONT — Controls</option>
+        <option value="MOTO">MOTO — Motors</option>
+        <option value="FAB">FAB — Fabricated</option>
+      </select>
+      <span id="comp-count-display" style="font-size:11px;color:#888;white-space:nowrap"></span>
+    </div>
+    <div class="scroll-wrap" style="max-height:550px">
+      <table class="cost-table" id="tbl-comp">
+        <thead><tr>
+          <th>Part No.</th><th>Description</th><th>Class</th>
+          <th>$/EA</th><th>Vendor</th><th>PO #</th><th>Order Date</th>
+        </tr></thead>
+        <tbody id="tbody-comp"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── Rates Tab ── -->
+  <div class="tab-panel" id="tab-rates">
+    <div style="font-size:11px;color:#888;margin-bottom:8px" id="rates-updated-ts"></div>
+    <div class="section-head">Labor Rates</div>
+    <table class="cost-table" style="max-width:500px">
+      <thead><tr><th>Category</th><th>Rate ($/hr)</th><th>Key</th></tr></thead>
+      <tbody id="tbody-labor"></tbody>
+    </table>
+
+    <div class="section-head" style="margin-top:20px">Freight</div>
+    <table class="cost-table" style="max-width:500px">
+      <thead><tr><th>Description</th><th>Rate</th><th>Unit / Key</th></tr></thead>
+      <tbody id="tbody-freight"></tbody>
+    </table>
+
+    <div class="section-head" style="margin-top:20px">Travel Expenses</div>
+    <table class="cost-table" style="max-width:500px">
+      <thead><tr><th>Description</th><th>Rate</th><th>Unit / Key</th></tr></thead>
+      <tbody id="tbody-expenses"></tbody>
+    </table>
+
+    <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
+      <button class="primary" onclick="saveRates()">Save Rates</button>
+      <span id="rates-save-msg" style="font-size:12px;color:#2e7d32;display:none">Saved.</span>
+    </div>
+    <p style="font-size:11px;color:#888;margin-top:8px">Rates are saved to your browser and persist across sessions. They override the built-in costs.json values for all tools on this machine.</p>
+  </div>
+
+  <!-- ── Upload Tab ── -->
+  <div class="tab-panel" id="tab-upload">
+    <div class="upload-zone" id="drop-zone"
+      onclick="document.getElementById('file-input2').click()"
+      ondragover="event.preventDefault();this.classList.add('drag-over')"
+      ondragleave="this.classList.remove('drag-over')"
+      ondrop="handleDrop(event)">
+      <div class="icon">📁</div>
+      <strong>Drag &amp; drop a file here, or click to browse</strong>
+      <p>Accepts: <code>.json</code> (full costs.json replacement) or <code>.csv</code> (Epicor part export or steel price update)</p>
+      <input type="file" id="file-input2" accept=".csv,.json" style="display:none" onchange="handleFileUpload(this)">
+    </div>
+
+    <div class="format-box">
+      <h3>CSV Format — Epicor Part Export</h3>
+      <code>PartNum,PartDescription,VendorName,ClassID,UnitCost,PONum,OrderDate
+500133,BLIND GASKET 3" ANSI,ALLSTATE GASKET,NONM,27.74,409814,2/11/25</code>
+      <p>Maps to <strong>purchased_components</strong> section. ClassID must be one of: PURF, NONM, CONT, MOTO, FAB, STEE.</p>
+
+      <h3 style="margin-top:14px">CSV Format — Steel Price Update (Phoenix Metals or equivalent)</h3>
+      <code>Grade,Form,ThicknessIn,Gauge,PricePerLb,Vendor,QuoteDate,ASTM,Finish
+304 SS,Plate,0.1875,,1.70,Phoenix Metals,2026-01-30,A240,2B</code>
+      <p>Maps to <strong>steel.plate_and_sheet</strong>. Leave Gauge blank for plate. QuoteDate format: YYYY-MM-DD.</p>
+
+      <h3 style="margin-top:14px">Full JSON Replacement</h3>
+      <p>Upload a complete <code>costs.json</code> file to replace all pricing data. The tool validates the schema before applying.</p>
+    </div>
+
+    <div class="btn-row">
+      <button onclick="exportJson()" class="primary">Download current costs.json</button>
+      <button onclick="resetToBuiltIn()">Reset to built-in defaults</button>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────────
+let COSTS = null;
+const LS_KEY = 'jms_costs_override';
+
+// ── Load costs.json ───────────────────────────────────────────────────────
+async function loadCosts() {
+  // Check localStorage for an uploaded override first
+  const override = localStorage.getItem(LS_KEY);
+  if (override) {
+    try {
+      COSTS = JSON.parse(override);
+      showStatus('Using locally uploaded cost data. <a href="#" onclick="resetToBuiltIn();return false">Reset to defaults</a>', 'info');
+    } catch(e) {
+      localStorage.removeItem(LS_KEY);
+    }
+  }
+  if (!COSTS) {
+    try {
+      const res = await fetch('costs.json');
+      COSTS = await res.json();
+    } catch(e) {
+      showStatus('Could not load costs.json. Make sure the file is in the same directory.', 'err');
+      return;
+    }
+  }
+  renderAll();
+}
+
+function renderAll() {
+  if (!COSTS) return;
+  renderMeta();
+  renderSteel();
+  renderComponents();
+  renderRates();
+}
+
+// ── Meta bar ──────────────────────────────────────────────────────────────
+function fmtTs(iso) {
+  if (!iso) return 'Never';
+  const d = new Date(iso);
+  return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+}
+
+function renderMeta() {
+  const m = COSTS.metadata || {};
+  document.getElementById('meta-vendor').textContent  = m.vendor_steel || '—';
+  document.getElementById('meta-date').textContent    = m.quote_date   || '—';
+  const steelCount = (COSTS.steel?.plate_and_sheet?.length||0)
+                   + (COSTS.steel?.structural_angles_500costs?.length||0);
+  const compCount  = (COSTS.purchased_components?.hopper_500_costs_purf?.length||0)
+                   + (COSTS.purchased_components?.hopper_500_costs_nonm?.length||0)
+                   + (COSTS.purchased_components?.hopper_500_costs_cont?.length||0)
+                   + (COSTS.purchased_components?.hopper_500_costs_moto?.length||0)
+                   + (COSTS.purchased_components?.belt_purchased?.length||0);
+  document.getElementById('meta-steel-count').textContent = steelCount;
+  document.getElementById('meta-comp-count').textContent  = compCount;
+  document.getElementById('meta-updated').textContent = m.generated_from ? 'From Excel import' : 'Unknown';
+  // per-section timestamps
+  const steelTs = document.getElementById('steel-updated-ts');
+  const compTs  = document.getElementById('comp-updated-ts');
+  const ratesTs = document.getElementById('rates-updated-ts');
+  if (steelTs) steelTs.textContent = 'Last updated: ' + fmtTs(m.steel_updated_at || m.full_import_at);
+  if (compTs)  compTs.textContent  = 'Last updated: ' + fmtTs(m.components_updated_at || m.full_import_at);
+  if (ratesTs) ratesTs.textContent = 'Last updated: ' + fmtTs(m.rates_updated_at);
+}
+
+// ── Steel ─────────────────────────────────────────────────────────────────
+function gradeClass(grade) {
+  if (!grade) return '';
+  if (grade.includes('316')) return 'grade-316';
+  if (grade.includes('304L')) return 'grade-304L';
+  if (grade.includes('304')) return 'grade-304';
+  return '';
+}
+
+function renderSteel() {
+  const plate = COSTS.steel?.plate_and_sheet || [];
+  document.getElementById('steel-plate-count').textContent = plate.length + ' entries';
+  document.getElementById('tbody-plate').innerHTML = plate.map(r => `
+    <tr>
+      <td class="${gradeClass(r.grade)}">${r.grade||'—'}</td>
+      <td>${r.form||'—'}</td>
+      <td class="num">${r.thickness_in ? r.thickness_in+'"' : '—'}</td>
+      <td class="num">${r.gauge ? r.gauge+'GA' : '—'}</td>
+      <td>${r.astm||'—'}</td>
+      <td>${r.finish||'—'}</td>
+      <td class="num"><strong>$${(r.price_per_lb||0).toFixed(2)}</strong></td>
+      <td>${r.vendor||'—'}</td>
+      <td>${r.quote_date||'—'}</td>
+    </tr>`).join('');
+
+  const angles = COSTS.steel?.structural_angles_500costs || [];
+  document.getElementById('steel-angle-count').textContent = angles.length + ' entries';
+  document.getElementById('tbody-angle').innerHTML = angles.map(r => `
+    <tr>
+      <td>${r.part_number||r.pn||'—'}</td>
+      <td>${r.description||'—'}</td>
+      <td>${r.uom||'EA'}</td>
+      <td class="num"><strong>$${(r.unit_cost||r.price_per_ft||0).toFixed(2)}</strong></td>
+      <td>${r.vendor||'—'}</td>
+      <td>${r.order_date||r.quote_date||'—'}</td>
+    </tr>`).join('');
+
+  const belt = COSTS.rubber_belt_per_ft || {};
+  const beltEntries = Object.entries(belt);
+  document.getElementById('steel-belt-count').textContent = beltEntries.length + ' entries';
+  document.getElementById('tbody-belt').innerHTML = beltEntries.map(([width, price]) => `
+    <tr>
+      <td>${width}</td>
+      <td>2-ply MOR rubber</td>
+      <td class="num"><strong>$${Number(price).toFixed(2)}/ft</strong></td>
+    </tr>`).join('');
+}
+
+// ── Components ────────────────────────────────────────────────────────────
+let allComponents = [];
+
+function renderComponents() {
+  const pc = COSTS.purchased_components || {};
+  allComponents = [
+    ...(pc.hopper_500_costs_purf||[]).map(r=>({...r, _class:'PURF'})),
+    ...(pc.hopper_500_costs_nonm||[]).map(r=>({...r, _class:'NONM'})),
+    ...(pc.hopper_500_costs_cont||[]).map(r=>({...r, _class:'CONT'})),
+    ...(pc.hopper_500_costs_moto||[]).map(r=>({...r, _class:'MOTO'})),
+    ...(pc.hopper_500_costs_fab ||[]).map(r=>({...r, _class:'FAB'})),
+    ...(pc.belt_purchased        ||[]).map(r=>({...r, _class:r.class_id||'PURF'})),
+  ];
+  renderCompTable(allComponents);
+}
+
+function renderCompTable(rows) {
+  document.getElementById('comp-count-display').textContent = rows.length.toLocaleString() + ' items';
+  document.getElementById('tbody-comp').innerHTML = rows.slice(0,500).map(r => {
+    const cls = r._class || r.class_id || '';
+    return `<tr>
+      <td style="font-family:monospace;font-size:11px">${esc(r.part_number||r.pn||r.PartNum||'—')}</td>
+      <td style="max-width:320px;overflow:hidden;text-overflow:ellipsis">${esc(r.description||r.PartDescription||'—')}</td>
+      <td><span class="badge badge-${cls.toLowerCase()}">${cls}</span></td>
+      <td class="num"><strong>$${Number(r.unit_cost||r.UnitCost||0).toFixed(2)}</strong></td>
+      <td>${esc(r.vendor||r.VendorName||'—')}</td>
+      <td style="font-size:11px;color:#888">${esc(r.po_number||r.PONum||'—')}</td>
+      <td style="font-size:11px;color:#888">${esc(r.order_date||r.OrderDate||'—')}</td>
+    </tr>`;
+  }).join('') + (rows.length > 500 ? `<tr><td colspan="7" style="text-align:center;color:#888;font-style:italic;padding:8px">Showing 500 of ${rows.length} — use search to filter</td></tr>` : '');
+}
+
+function filterComponents() {
+  const q     = document.getElementById('comp-search').value.toLowerCase();
+  const cls   = document.getElementById('comp-class-filter').value;
+  const filtered = allComponents.filter(r => {
+    const desc = (r.description||r.PartDescription||'').toLowerCase();
+    const pn   = (r.part_number||r.pn||r.PartNum||'').toLowerCase();
+    const matchQ   = !q   || desc.includes(q) || pn.includes(q);
+    const matchCls = !cls || (r._class||r.class_id||'') === cls;
+    return matchQ && matchCls;
+  });
+  renderCompTable(filtered);
+}
+
+// ── Rates ─────────────────────────────────────────────────────────────────
+const LABOR_FIELDS = [
+  { label: 'Project Engineering', key: 'engineering_per_hr',   fallback: 110 },
+  { label: 'Assembly (Shop)',     key: 'assembly_per_hr',       fallback: 119 },
+  { label: 'Field Service',       key: 'field_service_per_hr',  fallback: 110 },
+  { label: 'Finishing',           key: 'finishing_per_hr',      fallback: 110 },
+  { label: 'Processing',          key: 'processing_per_hr',     fallback: 110 },
+];
+const FREIGHT_FIELDS = [
+  { label: 'Mileage rate', key: 'rate_per_mile', fallback: 3,   unit: '$/mile/load' },
+];
+const EXPENSE_FIELDS = [
+  { label: 'Per trip', key: 'per_trip', fallback: 800, unit: '$/trip' },
+  { label: 'Per day',  key: 'per_day',  fallback: 389, unit: '$/day'  },
+];
+
+function rateInput(section, key, value) {
+  return `<input type="number" step="0.01" min="0" data-section="${section}" data-key="${key}"
+    value="${Number(value).toFixed(2)}"
+    style="width:90px;padding:3px 5px;border:1px solid #bbb;border-radius:3px;font-size:13px;text-align:right">`;
+}
+
+function renderRates() {
+  const lr = COSTS.labor   || {};
+  const fr = COSTS.freight || {};
+  const ex = COSTS.expenses || {};
+
+  document.getElementById('tbody-labor').innerHTML = LABOR_FIELDS.map(f =>
+    `<tr><td>${f.label}</td><td class="num">${rateInput('labor', f.key, lr[f.key] ?? f.fallback)}</td><td style="color:#888;font-size:11px">${f.key}</td></tr>`
+  ).join('');
+
+  document.getElementById('tbody-freight').innerHTML = FREIGHT_FIELDS.map(f =>
+    `<tr><td>${f.label}</td><td class="num">${rateInput('freight', f.key, fr[f.key] ?? f.fallback)}</td><td style="color:#888;font-size:11px">${f.unit} · ${f.key}</td></tr>`
+  ).join('');
+
+  document.getElementById('tbody-expenses').innerHTML = EXPENSE_FIELDS.map(f =>
+    `<tr><td>${f.label}</td><td class="num">${rateInput('expenses', f.key, ex[f.key] ?? f.fallback)}</td><td style="color:#888;font-size:11px">${f.unit} · ${f.key}</td></tr>`
+  ).join('');
+}
+
+function saveRates() {
+  document.querySelectorAll('#tab-rates input[data-section]').forEach(el => {
+    const section = el.dataset.section;
+    const key     = el.dataset.key;
+    const val     = parseFloat(el.value);
+    if (!isNaN(val)) {
+      if (!COSTS[section]) COSTS[section] = {};
+      COSTS[section][key] = val;
+    }
+  });
+  if (!COSTS.metadata) COSTS.metadata = {};
+  COSTS.metadata.rates_updated_at = new Date().toISOString();
+  localStorage.setItem('jms_costs_override', JSON.stringify(COSTS));
+  const msg = document.getElementById('rates-save-msg');
+  msg.style.display = 'inline';
+  setTimeout(() => { msg.style.display = 'none'; }, 2500);
+  renderMeta();
+}
+
+// ── File upload ───────────────────────────────────────────────────────────
+function handleFileUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const ext = file.name.split('.').pop().toLowerCase();
+  const reader = new FileReader();
+  reader.onload = e => {
+    if (ext === 'json') importJson(e.target.result, file.name);
+    else if (ext === 'csv') importCsv(e.target.result, file.name);
+    else showStatus('Unsupported file type. Use .json or .csv', 'err');
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+function handleDrop(event) {
+  event.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag-over');
+  const file = event.dataTransfer.files[0];
+  if (!file) return;
+  const fakeInput = { files: [file] };
+  handleFileUpload(fakeInput);
+}
+
+function importJson(text, filename) {
+  try {
+    const data = JSON.parse(text);
+    if (!data.steel && !data.purchased_components && !data.labor) {
+      showStatus('JSON does not look like a valid costs.json file — missing expected sections.', 'err');
+      return;
+    }
+    if (!data.metadata) data.metadata = {};
+    data.metadata.full_import_at = new Date().toISOString();
+    localStorage.setItem(LS_KEY, JSON.stringify(data));
+    COSTS = data;
+    renderAll();
+    showStatus(`Loaded ${filename} successfully. All tools will use this pricing data.`, 'ok');
+  } catch(e) {
+    showStatus('Invalid JSON: ' + e.message, 'err');
+  }
+}
+
+function importCsv(text, filename) {
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) { showStatus('CSV appears empty.', 'err'); return; }
+  const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/\s+/g,'_'));
+
+  // detect format by headers
+  if (headers.includes('price_per_lb') || headers.includes('priceperlb')) {
+    importSteelCsv(headers, lines.slice(1), filename);
+  } else if (headers.includes('partnum') || headers.includes('part_number')) {
+    importComponentCsv(headers, lines.slice(1), filename);
+  } else {
+    showStatus('Could not detect CSV format. Check the Upload tab for expected column headers.', 'err');
+  }
+}
+
+function importSteelCsv(headers, rows, filename) {
+  const entries = rows.map(line => {
+    const cols = line.split(',');
+    const obj = {};
+    headers.forEach((h,i) => obj[h] = (cols[i]||'').trim());
+    return {
+      grade:         obj.grade || '',
+      form:          obj.form  || '',
+      thickness_in:  parseFloat(obj.thickness_in||obj.thicknessin) || null,
+      gauge:         parseInt(obj.gauge) || null,
+      price_per_lb:  parseFloat(obj.price_per_lb||obj.priceperlb) || 0,
+      vendor:        obj.vendor || '',
+      quote_date:    obj.quotedate||obj.quote_date || '',
+      astm:          obj.astm || '',
+      finish:        obj.finish || '',
+    };
+  }).filter(r => r.grade && r.price_per_lb > 0);
+
+  if (!COSTS.steel) COSTS.steel = {};
+  COSTS.steel.plate_and_sheet = entries;
+  if (!COSTS.metadata) COSTS.metadata = {};
+  COSTS.metadata.quote_date = entries[0]?.quote_date || COSTS.metadata.quote_date;
+  COSTS.metadata.steel_updated_at = new Date().toISOString();
+  localStorage.setItem(LS_KEY, JSON.stringify(COSTS));
+  renderAll();
+  showStatus(`Imported ${entries.length} steel prices from ${filename}.`, 'ok');
+}
+
+function importComponentCsv(headers, rows, filename) {
+  const entries = rows.map(line => {
+    const cols = parseCsvLine(line);
+    const obj = {};
+    headers.forEach((h,i) => obj[h] = (cols[i]||'').trim());
+    return {
+      part_number:  obj.partnum  || obj.part_number || '',
+      description:  obj.partdescription || obj.description || '',
+      vendor:       obj.vendorname || obj.vendor || '',
+      class_id:     obj.classid || obj.class_id || 'PURF',
+      unit_cost:    parseFloat(obj.unitcost||obj.unit_cost) || 0,
+      po_number:    obj.ponum  || obj.po_number || '',
+      order_date:   obj.orderdate || obj.order_date || '',
+    };
+  }).filter(r => r.part_number);
+
+  if (!COSTS.purchased_components) COSTS.purchased_components = {};
+  // merge by class
+  const byClass = {};
+  entries.forEach(r => {
+    const cls = (r.class_id||'PURF').toLowerCase();
+    if (!byClass[cls]) byClass[cls] = [];
+    byClass[cls].push(r);
+  });
+  Object.entries(byClass).forEach(([cls, items]) => {
+    COSTS.purchased_components['hopper_500_costs_'+cls] = items;
+  });
+  if (!COSTS.metadata) COSTS.metadata = {};
+  COSTS.metadata.components_updated_at = new Date().toISOString();
+  localStorage.setItem(LS_KEY, JSON.stringify(COSTS));
+  renderAll();
+  showStatus(`Imported ${entries.length} components from ${filename}.`, 'ok');
+}
+
+function parseCsvLine(line) {
+  const result = [];
+  let cur = '', inQ = false;
+  for (let i=0; i<line.length; i++) {
+    if (line[i]==='"') { inQ=!inQ; continue; }
+    if (line[i]===',' && !inQ) { result.push(cur); cur=''; continue; }
+    cur += line[i];
+  }
+  result.push(cur);
+  return result;
+}
+
+function exportJson() {
+  if (!COSTS) { showStatus('No cost data loaded.', 'err'); return; }
+  const blob = new Blob([JSON.stringify(COSTS, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'costs.json';
+  a.click();
+}
+
+function resetToBuiltIn() {
+  if (!confirm('Reset to built-in costs.json? Any uploaded data will be lost.')) return;
+  localStorage.removeItem(LS_KEY);
+  COSTS = null;
+  clearStatus();
+  loadCosts();
+}
+
+// ── UI helpers ────────────────────────────────────────────────────────────
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    const panels = ['steel','components','rates','upload'];
+    t.classList.toggle('active', panels[i]===name);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => {
+    p.classList.toggle('active', p.id==='tab-'+name);
+  });
+}
+
+function showStatus(msg, type) {
+  const el = document.getElementById('status-bar');
+  el.innerHTML = msg;
+  el.className = 'status-bar ' + type;
+}
+
+function clearStatus() {
+  const el = document.getElementById('status-bar');
+  el.className = 'status-bar';
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── Boot ──────────────────────────────────────────────────────────────────
+loadCosts();
+</script>
+</body>
+</html>
