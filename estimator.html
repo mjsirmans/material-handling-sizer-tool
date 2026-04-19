@@ -168,6 +168,25 @@ button.primary:hover{background:#002244}
 </div>
 </div>
 
+<!-- Pricing Overrides -->
+<div class="section">
+<div class="sec-header" onclick="toggleSec('sec-pricing')">
+  <h2>Pricing Overrides</h2><span class="sec-toggle" id="tog-pricing">▸</span>
+</div>
+<div class="sec-body collapsed" id="sec-pricing">
+<div style="height:6px"></div>
+<p class="note" style="margin-bottom:8px">Default rates from Excel. Override per project as needed.</p>
+<table style="width:100%;font-size:12px;border-collapse:collapse">
+<thead><tr>
+  <th style="text-align:left;padding:4px 6px;background:#eef2f8;border:1px solid #dde;color:#003366;font-size:11px">Tier</th>
+  <th style="padding:4px 6px;background:#eef2f8;border:1px solid #dde;color:#003366;font-size:11px">GMaC %</th>
+  <th style="padding:4px 6px;background:#eef2f8;border:1px solid #dde;color:#003366;font-size:11px">Comm %</th>
+</tr></thead>
+<tbody id="tier-override-rows"></tbody>
+</table>
+</div>
+</div>
+
 <!-- Labor Rates -->
 <div class="section">
 <div class="sec-header" onclick="toggleSec('sec-labor')">
@@ -256,7 +275,34 @@ function buildLines(n) {
 
 // ── Init ───────────────────────────────────────────────────────────────────
 function init() {
+  buildTierOverrideRows();
   buildEquipBlocks();
+}
+
+function buildTierOverrideRows() {
+  const tbody = document.getElementById('tier-override-rows');
+  tbody.innerHTML = TIERS.map(t => `
+    <tr>
+      <td style="padding:3px 6px;border:1px solid #e4e8ee;font-weight:600;color:#444">${t.name}</td>
+      <td style="padding:3px 4px;border:1px solid #e4e8ee">
+        <input type="number" id="gmac-${t.id}" value="${t.gmac}" step="0.5" min="0" max="99"
+          style="width:100%;border:none;background:transparent;font-size:12px;text-align:right;padding:1px 3px"
+          oninput="render()">
+      </td>
+      <td style="padding:3px 4px;border:1px solid #e4e8ee">
+        <input type="number" id="comm-${t.id}" value="${t.comm}" step="0.5" min="0" max="99"
+          style="width:100%;border:none;background:transparent;font-size:12px;text-align:right;padding:1px 3px"
+          oninput="render()">
+      </td>
+    </tr>`).join('');
+}
+
+function activeTiers() {
+  return TIERS.map(t => ({
+    ...t,
+    gmac: parseFloat(document.getElementById('gmac-'+t.id)?.value) ?? t.gmac,
+    comm: parseFloat(document.getElementById('comm-'+t.id)?.value) ?? t.comm,
+  }));
 }
 
 function buildEquipBlocks() {
@@ -419,7 +465,7 @@ function laborRates() {
 // ── Tier price table HTML ─────────────────────────────────────────────────
 function tierTableHtml(cost, qty) {
   qty = qty || 1;
-  const rows = TIERS.map(t => {
+  const rows = activeTiers().map(t => {
     const unitSP  = salePrice(cost, t.gmac, t.comm);
     const totalSP = unitSP * qty;
     const gm      = unitSP - cost;
@@ -442,7 +488,7 @@ function tierTableHtml(cost, qty) {
 }
 
 function grandTierTableHtml(grandCost) {
-  const rows = TIERS.map(t => {
+  const rows = activeTiers().map(t => {
     const sp = salePrice(grandCost, t.gmac, t.comm);
     const gm = sp - grandCost;
     return `<tr class="tier-${t.id}">
