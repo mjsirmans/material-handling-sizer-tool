@@ -73,8 +73,8 @@ h3{font-size:13px;font-weight:600;color:#555;margin:8px 0 4px}
   .left{max-height:none;border-right:none;border-bottom:1px solid #d0d4dc;}
   .right{max-height:none;}
 }
-.field-row{display:grid;grid-template-columns:130px 1fr auto;align-items:center;gap:4px;margin-bottom:4px}
-@media(max-width:480px){.field-row{grid-template-columns:110px 1fr auto;}}
+.field-row{display:grid;grid-template-columns:150px 170px auto;align-items:center;gap:4px;margin-bottom:4px}
+@media(max-width:480px){.field-row{grid-template-columns:110px 140px auto;}}
 .field-row label{font-size:14px;color:#333;font-weight:500}
 .field-row .std{font-size:12px;color:#666;font-style:italic;white-space:nowrap}
 .field-row input,.field-row select{width:100%;padding:4px 5px;border:1px solid #bbb;border-radius:3px;font-size:14px;background:#fff;min-height:30px}
@@ -283,7 +283,7 @@ button.primary:hover{background:#002244}
 <option>8" SCH 40</option><option>8" SCH 80</option>
 </select>
 <span class="std" id="pipeSizeStd"></span></div>
-<div class="field-row input-secondary" style="grid-template-columns:130px 1fr"><label>Flight Thickness</label>
+<div class="field-row input-secondary" style="grid-template-columns:150px 170px"><label>Flight Thickness</label>
 <select id="flightT" onchange="markOverride('flightT');recalc()" style="min-width:0;width:100%">
 <option>0.1875</option><option>0.25</option><option>0.375</option>
 <option>0.75" x 2.5"</option><option>1" x 3"</option><option>1" x 4"</option>
