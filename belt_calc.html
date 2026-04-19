@@ -25,6 +25,7 @@ h3{font-size:13px;font-weight:600;color:#555;margin:8px 0 4px}
 .field-row{display:grid;grid-template-columns:150px 1fr 48px;align-items:center;gap:4px;margin-bottom:4px}
 @media(max-width:480px){.field-row{grid-template-columns:110px 1fr 40px;}}
 .field-row label{font-size:14px;color:#333;font-weight:500}
+.req{color:#c00;font-size:11px;margin-left:2px;vertical-align:super}
 .field-row .std{font-size:12px;color:#666;font-style:italic;white-space:nowrap}
 .field-row input,.field-row select{width:100%;padding:4px 5px;border:1px solid #bbb;border-radius:3px;font-size:14px;background:#fff;min-height:30px}
 .field-row input:focus,.field-row select:focus{outline:none;border-color:#003366;box-shadow:0 0 0 2px rgba(0,51,102,.15)}
@@ -122,6 +123,8 @@ button.primary:hover{background:#002244}
 <!-- ===== LEFT PANEL: INPUT FORM ===== -->
 <div class="left">
 
+  <div style="font-size:11px;color:#666;margin-bottom:8px"><span class="req">*</span> Required field</div>
+
   <!-- 1. Project Info -->
   <div class="section">
   <div class="sec-header" onclick="toggleSec('sec-project')">
@@ -147,10 +150,10 @@ button.primary:hover{background:#002244}
   </div>
   <div class="sec-body" id="sec-geometry">
   <div style="height:6px"></div>
-  <div class="field-row input-primary"><label>Horiz. Length</label><input type="number" id="horiz_length_ft" step="1" min="1" oninput="calculate()" onchange="calculate()"><span class="std">ft</span></div>
-  <div class="field-row input-primary"><label>Incline Length</label><input type="number" id="incline_length_ft" step="1" min="0" oninput="calculate()" onchange="calculate()"><span class="std">ft</span></div>
-  <div class="field-row input-primary"><label>Incline Angle</label><input type="number" id="incline_deg" step="0.1" min="0" max="30" oninput="calculate()" onchange="calculate()"><span class="std">deg</span></div>
-  <div class="field-row input-primary"><label>Belt Width</label>
+  <div class="field-row input-primary"><label>Horiz. Length<span class="req">*</span></label><input type="number" id="horiz_length_ft" step="1" min="1" oninput="calculate()" onchange="calculate()"><span class="std">ft</span></div>
+  <div class="field-row input-primary"><label>Incline Length<span class="req">*</span></label><input type="number" id="incline_length_ft" step="1" min="0" oninput="calculate()" onchange="calculate()"><span class="std">ft</span></div>
+  <div class="field-row input-primary"><label>Incline Angle<span class="req">*</span></label><input type="number" id="incline_deg" step="0.1" min="0" max="30" oninput="calculate()" onchange="calculate()"><span class="std">deg</span></div>
+  <div class="field-row input-primary"><label>Belt Width<span class="req">*</span></label>
     <select id="belt_width_in" onchange="calculate()">
       <option value="18">18"</option>
       <option value="24">24"</option>
@@ -161,8 +164,8 @@ button.primary:hover{background:#002244}
     </select>
     <span class="std">in</span>
   </div>
-  <div class="field-row input-primary"><label>Belt Speed</label><input type="number" id="belt_speed_fpm" step="10" min="50" max="800" oninput="calculate()" onchange="calculate()"><span class="std">fpm</span></div>
-  <div class="field-row input-primary"><label>Trough Angle</label>
+  <div class="field-row input-primary"><label>Belt Speed<span class="req">*</span></label><input type="number" id="belt_speed_fpm" step="10" min="50" max="800" oninput="calculate()" onchange="calculate()"><span class="std">fpm</span></div>
+  <div class="field-row input-primary"><label>Trough Angle<span class="req">*</span></label>
     <select id="trough_angle" onchange="calculate()">
       <option value="0">Flat (0°)</option>
       <option value="20" selected>20°</option>
@@ -181,7 +184,7 @@ button.primary:hover{background:#002244}
   </div>
   <div class="sec-body" id="sec-material">
   <div style="height:6px"></div>
-  <div class="field-row input-primary"><label>Material</label>
+  <div class="field-row input-primary"><label>Material<span class="req">*</span></label>
     <select id="material" onchange="onMaterialChange()">
       <option>Biosolids (Wet Cake)</option>
       <option>Biosolids (Dry)</option>
@@ -197,9 +200,9 @@ button.primary:hover{background:#002244}
       <option>Other</option>
     </select>
   </div>
-  <div class="field-row input-primary"><label>Density</label><input type="number" id="density_lb_ft3" step="1" min="10" oninput="calculate()" onchange="calculate()"><span class="std">lb/ft³</span></div>
-  <div class="field-row input-primary"><label>Design Cap.</label><input type="number" id="capacity_tph" step="1" min="0.1" oninput="calculate()" onchange="calculate()"><span class="std">ton/hr</span></div>
-  <div class="field-row input-primary"><label>Max Incline</label><input type="number" id="max_incline_deg" step="1" min="5" max="30" oninput="calculate()" onchange="calculate()"><span class="std">deg</span></div>
+  <div class="field-row input-primary"><label>Density<span class="req">*</span></label><input type="number" id="density_lb_ft3" step="1" min="10" oninput="calculate()" onchange="calculate()"><span class="std">lb/ft³</span></div>
+  <div class="field-row input-primary"><label>Design Cap.<span class="req">*</span></label><input type="number" id="capacity_tph" step="1" min="0.1" oninput="calculate()" onchange="calculate()"><span class="std">ton/hr</span></div>
+  <div class="field-row input-primary"><label>Max Incline<span class="req">*</span></label><input type="number" id="max_incline_deg" step="1" min="5" max="30" oninput="calculate()" onchange="calculate()"><span class="std">deg</span></div>
   </div>
   </div>
 
@@ -210,7 +213,7 @@ button.primary:hover{background:#002244}
   </div>
   <div class="sec-body" id="sec-belt">
   <div style="height:6px"></div>
-  <div class="field-row input-primary"><label>Belt Type</label>
+  <div class="field-row input-primary"><label>Belt Type<span class="req">*</span></label>
     <select id="belt_type" onchange="calculate()">
       <option value="Fabric">Fabric (2-ply, 3-ply, 4-ply)</option>
       <option value="Steel">Steel Core (ST series)</option>
@@ -255,7 +258,7 @@ button.primary:hover{background:#002244}
   </div>
   <div class="sec-body" id="sec-drive">
   <div style="height:6px"></div>
-  <div class="field-row input-primary"><label>Drive Arrangement</label>
+  <div class="field-row input-primary"><label>Drive Arrangement<span class="req">*</span></label>
     <select id="drive_arrangement" onchange="calculate()">
       <option value="Shaft Mounted Drive">Shaft Mounted Drive</option>
       <option value="Chain and Sprocket">Chain and Sprocket</option>
@@ -263,13 +266,13 @@ button.primary:hover{background:#002244}
       <option value="V-Belt">V-Belt</option>
     </select>
   </div>
-  <div class="field-row input-primary"><label>Take-Up Type</label>
+  <div class="field-row input-primary"><label>Take-Up Type<span class="req">*</span></label>
     <select id="takeup_type" onchange="calculate()">
       <option value="Manual">Manual / Screw</option>
       <option value="Gravity">Gravity</option>
     </select>
   </div>
-  <div class="field-row input-primary"><label>Motor HP</label><input type="number" id="motor_hp" step="1" min="1" oninput="calculate()" onchange="calculate()"><span class="std">HP</span></div>
+  <div class="field-row input-primary"><label>Motor HP<span class="req">*</span></label><input type="number" id="motor_hp" step="1" min="1" oninput="calculate()" onchange="calculate()"><span class="std">HP</span></div>
   <div class="field-row input-secondary"><label>Head Pulley Dia.</label><input type="number" id="head_pulley_dia" step="2" min="6" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
   <div class="field-row input-secondary"><label>Shaft Diameter</label><input type="number" id="shaft_dia_in" step="0.0625" min="1" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
   <div class="field-row input-secondary"><label>Shaft Material</label>
