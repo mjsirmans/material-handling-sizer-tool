@@ -133,30 +133,10 @@ button.primary:hover{background:#002244}
 </div>
 </div>
 
-<!-- 2. Hopper Dimensions -->
-<div class="section">
-<div class="sec-header" onclick="toggleSec('sec-dims')">
-  <h2>2. Hopper Dimensions</h2><span class="sec-toggle" id="tog-dims" style="transform:rotate(90deg)">▸</span>
-</div>
-<div class="sec-body" id="sec-dims">
-<div style="height:6px"></div>
-<div class="field-row input-primary"><label>Qty of Hoppers</label><input id="qty_hoppers" type="number" min="1" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
-<div class="field-row input-primary"><label>OAL (Overall Length)</label><input id="oal_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
-<div class="field-row input-primary" data-ac-req><label>OAW (Overall Width)</label><input id="oaw_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
-<div class="field-row input-primary"><label>OAH (Overall Height)</label><input id="oah_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
-<div class="field-row input-primary"><label>Side Slope</label><input id="side_slope_deg" type="number" step="0.5" min="60" max="90" oninput="calculate()" onchange="calculate()"><span class="std">deg</span></div>
-<div id="slope-warn" class="warn-inline" style="display:none">⚠ Slope must be &gt; 60°</div>
-<div class="field-row input-primary"><label>Required Volume</label><input id="req_volume_yds" type="number" step="1" min="0" oninput="calculate()" onchange="calculate()"><span class="std">yd³</span></div>
-<div class="field-row input-primary"><label>Discharge Length</label><input id="discharge_len_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
-<div class="field-row input-calculated"><label>Discharge Width</label><input id="discharge_wid_in" type="number" step="0.001" min="0" title="Auto-filled from LB screw qty × dia. Edit to override." oninput="this.dataset.manualOverride='1';calculate()" onchange="this.dataset.manualOverride='1';calculate()"><span class="std">in</span></div>
-<div style="font-size:10px;color:#888;margin:-2px 0 4px 154px">Auto-filled from LB table · edit to override</div>
-</div>
-</div>
-
-<!-- 3. Material Properties -->
+<!-- 2. Material & Flowrate -->
 <div class="section">
 <div class="sec-header" onclick="toggleSec('sec-material')">
-  <h2>3. Material Properties</h2><span class="sec-toggle" id="tog-material" style="transform:rotate(90deg)">▸</span>
+  <h2>2. Material &amp; Flowrate</h2><span class="sec-toggle" id="tog-material" style="transform:rotate(90deg)">▸</span>
 </div>
 <div class="sec-body" id="sec-material">
 <div style="height:6px"></div>
@@ -173,6 +153,26 @@ button.primary:hover{background:#002244}
 <div class="field-row input-secondary"><label>Density</label><input id="density_lbft3" type="number" step="1" min="1" oninput="calculate()" onchange="calculate()"><span class="std">lb/ft³</span></div>
 <div class="field-row input-secondary"><label>Angle of Repose</label><input id="angle_repose_deg" type="number" step="1" min="0" max="90" oninput="calculate()" onchange="calculate()"><span class="std">deg</span></div>
 <div class="field-row input-primary" data-ac-req><label>Flowrate</label><input id="flowrate_lbhr" type="number" step="100" min="0" oninput="calculate()" onchange="calculate()"><span class="std">lb/hr</span></div>
+</div>
+</div>
+
+<!-- 3. Hopper Dimensions -->
+<div class="section">
+<div class="sec-header" onclick="toggleSec('sec-dims')">
+  <h2>3. Hopper Dimensions</h2><span class="sec-toggle" id="tog-dims" style="transform:rotate(90deg)">▸</span>
+</div>
+<div class="sec-body" id="sec-dims">
+<div style="height:6px"></div>
+<div class="field-row input-primary"><label>Qty of Hoppers</label><input id="qty_hoppers" type="number" min="1" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
+<div class="field-row input-primary" data-ac-req><label>OAW (Overall Width)</label><input id="oaw_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+<div class="field-row input-primary"><label>OAL (Overall Length)</label><input id="oal_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+<div class="field-row input-primary"><label>OAH (Overall Height)</label><input id="oah_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+<div class="field-row input-primary"><label>Side Slope</label><input id="side_slope_deg" type="number" step="0.5" min="60" max="90" oninput="calculate()" onchange="calculate()"><span class="std">deg</span></div>
+<div id="slope-warn" class="warn-inline" style="display:none">⚠ Slope must be &gt; 60°</div>
+<div class="field-row input-primary"><label>Required Volume</label><input id="req_volume_yds" type="number" step="1" min="0" oninput="calculate()" onchange="calculate()"><span class="std">yd³</span></div>
+<div class="field-row input-primary"><label>Discharge Length</label><input id="discharge_len_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+<div class="field-row input-calculated"><label>Discharge Width</label><input id="discharge_wid_in" type="number" step="0.001" min="0" title="Auto-filled from LB screw qty × dia. Edit to override." oninput="this.dataset.manualOverride='1';calculate()" onchange="this.dataset.manualOverride='1';calculate()"><span class="std">in</span></div>
+<div style="font-size:10px;color:#888;margin:-2px 0 4px 154px">Auto-filled from LB table · edit to override</div>
 </div>
 </div>
 
