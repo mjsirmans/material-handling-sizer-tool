@@ -413,7 +413,7 @@ function buildChuteBody() {
 
 function addChute() {
   const id = ++chuteSeq;
-  equip.chute.chutes.push({ id, lt:0, wt:0, lb:0, wb:0, fw:2, mat:0, asm_hrs:0, extra_cost:0 });
+  equip.chute.chutes.push({ id, qty:1, lt:0, wt:0, lb:0, wb:0, fw:2, mat:0, asm_hrs:0, extra_cost:0 });
   renderChuteList();
   render();
 }
@@ -436,6 +436,9 @@ function renderChuteList() {
         <span>Chute ${idx+1}</span>
         <button class="del-btn" onclick="removeChute(${c.id})">✕ Remove</button>
       </div>
+      <div class="field-row"><label>Quantity</label>
+        <input type="number" min="1" value="${c.qty||1}" onchange="setChuteField(${c.id},'qty',this.value)" style="width:70px">
+        <span class="unit">ea</span></div>
       <div class="field-row"><label>Top L × W</label>
         <div style="display:flex;gap:4px">
           <input type="number" min="0" value="${c.lt||''}" placeholder="L" style="width:60px;text-align:right" onchange="setChuteField(${c.id},'lt',this.value)">
@@ -469,7 +472,8 @@ function renderChuteList() {
         <span>Mat Cost: <strong>${fmt(calc.mat_cost)}</strong></span>
         <span>Weld Ft: <strong>${calc.weld_ft.toFixed(1)}</strong></span>
         <span>Weld Cost: <strong>${fmt(calc.weld_cost)}</strong></span>
-        <span>Total: <strong>${fmt(calc.total)}</strong></span>
+        <span>Unit Total: <strong>${fmt(calc.total)}</strong></span>
+        ${(c.qty||1)>1?`<span style="grid-column:1/-1;color:#003366">× ${c.qty||1} ea = <strong>${fmt(calc.total*(c.qty||1))}</strong></span>`:''}
       </div>
     </div>`;
   }).join('');
@@ -687,9 +691,10 @@ function chuteCost() {
   let mat=0, labor=0, extra=0;
   chutes.forEach(c => {
     const calc = calcChute(c);
-    mat   += calc.mat_cost + calc.weld_cost;
-    labor += (c.asm_hrs||0) * lr.asm;
-    extra += c.extra_cost||0;
+    const qty = c.qty||1;
+    mat   += (calc.mat_cost + calc.weld_cost) * qty;
+    labor += (c.asm_hrs||0) * lr.asm * qty;
+    extra += (c.extra_cost||0) * qty;
   });
   const eng_labor = (parseFloat(document.getElementById('eng-chute')?.value)||0) * lr.eng;
   const freight   = parseFloat(document.getElementById('freight-chute')?.value)||0;
