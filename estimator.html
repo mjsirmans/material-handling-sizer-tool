@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bio-TOOL Estimator</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;font-size:15px;background:#f0f2f5;color:#1a1a1a}
+h1{font-size:17px;font-weight:700;color:#003366}
+h2{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#003366;margin:10px 0 6px;border-bottom:1px solid #ccd;padding-bottom:3px}
+h3{font-size:13px;font-weight:600;color:#555;margin:8px 0 4px}
+.header{background:#003366;color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.header h1{color:#fff}
+.header .rev{font-size:11px;opacity:.7}
+.main{display:grid;grid-template-columns:480px 1fr;gap:0;min-height:calc(100vh - 42px)}
+@media(max-width:860px){.main{grid-template-columns:1fr}}
+.left{background:#fff;border-right:1px solid #d0d4dc;padding:12px;overflow-y:auto;max-height:calc(100vh - 42px)}
+.right{background:#f8f9fc;padding:12px;overflow-y:auto;max-height:calc(100vh - 42px)}
+@media(max-width:860px){.left{max-height:none;border-right:none;border-bottom:1px solid #d0d4dc}.right{max-height:none}}
+
+/* collapsible sections */
+.sec-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding-bottom:3px;border-bottom:1px solid #ccd}
+.sec-header h2{margin:8px 0 0;border-bottom:none;padding-bottom:0;flex:1}
+.sec-toggle{font-size:11px;color:#669;margin-left:6px;transition:transform .15s;flex-shrink:0;margin-top:8px}
+.sec-body{overflow:hidden}
+.sec-body.collapsed{display:none}
+.section{margin-bottom:8px}
+
+/* equipment block */
+.equip-block{margin:0 0 6px;border:1px solid #dde;border-radius:4px;overflow:hidden}
+.equip-header{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#eef2f8;cursor:pointer;user-select:none}
+.equip-header label{font-size:13px;font-weight:700;color:#003366;cursor:pointer;flex:1}
+.equip-header input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:#003366}
+.equip-toggle{font-size:11px;color:#669;margin-left:auto}
+.equip-body{padding:10px;display:none;background:#fff}
+.equip-body.open{display:block}
+
+/* field rows */
+.field-row{display:grid;grid-template-columns:160px 1fr auto;align-items:center;gap:4px;margin-bottom:4px}
+.field-row label{font-size:13px;color:#333;font-weight:500}
+.field-row .unit{font-size:11px;color:#888;white-space:nowrap}
+.field-row input,.field-row select{width:100%;padding:4px 6px;border:1px solid #bbb;border-radius:3px;font-size:13px;background:#fff;min-height:28px}
+.field-row input:focus,.field-row select:focus{outline:none;border-color:#003366;box-shadow:0 0 0 2px rgba(0,51,102,.12)}
+.field-row input[type=number]{text-align:right}
+
+/* subsection within equipment */
+.sub-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#669;margin:10px 0 4px;padding-bottom:2px;border-bottom:1px solid #eee}
+
+/* material line items */
+.line-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:6px}
+.line-table th{background:#eef2f8;color:#003366;font-weight:700;padding:4px 6px;text-align:left;font-size:11px;border:1px solid #dde}
+.line-table td{padding:3px 4px;border:1px solid #e4e8ee;vertical-align:middle}
+.line-table td input{width:100%;border:none;background:transparent;font-size:12px;padding:1px 3px;min-height:0}
+.line-table td input:focus{outline:1px solid #003366;border-radius:2px}
+.line-table td.total-cell{font-weight:600;text-align:right;color:#003366;min-width:70px}
+.line-table tr.total-row td{background:#f0f4fa;font-weight:700}
+.add-row-btn{font-size:11px;padding:2px 8px;margin-top:3px;border:1px dashed #99a;border-radius:3px;background:#f8f9fc;color:#669;cursor:pointer}
+.add-row-btn:hover{background:#eef2f8;color:#003366}
+
+/* results */
+.result-box{background:#fff;border:1px solid #d0d4dc;border-radius:4px;padding:10px 12px;margin-bottom:8px}
+.result-box h3{margin-bottom:8px;font-size:13px}
+.result-row{display:grid;grid-template-columns:1fr 100px 70px;align-items:center;gap:4px;margin-bottom:4px;font-size:13px}
+.result-row .lbl{color:#555}
+.result-row .val{font-weight:600;text-align:right;color:#003366}
+.result-row .unit{color:#888;font-size:11px}
+.result-divider{border:none;border-top:1px solid #e0e4ea;margin:6px 0}
+.result-total{font-size:15px;font-weight:700;color:#003366}
+.result-sale{font-size:16px;font-weight:700;color:#1a6e1a}
+.badge-stub{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:700;background:#fff3e0;color:#e65100}
+
+/* pricing tier */
+.tier-row{display:flex;gap:8px;margin:6px 0;flex-wrap:wrap}
+.tier-card{flex:1;min-width:110px;border:2px solid #dde;border-radius:4px;padding:6px 8px;cursor:pointer;background:#fff;transition:border-color .12s,background .12s}
+.tier-card.selected{border-color:#003366;background:#eef2f8}
+.tier-card .tier-name{font-size:12px;font-weight:700;color:#003366}
+.tier-card .tier-pct{font-size:11px;color:#555;margin-top:2px}
+
+button{padding:4px 12px;font-size:12px;border:1px solid #003366;border-radius:3px;cursor:pointer;background:#fff;color:#003366}
+button:hover{background:#003366;color:#fff}
+button.primary{background:#003366;color:#fff}
+button.primary:hover{background:#002244}
+.btn-row{display:flex;gap:8px;margin-top:8px}
+.note{font-size:10px;color:#777;margin-top:4px;padding:3px 6px;background:#fffbe6;border-left:2px solid #f0a800;border-radius:0 2px 2px 0}
+
+@media print{
+  .left,.header .btn-row{display:none!important}
+  .main{display:block}
+  .right{padding:8px;overflow:visible;max-height:unset}
+  .result-box{break-inside:avoid}
+  button{display:none!important}
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <a href="index.html" style="font-size:11px;color:#aac;text-decoration:none;display:block;margin-bottom:2px;">← Back to Tool Index</a>
+    <h1>Bio-TOOL Estimator</h1>
+    <span class="rev">Rev 1.0</span>
+  </div>
+  <div class="btn-row" style="margin:0">
+    <button onclick="window.print()" class="primary">Print / PDF</button>
+  </div>
+</div>
+
+<div class="main">
+<!-- ===== LEFT: INPUTS ===== -->
+<div class="left">
+
+<!-- Project Info -->
+<div class="section">
+<div class="sec-header" onclick="toggleSec('sec-project')">
+  <h2>Project Info</h2><span class="sec-toggle" id="tog-project" style="transform:rotate(90deg)">▸</span>
+</div>
+<div class="sec-body" id="sec-project">
+<div style="height:6px"></div>
+<div class="field-row"><label>Project No.</label><input id="projNo" type="text" placeholder="e.g. 25-001" oninput="render()"></div>
+<div class="field-row"><label>Customer</label><input id="customer" type="text" oninput="render()"></div>
+<div class="field-row"><label>Estimator</label><input id="estimator" type="text" oninput="render()"></div>
+<div class="field-row"><label>Date</label><input id="proj-date" type="date" oninput="render()"></div>
+<div class="field-row"><label>Location</label><input id="location" type="text" oninput="render()"></div>
+<div class="field-row"><label>Description</label><input id="desc" type="text" oninput="render()"></div>
+</div>
+</div>
+
+<!-- Pricing Tier -->
+<div class="section">
+<div class="sec-header" onclick="toggleSec('sec-tier')">
+  <h2>Pricing Tier</h2><span class="sec-toggle" id="tog-tier" style="transform:rotate(90deg)">▸</span>
+</div>
+<div class="sec-body" id="sec-tier">
+<div style="height:8px"></div>
+<div class="tier-row" id="tier-row"></div>
+<div style="height:6px"></div>
+<div class="field-row"><label>GMaC %</label><input id="gmac-override" type="number" step="0.1" placeholder="auto" oninput="render()"><span class="unit">%</span></div>
+<div class="field-row"><label>Commission %</label><input id="comm-override" type="number" step="0.1" placeholder="auto" oninput="render()"><span class="unit">%</span></div>
+<p class="note">GMaC and Commission auto-fill from tier. Override here if needed.</p>
+</div>
+</div>
+
+<!-- Equipment Selector -->
+<div class="section">
+<div class="sec-header" onclick="toggleSec('sec-equip')">
+  <h2>Equipment</h2><span class="sec-toggle" id="tog-equip" style="transform:rotate(90deg)">▸</span>
+</div>
+<div class="sec-body" id="sec-equip">
+<div style="height:6px"></div>
+<p class="note" style="margin-bottom:8px">Check each equipment type on this project. Fill in cost details below.</p>
+<div id="equip-blocks"></div>
+</div>
+</div>
+
+<!-- Labor Rates -->
+<div class="section">
+<div class="sec-header" onclick="toggleSec('sec-labor')">
+  <h2>Labor Rates</h2><span class="sec-toggle" id="tog-labor">▸</span>
+</div>
+<div class="sec-body collapsed" id="sec-labor">
+<div style="height:6px"></div>
+<div class="field-row"><label>Engineering</label><input id="lr-eng" type="number" value="119" oninput="render()"><span class="unit">$/hr</span></div>
+<div class="field-row"><label>Assembly</label><input id="lr-asm" type="number" value="113" oninput="render()"><span class="unit">$/hr</span></div>
+<div class="field-row"><label>Finishing</label><input id="lr-fin" type="number" value="110" oninput="render()"><span class="unit">$/hr</span></div>
+<div class="field-row"><label>Processing</label><input id="lr-proc" type="number" value="110" oninput="render()"><span class="unit">$/hr</span></div>
+</div>
+</div>
+
+</div><!-- /left -->
+
+<!-- ===== RIGHT: RESULTS ===== -->
+<div class="right" id="results-panel">
+  <div id="summary-out"></div>
+</div>
+
+</div><!-- /main -->
+
+<script>
+// ── Pricing Tiers ─────────────────────────────────────────────────────────
+const TIERS = [
+  { id:'base',   name:'Base',       gmac:33.0, comm:6.0 },
+  { id:'sand',   name:'Sand',       gmac:31.0, comm:6.0 },
+  { id:'line',   name:'Line',       gmac:35.0, comm:6.0 },
+  { id:'repair', name:'Reg/Repair', gmac:40.0, comm:6.0 },
+];
+let selectedTier = 'base';
+
+// ── Equipment Types ────────────────────────────────────────────────────────
+const EQUIP_TYPES = [
+  { id:'screw',    label:'Screw Conveyor'   },
+  { id:'belt',     label:'Belt Conveyor'    },
+  { id:'hopper',   label:'Hopper (Enclosed Storage)' },
+  { id:'diverter', label:'Diverter'         },
+  { id:'silo',     label:'Silo'             },
+  { id:'chute',    label:'Chute'            },
+  { id:'support',  label:'Support Structure'},
+];
+
+// ── State ─────────────────────────────────────────────────────────────────
+// equip[id] = { enabled, qty, label, mats_offsite, mats_raw, mats_nonmetal,
+//               eng_hrs, asm_hrs, fin_hrs, proc_hrs, freight, purchased_sys, purchased_comp }
+const equip = {};
+EQUIP_TYPES.forEach(e => {
+  equip[e.id] = {
+    enabled: false,
+    qty: 1,
+    mats_offsite:   buildLines(5),
+    mats_raw:       buildLines(5),
+    mats_nonmetal:  buildLines(3),
+    purchased_sys:  buildLines(3),
+    purchased_comp: buildLines(3),
+    eng_hrs:   0,
+    asm_hrs:   0,
+    fin_hrs:   0,
+    proc_hrs:  0,
+    freight:   0,
+  };
+});
+
+function buildLines(n) {
+  const rows = [];
+  for (let i=0; i<n; i++) rows.push({desc:'', vendor:'', qty:0, unit_cost:0});
+  return rows;
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+function init() {
+  buildTierCards();
+  buildEquipBlocks();
+  render();
+}
+
+function buildTierCards() {
+  const row = document.getElementById('tier-row');
+  row.innerHTML = TIERS.map(t => `
+    <div class="tier-card ${t.id===selectedTier?'selected':''}" onclick="selectTier('${t.id}')" id="tc-${t.id}">
+      <div class="tier-name">${t.name}</div>
+      <div class="tier-pct">GMaC ${t.gmac}% / Comm ${t.comm}%</div>
+    </div>`).join('');
+}
+
+function selectTier(id) {
+  selectedTier = id;
+  document.querySelectorAll('.tier-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('tc-'+id).classList.add('selected');
+  const t = TIERS.find(x=>x.id===id);
+  const go = document.getElementById('gmac-override');
+  const co = document.getElementById('comm-override');
+  if (!go.value) go.placeholder = t.gmac;
+  if (!co.value) co.placeholder = t.comm;
+  render();
+}
+
+function buildEquipBlocks() {
+  const container = document.getElementById('equip-blocks');
+  container.innerHTML = EQUIP_TYPES.map(e => `
+    <div class="equip-block" id="eb-${e.id}">
+      <div class="equip-header" onclick="toggleEquip('${e.id}')">
+        <input type="checkbox" id="chk-${e.id}" onclick="event.stopPropagation();toggleEquipCheck('${e.id}')">
+        <label for="chk-${e.id}" onclick="event.stopPropagation();toggleEquipCheck('${e.id}')">${e.label}</label>
+        <span class="equip-toggle" id="etog-${e.id}">▸</span>
+      </div>
+      <div class="equip-body" id="ebody-${e.id}">
+        ${buildEquipBody(e.id)}
+      </div>
+    </div>`).join('');
+}
+
+function buildEquipBody(id) {
+  return `
+    <div class="field-row"><label>Quantity</label><input type="number" value="1" min="1" id="qty-${id}" oninput="updateEquip('${id}','qty',this.value);render()" style="width:70px"><span class="unit">ea</span></div>
+
+    <div class="sub-label">Materials — Off-Site Purchased</div>
+    ${buildLineTable(id,'mats_offsite')}
+
+    <div class="sub-label">Materials — Raw / Metallic</div>
+    ${buildLineTable(id,'mats_raw')}
+
+    <div class="sub-label">Materials — Non-Metallic</div>
+    ${buildLineTable(id,'mats_nonmetal')}
+
+    <div class="sub-label">Purchased Systems</div>
+    ${buildLineTable(id,'purchased_sys')}
+
+    <div class="sub-label">Purchased Components</div>
+    ${buildLineTable(id,'purchased_comp')}
+
+    <div class="sub-label">Labor Hours</div>
+    <div class="field-row"><label>Engineering</label><input type="number" min="0" value="0" id="eng-${id}" oninput="updateEquip('${id}','eng_hrs',this.value);render()"><span class="unit">hrs</span></div>
+    <div class="field-row"><label>Assembly</label><input type="number" min="0" value="0" id="asm-${id}" oninput="updateEquip('${id}','asm_hrs',this.value);render()"><span class="unit">hrs</span></div>
+    <div class="field-row"><label>Finishing</label><input type="number" min="0" value="0" id="fin-${id}" oninput="updateEquip('${id}','fin_hrs',this.value);render()"><span class="unit">hrs</span></div>
+    <div class="field-row"><label>Processing</label><input type="number" min="0" value="0" id="proc-${id}" oninput="updateEquip('${id}','proc_hrs',this.value);render()"><span class="unit">hrs</span></div>
+    <div class="field-row"><label>Freight</label><input type="number" min="0" value="0" id="freight-${id}" oninput="updateEquip('${id}','freight',this.value);render()"><span class="unit">$</span></div>
+  `;
+}
+
+function buildLineTable(eid, section) {
+  const sid = eid+'_'+section;
+  return `
+    <table class="line-table" id="tbl-${sid}">
+      <thead><tr>
+        <th style="width:34%">Description</th>
+        <th style="width:22%">Vendor</th>
+        <th style="width:10%">Qty</th>
+        <th style="width:18%">Unit Cost</th>
+        <th style="width:16%">Total</th>
+      </tr></thead>
+      <tbody id="tbody-${sid}">
+        ${equip[eid][section].map((_,i)=>lineRow(eid,section,i)).join('')}
+      </tbody>
+      <tfoot><tr class="total-row">
+        <td colspan="4" style="text-align:right;font-size:11px;padding:3px 6px">Section Total</td>
+        <td class="total-cell" id="sec-total-${sid}">$0</td>
+      </tr></tfoot>
+    </table>
+    <button class="add-row-btn" onclick="addLine('${eid}','${section}')">+ Add Row</button>
+  `;
+}
+
+function lineRow(eid, section, i) {
+  const sid = eid+'_'+section;
+  const r = equip[eid][section][i];
+  return `<tr id="row-${sid}-${i}">
+    <td><input value="${r.desc}" oninput="setLine('${eid}','${section}',${i},'desc',this.value)"></td>
+    <td><input value="${r.vendor}" oninput="setLine('${eid}','${section}',${i},'vendor',this.value)"></td>
+    <td><input type="number" min="0" value="${r.qty||''}" oninput="setLine('${eid}','${section}',${i},'qty',this.value);render()"></td>
+    <td><input type="number" min="0" step="0.01" value="${r.unit_cost||''}" oninput="setLine('${eid}','${section}',${i},'unit_cost',this.value);render()"></td>
+    <td class="total-cell" id="lt-${sid}-${i}">$0</td>
+  </tr>`;
+}
+
+// ── State mutators ─────────────────────────────────────────────────────────
+function toggleEquipCheck(id) {
+  equip[id].enabled = !equip[id].enabled;
+  document.getElementById('chk-'+id).checked = equip[id].enabled;
+  const body = document.getElementById('ebody-'+id);
+  if (equip[id].enabled) body.classList.add('open');
+  else body.classList.remove('open');
+  render();
+}
+
+function toggleEquip(id) {
+  const body = document.getElementById('ebody-'+id);
+  body.classList.toggle('open');
+}
+
+function updateEquip(id, key, val) {
+  equip[id][key] = parseFloat(val)||0;
+}
+
+function setLine(eid, section, i, key, val) {
+  equip[eid][section][i][key] = (key==='desc'||key==='vendor') ? val : (parseFloat(val)||0);
+}
+
+function addLine(eid, section) {
+  equip[eid][section].push({desc:'',vendor:'',qty:0,unit_cost:0});
+  const sid = eid+'_'+section;
+  const tbody = document.getElementById('tbody-'+sid);
+  const i = equip[eid][section].length - 1;
+  tbody.insertAdjacentHTML('beforeend', lineRow(eid, section, i));
+}
+
+// ── Pricing engine (SalePrice from VBA) ───────────────────────────────────
+function salePrice(cost, gmacPct, commPct) {
+  if (cost <= 0) return 0;
+  const gm_target = gmacPct / 100;
+  const comm = commPct / 100;
+  // bisection: find GMpercent such that GM/SP = gm_target
+  let xL=0, xU=0.9999, xr=0, xold=0, ea=1, i=0;
+  while (ea > 0.0001 && i < 30) {
+    xr = (xU + xL) / 2;
+    ea = xold ? Math.abs((xr - xold) / xr) : 1;
+    const gm  = cost / (1 - xr) - cost;
+    const sp  = cost + gm + comm * (cost + gm);
+    const fxr = gm / sp;
+    if (gm_target - fxr < 0) xU = xr; else xL = xr;
+    xold = xr; i++;
+  }
+  const gm_final = cost / (1 - xr) - cost;
+  return cost + gm_final + comm * (cost + gm_final);
+}
+
+// ── Section totals ─────────────────────────────────────────────────────────
+function sectionTotal(eid, section) {
+  return equip[eid][section].reduce((s,r) => s + (r.qty||0)*(r.unit_cost||0), 0);
+}
+
+function equipCost(eid) {
+  const e = equip[eid];
+  const lr = laborRates();
+  const mat = sectionTotal(eid,'mats_offsite')
+             + sectionTotal(eid,'mats_raw')
+             + sectionTotal(eid,'mats_nonmetal')
+             + sectionTotal(eid,'purchased_sys')
+             + sectionTotal(eid,'purchased_comp');
+  const labor = e.eng_hrs * lr.eng
+              + e.asm_hrs * lr.asm
+              + e.fin_hrs * lr.fin
+              + e.proc_hrs * lr.proc;
+  return { mat, labor, freight: e.freight||0, total: mat + labor + (e.freight||0) };
+}
+
+function laborRates() {
+  return {
+    eng:  parseFloat(document.getElementById('lr-eng').value)||119,
+    asm:  parseFloat(document.getElementById('lr-asm').value)||113,
+    fin:  parseFloat(document.getElementById('lr-fin').value)||110,
+    proc: parseFloat(document.getElementById('lr-proc').value)||110,
+  };
+}
+
+function activeTier() {
+  const t = TIERS.find(x=>x.id===selectedTier);
+  const go = parseFloat(document.getElementById('gmac-override').value);
+  const co = parseFloat(document.getElementById('comm-override').value);
+  return {
+    gmac: isNaN(go) ? t.gmac : go,
+    comm: isNaN(co) ? t.comm : co,
+  };
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────
+function render() {
+  const tier = activeTier();
+  let grandCost = 0;
+  const activeEquip = EQUIP_TYPES.filter(e => equip[e.id].enabled);
+
+  // update line-item totals in DOM
+  EQUIP_TYPES.forEach(e => {
+    if (!equip[e.id].enabled) return;
+    ['mats_offsite','mats_raw','mats_nonmetal','purchased_sys','purchased_comp'].forEach(sec => {
+      const sid = e.id+'_'+sec;
+      let secSum = 0;
+      equip[e.id][sec].forEach((r,i) => {
+        const t = (r.qty||0)*(r.unit_cost||0);
+        secSum += t;
+        const el = document.getElementById('lt-'+sid+'-'+i);
+        if (el) el.textContent = fmt(t);
+      });
+      const el = document.getElementById('sec-total-'+sid);
+      if (el) el.textContent = fmt(secSum);
+    });
+  });
+
+  // summary output
+  const out = document.getElementById('summary-out');
+
+  // project header
+  const proj = v('projNo'); const cust = v('customer');
+  const est  = v('estimator'); const dt = v('proj-date');
+  const loc  = v('location'); const desc = v('desc');
+
+  let html = `<div class="result-box">
+    <h3>Project Summary</h3>
+    ${proj ? `<div class="result-row"><span class="lbl">Project No.</span><span class="val" style="grid-column:2/4">${proj}</span></div>` : ''}
+    ${cust ? `<div class="result-row"><span class="lbl">Customer</span><span class="val" style="grid-column:2/4">${cust}</span></div>` : ''}
+    ${loc  ? `<div class="result-row"><span class="lbl">Location</span><span class="val" style="grid-column:2/4">${loc}</span></div>` : ''}
+    ${desc ? `<div class="result-row"><span class="lbl">Description</span><span class="val" style="grid-column:2/4">${desc}</span></div>` : ''}
+    ${est  ? `<div class="result-row"><span class="lbl">Estimator</span><span class="val" style="grid-column:2/4">${est}</span></div>` : ''}
+    ${dt   ? `<div class="result-row"><span class="lbl">Date</span><span class="val" style="grid-column:2/4">${dt}</span></div>` : ''}
+    <div class="result-row" style="margin-top:6px"><span class="lbl">Pricing Tier</span>
+      <span class="val" style="grid-column:2/4">${TIERS.find(t=>t.id===selectedTier).name} &mdash; GMaC ${tier.gmac}% / Comm ${tier.comm}%</span></div>
+  </div>`;
+
+  if (activeEquip.length === 0) {
+    html += `<div class="result-box"><p style="color:#888;font-size:13px">Select equipment types on the left to begin estimating.</p></div>`;
+    out.innerHTML = html;
+    return;
+  }
+
+  // per-equipment breakdown
+  activeEquip.forEach(e => {
+    const ec = equipCost(e.id);
+    const qty = equip[e.id].qty || 1;
+    const unitSP = salePrice(ec.total, tier.gmac, tier.comm);
+    const totalSP = unitSP * qty;
+    grandCost += ec.total * qty;
+
+    html += `<div class="result-box">
+      <h3>${e.label}${qty>1?' (×'+qty+')':''}</h3>
+      <div class="result-row"><span class="lbl">Materials</span><span class="val">${fmt(ec.mat)}</span><span class="unit"></span></div>
+      <div class="result-row"><span class="lbl">Labor</span><span class="val">${fmt(ec.labor)}</span><span class="unit"></span></div>
+      ${ec.freight ? `<div class="result-row"><span class="lbl">Freight</span><span class="val">${fmt(ec.freight)}</span><span class="unit"></span></div>` : ''}
+      <hr class="result-divider">
+      <div class="result-row"><span class="lbl">Unit Cost</span><span class="val result-total">${fmt(ec.total)}</span><span class="unit"></span></div>
+      <div class="result-row"><span class="lbl">Unit Sale Price</span><span class="val result-sale">${fmt(unitSP)}</span><span class="unit"></span></div>
+      ${qty>1 ? `<div class="result-row"><span class="lbl">Total Sale Price</span><span class="val result-sale">${fmt(totalSP)}</span><span class="unit"></span></div>` : ''}
+    </div>`;
+  });
+
+  // grand total
+  const grandSP = salePrice(grandCost, tier.gmac, tier.comm);
+  const gm = grandSP - grandCost;
+  html += `<div class="result-box" style="border-color:#003366">
+    <h3>Project Total</h3>
+    <div class="result-row"><span class="lbl">Total Cost</span><span class="val result-total">${fmt(grandCost)}</span><span class="unit"></span></div>
+    <div class="result-row"><span class="lbl">Gross Margin</span><span class="val">${fmt(gm)}</span><span class="unit">${pct(gm,grandSP)}</span></div>
+    <hr class="result-divider">
+    <div class="result-row"><span class="lbl" style="font-size:15px;font-weight:700">TOTAL SALE PRICE</span>
+      <span class="val result-sale" style="font-size:18px">${fmt(grandSP)}</span><span class="unit"></span></div>
+  </div>`;
+
+  out.innerHTML = html;
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+function v(id) { return document.getElementById(id)?.value?.trim()||''; }
+function fmt(n) { return '$'+(n||0).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+function pct(a,b) { return b ? '('+Math.round(a/b*100)+'%)' : ''; }
+
+function toggleSec(id) {
+  const body = document.getElementById(id);
+  const tog  = document.getElementById('tog-'+id.replace('sec-',''));
+  const collapsed = body.classList.toggle('collapsed');
+  tog.style.transform = collapsed ? '' : 'rotate(90deg)';
+}
+
+init();
+</script>
+</body>
+</html>
