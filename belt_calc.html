@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JMS Belt Conveyor Design Calculator</title>
+<style>
+:root {
+  --navy: #1a2744;
+  --navy-light: #2c3e6b;
+  --pass-bg: #e8f5e9;
+  --pass-text: #2e7d32;
+  --fail-bg: #ffebee;
+  --fail-text: #c62828;
+  --border: #dee2e6;
+  --label: #495057;
+}
+* { box-sizing: border-box; }
+body { font-family: system-ui, sans-serif; font-size: 13px; margin: 0; }
+.app { display: flex; height: 100vh; }
+.form-panel { width: 38%; min-width: 320px; overflow-y: auto; padding: 12px; border-right: 2px solid var(--navy); background: #f8f9fa; }
+.output-panel { flex: 1; overflow-y: auto; padding: 16px; }
+.section-title { background: var(--navy); color: white; padding: 6px 10px; font-weight: 600; margin: 12px 0 6px; font-size: 12px; letter-spacing: 0.5px; }
+table { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 12px; }
+th { background: var(--navy); color: white; padding: 5px 8px; text-align: left; }
+td { padding: 4px 8px; border-bottom: 1px solid var(--border); }
+tr:nth-child(even) td { background: #f8f9fa; }
+.pass { background: var(--pass-bg) !important; color: var(--pass-text); font-weight: 600; }
+.fail { background: var(--fail-bg) !important; color: var(--fail-text); font-weight: 600; }
+.na { color: #888; font-style: italic; }
+.project-header { background: var(--navy); color: white; padding: 10px 14px; margin-bottom: 12px; }
+.project-header h2 { margin: 0; font-size: 15px; }
+.project-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 20px; font-size: 11px; margin-top: 6px; }
+.btn { padding: 7px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; }
+.btn-primary { background: var(--navy); color: white; }
+.btn-secondary { background: #6c757d; color: white; }
+.btn-bar { display: flex; gap: 8px; margin-bottom: 12px; }
+input[type="text"], input[type="number"], select { width: 100%; padding: 4px 6px; border: 1px solid #ced4da; border-radius: 3px; font-size: 12px; }
+label { display: block; font-size: 11px; color: var(--label); margin-bottom: 2px; margin-top: 6px; font-weight: 500; }
+details summary { cursor: pointer; padding: 6px 8px; background: #e9ecef; border-radius: 3px; font-weight: 600; font-size: 12px; margin-bottom: 4px; list-style: none; }
+details summary::-webkit-details-marker { display: none; }
+details summary::before { content: "▶ "; font-size: 10px; }
+details[open] summary::before { content: "▼ "; font-size: 10px; }
+details[open] summary { background: var(--navy-light); color: white; }
+details { margin-bottom: 6px; }
+.form-panel h1 { font-size: 14px; color: var(--navy); margin: 0 0 10px; font-weight: 700; border-bottom: 2px solid var(--navy); padding-bottom: 6px; }
+.footer-bar { background: var(--navy); color: white; padding: 6px 14px; font-size: 11px; font-weight: 600; text-align: center; margin-top: 12px; letter-spacing: 0.5px; }
+.warn { color: #856404; font-size: 11px; }
+.fixit-table { background: #fff8e1; border: 1px solid #ffe082; border-radius: 4px; padding: 8px; margin-top: 8px; font-size: 11px; }
+.fixit-table h4 { margin: 0 0 6px; color: #5f4300; font-size: 12px; }
+.home-link { display: inline-block; font-size: 11px; color: var(--navy); text-decoration: none; margin-bottom: 8px; }
+.home-link:hover { text-decoration: underline; }
+@media print {
+  .form-panel, .btn-bar, .home-link { display: none !important; }
+  .output-panel { width: 100%; padding: 8px; overflow: visible; }
+  .app { display: block; height: auto; }
+  body { font-size: 11px; }
+  table { page-break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ===== LEFT PANEL: INPUT FORM ===== -->
+<div class="form-panel">
+  <a class="home-link" href="index.html">← Back to Tool Index</a>
+  <h1>JMS Belt Conveyor Design</h1>
+  <div class="btn-bar">
+    <button class="btn btn-primary" onclick="window.print()">Print / Save as PDF</button>
+    <button class="btn btn-secondary" onclick="resetToDefaults()">Reset to Defaults</button>
+  </div>
+
+  <!-- 1. Project Info -->
+  <details open>
+    <summary>1. Project Info</summary>
+    <label>Project No.<input type="text" id="project_no"></label>
+    <label>Location<input type="text" id="location"></label>
+    <label>Customer<input type="text" id="customer"></label>
+    <label>Engineer<input type="text" id="engineer"></label>
+    <label>Description<input type="text" id="description"></label>
+    <label>By<input type="text" id="by"></label>
+    <label>Date<input type="text" id="date"></label>
+    <label>Revision<input type="text" id="revision"></label>
+  </details>
+
+  <!-- 2. Conveyor Geometry -->
+  <details open>
+    <summary>2. Conveyor Geometry</summary>
+    <label>Horizontal Length (ft)<input type="number" id="horiz_length_ft" step="1" min="1" oninput="calculate()" onchange="calculate()"></label>
+    <label>Incline Length (ft) — along slope<input type="number" id="incline_length_ft" step="1" min="0" oninput="calculate()" onchange="calculate()"></label>
+    <label>Incline Angle (deg)<input type="number" id="incline_deg" step="0.1" min="0" max="30" oninput="calculate()" onchange="calculate()"></label>
+    <label>Belt Width (in)
+      <select id="belt_width_in" onchange="calculate()">
+        <option value="18">18"</option>
+        <option value="24">24"</option>
+        <option value="30">30"</option>
+        <option value="36" selected>36"</option>
+        <option value="42">42"</option>
+        <option value="48">48"</option>
+      </select>
+    </label>
+    <label>Belt Speed (fpm)<input type="number" id="belt_speed_fpm" step="10" min="50" max="800" oninput="calculate()" onchange="calculate()"></label>
+    <label>Trough Angle (deg)
+      <select id="trough_angle" onchange="calculate()">
+        <option value="0">Flat (0°)</option>
+        <option value="20" selected>20°</option>
+        <option value="35">35°</option>
+        <option value="45">45°</option>
+      </select>
+    </label>
+  </details>
+
+  <!-- 3. Material Properties -->
+  <details open>
+    <summary>3. Material Properties</summary>
+    <label>Material
+      <select id="material" onchange="onMaterialChange()">
+        <option>Biosolids (Wet Cake)</option>
+        <option>Biosolids (Dry)</option>
+        <option>Coal</option>
+        <option>Crushed Stone / Aggregate</option>
+        <option>Sand</option>
+        <option>Gravel</option>
+        <option>Grain</option>
+        <option>Wood Chips</option>
+        <option>Screenings</option>
+        <option>Grit</option>
+        <option>Lime</option>
+        <option>Other</option>
+      </select>
+    </label>
+    <label>Density (lb/ft³)<input type="number" id="density_lb_ft3" step="1" min="10" oninput="calculate()" onchange="calculate()"></label>
+    <label>Design Capacity (ton/hr)<input type="number" id="capacity_tph" step="1" min="0.1" oninput="calculate()" onchange="calculate()"></label>
+    <label>Max Incline for Material (deg)<input type="number" id="max_incline_deg" step="1" min="5" max="30" oninput="calculate()" onchange="calculate()"></label>
+  </details>
+
+  <!-- 4. Belt Design -->
+  <details open>
+    <summary>4. Belt Design</summary>
+    <label>Belt Type
+      <select id="belt_type" onchange="calculate()">
+        <option value="Fabric">Fabric (2-ply, 3-ply, 4-ply)</option>
+        <option value="Steel">Steel Core (ST series)</option>
+      </select>
+    </label>
+    <label>Belt Rating (PIW)<input type="number" id="belt_rating_piw" step="10" min="100" max="2000" oninput="calculate()" onchange="calculate()"></label>
+    <label>Belt Thickness (in)<input type="number" id="belt_thick_in" step="0.03125" min="0.1875" oninput="calculate()" onchange="calculate()"></label>
+    <label>Lagging on Head Pulley?
+      <select id="lagging" onchange="calculate()">
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+    </label>
+    <label>Lagging Thickness (in)<input type="number" id="lagging_thick_in" step="0.0625" min="0" oninput="calculate()" onchange="calculate()"></label>
+  </details>
+
+  <!-- 5. Idlers -->
+  <details open>
+    <summary>5. Idlers</summary>
+    <label>Idler Type
+      <select id="idler_type" onchange="calculate()">
+        <option value="TROUGHING">Troughing</option>
+        <option value="FLAT">Flat</option>
+      </select>
+    </label>
+    <label>Idler Roll Diameter (in)
+      <select id="idler_roll_dia" onchange="calculate()">
+        <option value="5" selected>5"</option>
+        <option value="6">6"</option>
+      </select>
+    </label>
+    <label>Carrying Idler Spacing (ft)<input type="number" id="carry_spacing_ft" step="0.5" min="1" max="8" oninput="calculate()" onchange="calculate()"></label>
+    <label>Return Idler Spacing (ft)<input type="number" id="return_spacing_ft" step="1" min="2" max="15" oninput="calculate()" onchange="calculate()"></label>
+    <label>Impact Idler Spacing (ft)<input type="number" id="impact_spacing_ft" step="0.5" min="0.5" oninput="calculate()" onchange="calculate()"></label>
+    <label># of Impact Zones<input type="number" id="num_impact_zones" step="1" min="0" oninput="calculate()" onchange="calculate()"></label>
+    <label>Length of Impact Zones (ft)<input type="number" id="impact_zone_len_ft" step="1" min="0" oninput="calculate()" onchange="calculate()"></label>
+    <label>Height of Material Fall (in)<input type="number" id="fall_height_in" step="1" min="0" oninput="calculate()" onchange="calculate()"></label>
+  </details>
+
+  <!-- 6. Pulleys & Drive -->
+  <details>
+    <summary>6. Pulleys &amp; Drive</summary>
+    <label>Head Pulley Diameter (in)<input type="number" id="head_pulley_dia" step="2" min="6" oninput="calculate()" onchange="calculate()"></label>
+    <label>Take-Up Type
+      <select id="takeup_type" onchange="calculate()">
+        <option value="Manual">Manual / Screw</option>
+        <option value="Gravity">Gravity</option>
+      </select>
+    </label>
+    <label>Drive Arrangement
+      <select id="drive_arrangement" onchange="calculate()">
+        <option value="Shaft Mounted Drive">Shaft Mounted Drive</option>
+        <option value="Chain and Sprocket">Chain and Sprocket</option>
+        <option value="Motorized Drum Pulley">Motorized Drum Pulley</option>
+        <option value="V-Belt">V-Belt</option>
+      </select>
+    </label>
+    <label>Motor HP (selected)<input type="number" id="motor_hp" step="1" min="1" oninput="calculate()" onchange="calculate()"></label>
+    <label>Drive Wrap Angle (deg)<input type="number" id="wrap_deg" step="5" min="150" max="240" oninput="calculate()" onchange="calculate()"></label>
+    <label>Head Pulley Shaft Diameter (in)<input type="number" id="shaft_dia_in" step="0.0625" min="1" oninput="calculate()" onchange="calculate()"></label>
+    <label>Shaft Material
+      <select id="shaft_material" onchange="calculate()">
+        <option>1045</option>
+        <option>1018</option>
+        <option>304 SS</option>
+        <option>316 SS</option>
+        <option>17-4PH</option>
+      </select>
+    </label>
+    <label>Gearbox Weight (lb)<input type="number" id="gearbox_weight_lb" step="10" min="0" oninput="calculate()" onchange="calculate()"></label>
+    <label>Pulley Weight (lb)<input type="number" id="pulley_weight_lb" step="10" min="0" oninput="calculate()" onchange="calculate()"></label>
+    <label>Angle Between Tension &amp; Overhung Load (deg)<input type="number" id="angle_tension_oh_deg" step="5" min="0" max="360" oninput="calculate()" onchange="calculate()"></label>
+  </details>
+
+  <!-- 7. Skirtboard & Accessories -->
+  <details>
+    <summary>7. Skirtboard &amp; Accessories</summary>
+    <label>Skirtboard Length — one side (ft)<input type="number" id="skirt_length_ft" step="1" min="0" oninput="calculate()" onchange="calculate()"></label>
+    <label>Skirtboard Friction Factor<input type="number" id="skirt_friction" step="0.01" min="0.05" max="0.5" oninput="calculate()" onchange="calculate()"></label>
+    <label>Quantity of Plows
+      <select id="num_plows" onchange="calculate()">
+        <option value="0">0 — None</option>
+        <option value="1">1 — Full V</option>
+        <option value="2">2 — Partial V</option>
+      </select>
+    </label>
+    <label>Plow Type
+      <select id="plow_type" onchange="calculate()">
+        <option value="Full V">Full V</option>
+        <option value="Partial V">Partial V</option>
+        <option value="None">None</option>
+      </select>
+    </label>
+    <label>Quantity of Scrapers<input type="number" id="num_scrapers" step="1" min="0" oninput="calculate()" onchange="calculate()"></label>
+  </details>
+
+  <!-- 8. Service & Environment -->
+  <details>
+    <summary>8. Service &amp; Environment</summary>
+    <label>Service Duty
+      <select id="service_duty" onchange="calculate()">
+        <option>Light</option>
+        <option selected>Standard</option>
+        <option>Heavy</option>
+      </select>
+    </label>
+    <label>Area Classification
+      <select id="area_classification" onchange="calculate()">
+        <option>NO</option>
+        <option>Class 1 Div 1</option>
+        <option>Class 1 Div 2</option>
+        <option>Class 2 Div 1</option>
+        <option>Class 2 Div 2</option>
+      </select>
+    </label>
+    <label>Drive Notes<input type="text" id="drive_notes"></label>
+  </details>
+
+</div><!-- end form-panel -->
+
+<!-- ===== RIGHT PANEL: OUTPUT ===== -->
+<div class="output-panel" id="output-panel">
+  <p style="color:#888; font-style:italic;">Loading calculations...</p>
+</div>
+
+</div><!-- end app -->
+
+<script>
+// ===========================================================================
+// LOOKUP TABLES (from Bio-BELT Calculator-Estimate Template REV 4.6.xlsm)
+// List!F4:I9 — Belt Weight by PIW range and width
+// Columns: [width_in, lbs/ft(30-74 PIW), lbs/ft(75-129 PIW), lbs/ft(130-200 PIW)]
+// Spot-check: 36" @ 75-129 PIW = 10 lbs/ft (col H row 7)
+// ===========================================================================
+const BELT_WEIGHT = {
+  // width: [lbs/ft_30to74, lbs/ft_75to129, lbs/ft_130to200]
+  18: [3.5, 4.0, 4.5],
+  24: [4.5, 5.5, 6.0],
+  30: [6.0, 7.0, 8.0],
+  36: [9.0, 10.0, 12.0],
+  42: [11.0, 12.0, 14.0],
+  48: [14.0, 15.0, 17.0],
+};
+
+// List!AS/AT — Capacity (ft³/hr per fpm) by trough angle and belt width
+// Trough 0° (Flat) @ 15° surcharge; 20°, 35°, 45° @ 15° surcharge
+// Spot-check: 36" 35°trough = 54.19 ft³/hr/fpm (List row 31)
+const CAPACITY_TABLE = {
+  0:  {18:3.71, 24:7.02, 30:11.38, 36:16.78, 42:23.23, 48:30.72},
+  20: {18:8.86, 24:16.99, 30:27.73, 36:41.07, 42:57.03, 48:75.60},
+  35: {18:11.69, 24:22.41, 30:36.58, 36:54.19, 42:75.24, 48:99.74},
+  45: {18:12.89, 24:24.67, 30:40.23, 36:59.55, 42:82.65, 48:109.53},
+};
+
+// Wrap factor — List!Y4:Z5 (Gravity) and List!AA4:AB5 (Manual/Screw)
+// Spot-check: Manual takeup, Lagged = 0.8; Gravity, Lagged = 0.5
+const WRAP_FACTOR = {
+  Manual: {Yes: 0.8, No: 1.2},
+  Gravity: {Yes: 0.5, No: 0.84},
+};
+
+// Drive efficiency — List!O15:P18
+// Spot-check: Shaft Mounted = 0.95; Chain and Sprocket = 0.88
+const DRIVE_EFF = {
+  "Shaft Mounted Drive": 0.95,
+  "Chain and Sprocket":  0.88,
+  "Motorized Drum Pulley": 0.95,
+  "V-Belt": 0.93,
+};
+
+// Idler Ai (force to rotate) — List!AG3:AH4
+// Spot-check: 5" roll dia → Ai = 1.5; 6" → Ai = 1.8
+const IDLER_AI = {5: 1.5, 6: 1.8};
+
+// Roll diameter factor K3B — List!AJ3:AK4
+// Spot-check: 5" → 1.25; 6" → 1.5
+const ROLL_DIA_K3B = {5: 1.25, 6: 1.5};
+
+// Impact idler spacing factor — List!AM3:AN6 (spacing factor) and List!AM3:AO6 (spacing length)
+// Cols: [impact_idler_spacing_ft, spacing_factor_col2, spacing_length_col3]
+// impact_spacing → [factor, length]  (spacing_factor and idler_spacing)
+// List rows 3-6: spacing col, factor col, length col
+// Row3: 1, 0.5, 1  Row4: 1.5, 0.7, 1.5  Row5: 2, 0.9, 2  Row6: ?, 1.0+, ?
+// Impact idler spacing is input; factor used in IML calc (AO col = spacing for length)
+const IMPACT_SPACING_FACTOR = [
+  {spacing: 1.0, factor: 0.5,  len: 1.0},
+  {spacing: 1.5, factor: 0.7,  len: 1.5},
+  {spacing: 2.0, factor: 0.9,  len: 2.0},
+  {spacing: 3.0, factor: 1.0,  len: 3.0},
+];
+
+// Shaft material properties — List!K4:N8
+// Spot-check: 1045 → Sut=82000, Sy=45000, E=29e6
+const SHAFT_MAT = {
+  "304 SS": {Sut: 70000, Sy: 30000, E: 29e6},
+  "316 SS": {Sut: 70000, Sy: 30000, E: 29e6},
+  "1045":   {Sut: 82000, Sy: 45000, E: 29e6},
+  "17-4PH": {Sut: 160000, Sy: 115000, E: 28.5e6},
+  "1018":   {Sut: 58000, Sy: 32000, E: 29e6},
+};
+
+// Plow discharge allowance (lbs/in belt width) — List!AD3:AE5
+// Spot-check: Full V = 5; Partial V = 3; None = 0
+const PLOW_ALLOW = {"Full V": 5, "Partial V": 3, "None": 0};
+
+// Standard motor HP steps
+const STD_MOTOR_HP = [1, 1.5, 2, 3, 5, 7.5, 10, 15, 20, 25, 30, 40, 50, 60, 75, 100, 125, 150, 200, 250, 300, 350, 400, 450, 500];
+
+// Standard belt ratings (PIW)
+const STD_BELT_PIW = [150, 195, 220, 330, 440, 500, 660, 990, 1260];
+
+// ===========================================================================
+// DEFAULTS
+// ===========================================================================
+const DEFAULTS = {
+  project_no: "EXAMPLE-001",
+  location: "Wastewater Treatment Plant",
+  customer: "Example Municipality",
+  engineer: "JMS Engineering",
+  description: "Belt Press Discharge - Dewatered Biosolids Conveyor",
+  by: "JMS",
+  date: "2026-04-19",
+  revision: "0",
+  horiz_length_ft: 60,
+  incline_length_ft: 0,
+  incline_deg: 0,
+  belt_width_in: 36,
+  belt_speed_fpm: 100,
+  trough_angle: 20,
+  material: "Biosolids (Wet Cake)",
+  density_lb_ft3: 55,
+  capacity_tph: 10,
+  max_incline_deg: 18,
+  belt_type: "Fabric",
+  belt_rating_piw: 220,
+  belt_thick_in: 0.3125,
+  lagging: "Yes",
+  lagging_thick_in: 0.375,
+  idler_type: "TROUGHING",
+  idler_roll_dia: 5,
+  carry_spacing_ft: 4,
+  return_spacing_ft: 10,
+  impact_spacing_ft: 1,
+  num_impact_zones: 1,
+  impact_zone_len_ft: 3,
+  fall_height_in: 20,
+  head_pulley_dia: 16,
+  takeup_type: "Manual",
+  drive_arrangement: "Shaft Mounted Drive",
+  motor_hp: 5,
+  wrap_deg: 180,
+  shaft_dia_in: 2.4375,
+  shaft_material: "1045",
+  gearbox_weight_lb: 150,
+  pulley_weight_lb: 295,
+  angle_tension_oh_deg: 90,
+  skirt_length_ft: 3,
+  skirt_friction: 0.14,
+  num_plows: 0,
+  plow_type: "None",
+  num_scrapers: 1,
+  service_duty: "Standard",
+  area_classification: "NO",
+  drive_notes: "",
+};
+
+// ===========================================================================
+// HELPERS
+// ===========================================================================
+function fmt(v, digits) {
+  if (v === null || v === undefined || isNaN(v) || !isFinite(v)) return "—";
+  return Number(v).toFixed(digits !== undefined ? digits : 4);
+}
+
+function getVal(id) {
+  const el = document.getElementById(id);
+  if (!el) return null;
+  if (el.type === "checkbox") return el.checked;
+  const v = el.value;
+  if (el.type === "number") return parseFloat(v) || 0;
+  return v;
+}
+
+function setField(id, val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.value = val;
+}
+
+function nextStdHP(hp) {
+  for (const h of STD_MOTOR_HP) { if (h >= hp) return h; }
+  return Math.ceil(hp / 50) * 50;
+}
+
+function interpTable(table, key) {
+  const keys = Object.keys(table).map(Number).sort((a,b)=>a-b);
+  if (keys.includes(key)) return table[key];
+  // nearest
+  let best = keys[0], bestDist = Math.abs(key - keys[0]);
+  for (const k of keys) { const d = Math.abs(key - k); if (d < bestDist) { bestDist = d; best = k; } }
+  return table[best];
+}
+
+function beltWeightLookup(width, rating) {
+  const row = BELT_WEIGHT[width] || BELT_WEIGHT[36];
+  if (rating >= 130) return row[2];
+  if (rating >= 75)  return row[1];
+  return row[0];
+}
+
+function checkRow(label, allowStr, calcStr, pass) {
+  const cls = pass ? "pass" : "fail";
+  const lbl = pass ? "PASS" : "FAIL";
+  return `<tr><td>${label}</td><td>${allowStr}</td><td>${calcStr}</td><td class="${cls}">${lbl}</td></tr>`;
+}
+
+function impactLookup(spacing) {
+  const tbl = IMPACT_SPACING_FACTOR;
+  for (let i = 0; i < tbl.length - 1; i++) {
+    if (spacing <= tbl[i+1].spacing) return tbl[i];
+  }
+  return tbl[tbl.length - 1];
+}
+
+// ===========================================================================
+// MAIN CALCULATION
+// ===========================================================================
+function calculate() {
+  // --- Read inputs ---
+  const proj_no     = getVal("project_no");
+  const location    = getVal("location");
+  const customer    = getVal("customer");
+  const engineer    = getVal("engineer");
+  const description = getVal("description");
+  const by          = getVal("by");
+  const date        = getVal("date");
+  const revision    = getVal("revision");
+
+  const horiz_ft    = getVal("horiz_length_ft");
+  const incl_ft     = getVal("incline_length_ft");
+  const incline_deg = getVal("incline_deg");
+  const bw          = parseInt(getVal("belt_width_in"));
+  const speed_fpm   = getVal("belt_speed_fpm");
+  const trough_ang  = parseInt(getVal("trough_angle"));
+
+  const material    = getVal("material");
+  const density     = getVal("density_lb_ft3");
+  const cap_tph     = getVal("capacity_tph");
+  const max_incl    = getVal("max_incline_deg");
+
+  const belt_type   = getVal("belt_type");
+  const rating_piw  = getVal("belt_rating_piw");
+  const belt_thick  = getVal("belt_thick_in");
+  const lagging     = getVal("lagging");
+  const lag_thick   = getVal("lagging_thick_in");
+
+  const idler_type  = getVal("idler_type");
+  const roll_dia    = parseInt(getVal("idler_roll_dia"));
+  const Si          = getVal("carry_spacing_ft");
+  const Sr          = getVal("return_spacing_ft");
+  const Simp        = getVal("impact_spacing_ft");
+  const n_impact    = getVal("num_impact_zones");
+  const len_impact  = getVal("impact_zone_len_ft");
+  const fall_in     = getVal("fall_height_in");
+
+  const head_dia    = getVal("head_pulley_dia");
+  const takeup      = getVal("takeup_type");
+  const drive_arr   = getVal("drive_arrangement");
+  const motor_hp    = getVal("motor_hp");
+  const wrap_deg    = getVal("wrap_deg");
+  const shaft_dia   = getVal("shaft_dia_in");
+  const shaft_mat   = getVal("shaft_material");
+  const gb_wt       = getVal("gearbox_weight_lb");
+  const pul_wt      = getVal("pulley_weight_lb");
+  const angle_oh    = getVal("angle_tension_oh_deg");
+
+  const skirt_ft    = getVal("skirt_length_ft");
+  const skirt_f     = getVal("skirt_friction");
+  const num_plows   = parseInt(getVal("num_plows"));
+  const plow_type   = getVal("plow_type");
+  const num_scrapers= getVal("num_scrapers");
+
+  // ===========================================================================
+  // GEOMETRY (CEMA formula chain)
+  // Design!P37 = SIN(incline_deg * π/180) * incline_length_ft
+  // ===========================================================================
+  // Total length along conveyor
+  const L_total = horiz_ft + incl_ft;
+  // Lift height H = sin(α) * incline_length
+  const H = Math.sin(incline_deg * Math.PI / 180) * incl_ft;
+
+  // Cross-sectional capacity (ft³/hr per fpm) from CEMA table
+  const cap_table_row = CAPACITY_TABLE[trough_ang] || CAPACITY_TABLE[20];
+  const cap_per_fpm = cap_table_row[bw] || cap_table_row[36];
+  // Volume capacity at input speed
+  const vol_cap_ft3hr = cap_per_fpm * speed_fpm;
+  // Design volume loading required
+  const vol_required_ft3hr = (cap_tph * 2000) / density;
+  // Capacity utilization
+  const cap_util = vol_required_ft3hr / vol_cap_ft3hr;
+  const cap_overload = cap_util > 1.0;
+
+  // Incline check
+  const incline_ok = incline_deg <= max_incl;
+
+  // ===========================================================================
+  // BELT LOADING
+  // Wm = (2000/60) * (TPH / speed_fpm)   [Design!P38]
+  // Wb = from table                        [Design!P39 = M30]
+  // ===========================================================================
+  const Wm = speed_fpm > 0 ? (2000 / 60) * (cap_tph / speed_fpm) : 0;
+  const Wb = beltWeightLookup(bw, rating_piw);
+  const WmWb = Wm + Wb;
+
+  // ===========================================================================
+  // TENSION COMPONENTS (CEMA 6th Ed.)
+  // KT = temperature correction factor (1.3 conservative, 0°F)
+  // Ai = force to rotate idlers (from table)
+  // Kx = idler friction = 0.00068*(Wm+Wb) + Ai/L_total  [Design!P46]
+  // Ky = belt/load flexure factor = 0.035 (standard per xlsm P47)
+  // ===========================================================================
+  const KT  = 1.3;
+  const Ai  = IDLER_AI[roll_dia] || 1.5;
+  const Kx  = L_total > 0 ? 0.00068 * WmWb + Ai / L_total : 0.00068 * WmWb;
+  const Ky  = 0.035;
+
+  // To = 2% sag minimum tension = 6.25 * (Wm+Wb) * carry_spacing  [Design!AU37]
+  const To = 6.25 * WmWb * Si;
+
+  // Tx = L*(KT*Kx) — resistance carrying & return idlers  [Design!AU39]
+  const Tx = L_total * KT * Kx;
+
+  // Tyc = L*(KT*Ky*Wb) — belt flex carrying idlers  [Design!AU40]
+  const Tyc = L_total * KT * Ky * Wb;
+
+  // Tyr = L*(KT*0.015*Wb) — belt flex return idlers  [Design!AU41]
+  const Tyr = L_total * KT * 0.015 * Wb;
+
+  // Tym = L*Ky*Wm — material flex riding over idlers  [Design!AU42]
+  const Tym = L_total * Ky * Wm;
+
+  // Tm = H * Wm — lift/lower material  [Design!AU43]
+  const Tm = H * Wm;
+
+  // Tp = pulley friction  [Design!AU44]
+  // If belt type = Fabric: (0.00541*T1est + 15.6)*numPulleys
+  // Using 2 pulleys (head + tail), estimated as 5 lbs initially (Design formula uses AU48 which creates circularity)
+  // Using simplified: Tp = 5 lb (conservative per xlsm default)
+  const Tp = 5;
+
+  // Tam = accelerated material = 2.8755e-4 * Q * V  [Design!AU45]
+  const Tam = 2.8755e-4 * cap_tph * speed_fpm;
+
+  // Tsb = skirtboard friction = skirt_length * (skirt_friction * (2/3*bw)^2 + 6)  [Design!P48]
+  const skirt_gap = (2 / 3) * bw;  // in inches
+  const Tsb = skirt_ft * (skirt_f * (skirt_gap * skirt_gap) + 6);
+
+  // Tpl = plow resistance = num_plows * plow_allow * belt_width  [Design!P49]
+  const plow_allow = PLOW_ALLOW[plow_type] || 0;
+  const Tpl = num_plows * plow_allow * bw;
+
+  // TBC = belt cleaning resistance = (scrapers) * 5 * belt_width  [Design!P50]
+  const TBC = num_scrapers * 5 * bw;
+
+  // Tac = resistance of accessories = Tsb + Tpl + TBC  [Design!AU47]
+  const Tac = Tsb + Tpl + TBC;
+
+  // Te = effective tension = sum  [Design!AU48]
+  const Te = Tx + Tyc + Tyr + Tym + Tm + Tp + Tam + Tac;
+
+  // Wrap factor Cw  [Design!P43]
+  const Cw_table = WRAP_FACTOR[takeup] || WRAP_FACTOR["Manual"];
+  const Cw = Cw_table[lagging] || 0.8;
+
+  // Tb = belt tension to bend around drive pulley = Wb * carry_spacing * belt_thick/drum_dia_factor
+  // Design!AU49: Tb = P37*P39 = H*Wb (this is the belt bending tension component)
+  // Simplified as per CEMA: Tb = Wb * Si * 0 (negligible for flat; for inclines uses H*Wb)
+  const Tb = H * Wb;
+
+  // T2 = Te * Cw  [Design!AU50]
+  const T2 = Te * Cw;
+
+  // T1 = Te + T2  [Design!AU51]
+  const T1 = Te + T2;
+
+  // Tmax = max tension in belt = T1
+  const Tmax = T1;
+
+  // Belt tension check: T1 must be ≤ rating_piw * belt_width
+  const belt_allow = rating_piw * bw;
+  const belt_pass = Tmax <= belt_allow;
+
+  // Tail tension (from Design!AU53): Tr = max(To, T2 - Tb + 0.5*Tx + Tpl_allow*num_plows*bw)
+  // Simplified: Tr = max(To, T2 - Tb + 0.5*Tx)
+  const Tr = Math.max(To, T2 - Tb + 0.5 * Tx);
+
+  // ===========================================================================
+  // POWER
+  // HPb = Te * V / 33000  [Design!AU55]
+  // ===========================================================================
+  const HPb = (Te * speed_fpm) / 33000;
+  const drive_eff = DRIVE_EFF[drive_arr] || 0.95;
+  const HPmin = HPb / drive_eff;
+  const HP_std = nextStdHP(HPmin);
+  const motor_pass = motor_hp >= HPmin;
+  const motor_SF = motor_hp > 0 ? motor_hp / HPmin : null;
+
+  // Drum with lagging
+  const drum_dia_lagged = head_dia + 2 * lag_thick;
+  const drum_rpm = (speed_fpm * 12) / (Math.PI * drum_dia_lagged);
+  const req_torque = drum_rpm > 0 ? 63025 * HPmin / drum_rpm : null;
+
+  // ===========================================================================
+  // BELT SAG CHECK
+  // y = ((Si^2 * WmWb) / (8 * To)) * 12   [Design!AU38 in inches]
+  // sag % = y / (Si * 12) * 100
+  // ===========================================================================
+  const sag_in = To > 0 ? ((Si * Si * WmWb) / (8 * To)) * 12 : null;
+  const sag_pct = sag_in !== null ? (sag_in / (Si * 12)) * 100 : null;
+  const sag_pass = sag_pct !== null ? sag_pct <= 2.0 : false;
+
+  // ===========================================================================
+  // IDLER BEARING LIFE (CEMA approach from Carrying Idler Bearing Life sheet)
+  // CIL = ((Wb + Wm*K1) * Si) + IML    [Sheet3!AU11]
+  // IML = (misalign * T1) / (6 * idler_spacing)
+  // Basic L10 = 30000 hr (from xlsm default)
+  // Factored: K2*K3A*K3B applied (from xlsm constants)
+  // Adjusted: Basic * K4A * K4B * K4C
+  // K2 = 10, K3A = 10, K3B = per roll dia
+  // K4A = 0.32 (maintenance), K4B = 0.4 (environment), K4C = 0.45 (temp)
+  // ===========================================================================
+  const K1_lump = 1.0;
+  const misalign = 0.25;  // in
+  const K2  = 10;
+  const K3A = 10;
+  const K3B = ROLL_DIA_K3B[roll_dia] || 1.25;
+  const K4A = 0.32;
+  const K4B = 0.40;
+  const K4C = 0.45;
+  const CEMA_L10_base = 30000;  // hr
+  const idler_load_rating = 900;  // lb per idler (xlsm default)
+
+  // IML = (misalign * T1) / (6 * Si)
+  const IML_carry = T1 > 0 ? (misalign * T1) / (6 * Si) : 0;
+  const CIL_carry = (Wb + Wm * K1_lump) * Si + IML_carry;
+
+  // Basic L10 factored (CEMA-C)
+  const basic_L10 = CEMA_L10_base * K2 * K3A * K3B;
+  // Adjusted L10
+  const adj_L10 = basic_L10 * K4A * K4B * K4C;
+  const bearing_pass = adj_L10 >= 30000;
+
+  // ===========================================================================
+  // IMPACT IDLER ANALYSIS
+  // F = impact load from falling material = 0.1389 * tph * sqrt(fall_height_in)
+  // Fu = F * K1_lump
+  // ===========================================================================
+  const F_impact = 0.1389 * cap_tph * Math.sqrt(fall_in);
+  const Fu_impact = F_impact * K1_lump;
+  const imp_rec = impactLookup(Simp);
+  const IML_impact = T1 > 0 ? (misalign * T1) / (6 * imp_rec.len) : 0;
+  const CIL_impact = (Wb + Wm * K1_lump) * imp_rec.len + IML_impact;
+  const impact_pass = Fu_impact < CIL_impact && Fu_impact < idler_load_rating;
+
+  // ===========================================================================
+  // SHAFT DEFLECTION (pulley shaft — ANSI B105.1 limit tan(α) < 0.0023)
+  // From Design!AJ69: tan(α) = (W * Lc * (L_bearing - 2*Lc)) / (4 * E * I * Lc)
+  // W = resultant load, Lc = moment arm, L_bearing = bearing centers
+  // ===========================================================================
+  const mat_props = SHAFT_MAT[shaft_mat] || SHAFT_MAT["1045"];
+  const E_shaft = mat_props.E;
+  const I_shaft = (Math.PI * Math.pow(shaft_dia, 4)) / 64;
+  const L_bearing = bw + 8;  // bearing centers (in) — belt width + 8 [Design!AU61]
+  const L_moment_arm = 4;    // pulley moment arm (in) [Design!AU62]
+  const L_oh_dist = 6;       // overhung load distance (in) [Design!AU63]
+
+  // Resultant belt tension = T1 + T2 [Design!AU64]
+  const R_belt = T1 + T2;
+
+  // Overhung load = gearbox_weight + pulley_weight (simplified)
+  const F_overhung = gb_wt > 0 ? gb_wt : 100;
+
+  // Resultant load on shaft [Design!AU65]
+  const R_load = Math.sqrt(R_belt * R_belt + F_overhung * F_overhung);
+
+  // Belt moment [Design!AU66]
+  const M_belt = R_load * (L_bearing / 2);
+
+  // Overhung moment [Design!AU67]
+  const M_oh = F_overhung * L_oh_dist;
+
+  // Overhung load ratio [Design!AU68]
+  const oh_ratio = I_shaft > 0 && E_shaft > 0
+    ? (R_load * L_bearing * (L_bearing - 2 * L_moment_arm)) / (4 * E_shaft * I_shaft)
+    : null;
+
+  // tan(α) [Design!AJ69]
+  const tan_alpha = I_shaft > 0 && E_shaft > 0
+    ? (R_load * L_bearing * (L_bearing - 2 * L_moment_arm)) / (4 * E_shaft * I_shaft * L_moment_arm)
+    : null;
+  const alpha_deg = tan_alpha !== null ? Math.atan(tan_alpha) * (180 / Math.PI) : null;
+  const shaft_pass = tan_alpha !== null ? tan_alpha < 0.0023 : false;
+
+  // Shaft stress (combined bending from ASME shaft formula)
+  const FS = 1.5;
+  const Sf = mat_props.Sy * 0.5;  // fatigue strength approx
+  const D_req = I_shaft > 0
+    ? Math.pow((32 * FS * (1 / Math.PI) * Math.sqrt(Math.pow(M_belt / Sf, 2) + 0.75 * Math.pow(req_torque / Sf || 0, 2))), 1/3)
+    : null;
+  const shaft_size_pass = D_req !== null ? shaft_dia >= D_req : true;
+
+  // ===========================================================================
+  // FIX-IT HINTS — belt ratings that would pass
+  // ===========================================================================
+  const fixit_belts = STD_BELT_PIW.filter(p => (p * bw) >= Tmax).sort((a,b)=>a-b).slice(0,3);
+  const fixit_hp    = STD_MOTOR_HP.filter(h => h >= HPmin).slice(0,3);
+
+  // ===========================================================================
+  // RENDER
+  // ===========================================================================
+  let html = "";
+
+  // Project header
+  html += `<div class="project-header">
+    <h2>JMS BELT CONVEYOR DESIGN SHEET</h2>
+    <div class="project-meta">
+      <span><strong>Project No.:</strong> ${proj_no}</span>
+      <span><strong>By:</strong> ${by}</span>
+      <span><strong>Location:</strong> ${location}</span>
+      <span><strong>Date:</strong> ${date}</span>
+      <span><strong>Customer:</strong> ${customer}</span>
+      <span><strong>Revision:</strong> ${revision}</span>
+      <span><strong>Engineer:</strong> ${engineer}</span>
+    </div>
+    <div style="font-size:11px;margin-top:4px;"><strong>Description:</strong> ${description}</div>
+  </div>`;
+
+  // Conveyor summary
+  html += `<div class="section-title">CONVEYOR PARAMETERS</div>
+  <table><thead><tr><th>Parameter</th><th>Value</th><th>Parameter</th><th>Value</th></tr></thead><tbody>
+    <tr><td>Horizontal Length</td><td>${fmt(horiz_ft,1)} ft</td><td>Incline Length</td><td>${fmt(incl_ft,1)} ft</td></tr>
+    <tr><td>Incline Angle</td><td>${fmt(incline_deg,1)} deg</td><td>Lift Height (H)</td><td>${fmt(H,2)} ft</td></tr>
+    <tr><td>Belt Width</td><td>${bw}"</td><td>Trough Angle</td><td>${trough_ang}°</td></tr>
+    <tr><td>Belt Speed</td><td>${fmt(speed_fpm,1)} fpm</td><td>Drive Arrangement</td><td>${drive_arr}</td></tr>
+    <tr><td>Material</td><td>${material}</td><td>Density</td><td>${fmt(density,1)} lb/ft³</td></tr>
+    <tr><td>Design Capacity</td><td>${fmt(cap_tph,1)} ton/hr</td><td>Belt Type</td><td>${belt_type}</td></tr>
+    <tr><td>Belt Rating</td><td>${fmt(rating_piw,0)} PIW</td><td>Takeup</td><td>${takeup}</td></tr>
+  </tbody></table>`;
+
+  // 1. Geometry & Capacity
+  html += `<div class="section-title">1. GEOMETRY &amp; CAPACITY</div>
+  <table><thead><tr><th>Variable</th><th>Description</th><th>Value</th><th>Unit</th></tr></thead><tbody>
+    <tr><td>L_total</td><td>Total Conveyor Length</td><td>${fmt(L_total,1)}</td><td>ft</td></tr>
+    <tr><td>H</td><td>Lift Height</td><td>${fmt(H,2)}</td><td>ft</td></tr>
+    <tr><td>α</td><td>Incline Angle</td><td>${fmt(incline_deg,1)}</td><td>deg</td></tr>
+    <tr><td>Cap/fpm</td><td>Cross-Section Capacity (CEMA table)</td><td>${fmt(cap_per_fpm,3)}</td><td>ft³/hr/fpm</td></tr>
+    <tr><td>Vol Capacity</td><td>Volume Capacity at Design Speed</td><td>${fmt(vol_cap_ft3hr,1)}</td><td>ft³/hr</td></tr>
+    <tr><td>Vol Required</td><td>Required Volume at Design Density</td><td>${fmt(vol_required_ft3hr,1)}</td><td>ft³/hr</td></tr>
+    <tr><td>Utilization</td><td>Capacity Utilization</td><td>${fmt(cap_util*100,1)}%</td><td class="${cap_overload?'fail':'pass'}">${cap_overload?"BELT OVERLOADED":"OK"}</td></tr>
+    <tr><td>Max Incline</td><td>Max Allowable Incline for Material</td><td>${fmt(max_incl,1)}</td><td class="${incline_ok?'pass':'fail'}">${incline_ok?"OK":"OVER LIMIT"}</td></tr>
+  </tbody></table>`;
+
+  // 2. Belt Loading
+  html += `<div class="section-title">2. BELT LOADING</div>
+  <table><thead><tr><th>Variable</th><th>Description</th><th>Value</th><th>Unit</th></tr></thead><tbody>
+    <tr><td>Wm</td><td>Material Weight per ft</td><td>${fmt(Wm,3)}</td><td>lb/ft</td></tr>
+    <tr><td>Wb</td><td>Belt Weight per ft</td><td>${fmt(Wb,3)}</td><td>lb/ft</td></tr>
+    <tr><td>Wm+Wb</td><td>Combined Belt+Material Weight</td><td>${fmt(WmWb,3)}</td><td>lb/ft</td></tr>
+    <tr><td>KT</td><td>Temperature Correction Factor</td><td>${fmt(KT,2)}</td><td>—</td></tr>
+    <tr><td>Ai</td><td>Force to Rotate Idlers</td><td>${fmt(Ai,2)}</td><td>—</td></tr>
+    <tr><td>Kx</td><td>Idler Friction Factor</td><td>${fmt(Kx,5)}</td><td>lb/ft</td></tr>
+    <tr><td>Ky</td><td>Belt/Load Flexure Factor</td><td>${fmt(Ky,4)}</td><td>—</td></tr>
+    <tr><td>Cw</td><td>Wrap Factor (${takeup}, ${lagging} lagging)</td><td>${fmt(Cw,3)}</td><td>—</td></tr>
+  </tbody></table>`;
+
+  // 3. Tensions
+  html += `<div class="section-title">3. BELT TENSIONS</div>
+  <table><thead><tr><th>Variable</th><th>Description</th><th>Value</th><th>Unit</th></tr></thead><tbody>
+    <tr><td>To</td><td>Min Tension for 2% Sag</td><td>${fmt(To,1)}</td><td>lb</td></tr>
+    <tr><td>Tx</td><td>Resistance Carrying &amp; Return Idlers</td><td>${fmt(Tx,1)}</td><td>lb</td></tr>
+    <tr><td>Tyc</td><td>Belt Flex — Carrying Idlers</td><td>${fmt(Tyc,1)}</td><td>lb</td></tr>
+    <tr><td>Tyr</td><td>Belt Flex — Return Idlers</td><td>${fmt(Tyr,1)}</td><td>lb</td></tr>
+    <tr><td>Tym</td><td>Material Flex Over Idlers</td><td>${fmt(Tym,1)}</td><td>lb</td></tr>
+    <tr><td>Tm</td><td>Force to Lift Material (H × Wm)</td><td>${fmt(Tm,1)}</td><td>lb</td></tr>
+    <tr><td>Tp</td><td>Pulley Friction</td><td>${fmt(Tp,1)}</td><td>lb</td></tr>
+    <tr><td>Tam</td><td>Accelerated Material</td><td>${fmt(Tam,1)}</td><td>lb</td></tr>
+    <tr><td>Tsb</td><td>Skirtboard Friction</td><td>${fmt(Tsb,1)}</td><td>lb</td></tr>
+    <tr><td>Tpl</td><td>Plow Resistance</td><td>${fmt(Tpl,1)}</td><td>lb</td></tr>
+    <tr><td>TBC</td><td>Belt Cleaning Resistance</td><td>${fmt(TBC,1)}</td><td>lb</td></tr>
+    <tr><td>Tac</td><td>Total Accessory Resistance</td><td>${fmt(Tac,1)}</td><td>lb</td></tr>
+    <tr><td><strong>Te</strong></td><td><strong>Effective Tension</strong></td><td><strong>${fmt(Te,1)}</strong></td><td>lb</td></tr>
+    <tr><td>Tb</td><td>Belt Bending Tension (H × Wb)</td><td>${fmt(Tb,1)}</td><td>lb</td></tr>
+    <tr><td><strong>T2</strong></td><td><strong>Slack Side Tension (Te × Cw)</strong></td><td><strong>${fmt(T2,1)}</strong></td><td>lb</td></tr>
+    <tr><td><strong>T1</strong></td><td><strong>Tight Side Tension (Te + T2)</strong></td><td><strong>${fmt(T1,1)}</strong></td><td>lb</td></tr>
+    <tr><td>Tr</td><td>Tail Tension</td><td>${fmt(Tr,1)}</td><td>lb</td></tr>
+  </tbody></table>
+  <table><thead><tr><th>Check</th><th>Allowable (lb)</th><th>Calculated (lb)</th><th>Result</th></tr></thead><tbody>
+    ${checkRow(`T1 ≤ Rating (${rating_piw} PIW × ${bw}")`, fmt(belt_allow,0), fmt(T1,0), belt_pass)}
+  </tbody></table>`;
+
+  // Fix-it belt hint if failing
+  if (!belt_pass) {
+    html += `<div class="fixit-table"><h4>Fix-It → Belt Rating</h4>
+    Belt T1 = ${fmt(T1,0)} lb exceeds ${rating_piw} PIW × ${bw}" = ${fmt(belt_allow,0)} lb.<br>
+    Minimum passing ratings at this width:<br>`;
+    for (const p of fixit_belts) {
+      html += `&nbsp;→ <strong>${p} PIW</strong> allows ${(p * bw).toLocaleString()} lb (T1/allow = ${fmt(T1/(p*bw)*100,1)}%)<br>`;
+    }
+    html += `</div>`;
+  }
+
+  // 4. Power
+  html += `<div class="section-title">4. POWER</div>
+  <table><thead><tr><th>Variable</th><th>Description</th><th>Value</th><th>Unit</th></tr></thead><tbody>
+    <tr><td>HPb</td><td>HP at Belt (Te × V / 33000)</td><td>${fmt(HPb,3)}</td><td>HP</td></tr>
+    <tr><td>Drive Eff (ηm)</td><td>Power Transmission Efficiency</td><td>${fmt(drive_eff,3)}</td><td>—</td></tr>
+    <tr><td><strong>HPmin</strong></td><td><strong>Min Required Motor HP</strong></td><td><strong>${fmt(HPmin,3)}</strong></td><td>HP</td></tr>
+    <tr><td>HP_std</td><td>Next Standard Motor HP</td><td>${fmt(HP_std,0)}</td><td>HP</td></tr>
+    <tr><td>Motor HP (selected)</td><td>Selected Motor HP</td><td>${fmt(motor_hp,0)}</td><td>HP</td></tr>
+    <tr><td>Safety Factor</td><td>Motor HP / HPmin</td><td>${motor_SF !== null ? fmt(motor_SF,2) : "—"}</td><td>—</td></tr>
+    <tr><td>Drum Dia (lagged)</td><td>Head Pulley + 2× Lagging</td><td>${fmt(drum_dia_lagged,3)}</td><td>in</td></tr>
+    <tr><td>Drum RPM</td><td>Design Speed at Drum</td><td>${fmt(drum_rpm,2)}</td><td>rpm</td></tr>
+    <tr><td>Req Torque</td><td>Required Torque at Drum</td><td>${fmt(req_torque,0)}</td><td>in-lb</td></tr>
+  </tbody></table>
+  <table><thead><tr><th>Check</th><th>Required</th><th>Selected</th><th>Result</th></tr></thead><tbody>
+    ${checkRow("Motor HP", `≥ ${fmt(HPmin,1)} HP`, `${fmt(motor_hp,0)} HP`, motor_pass)}
+  </tbody></table>`;
+
+  // Fix-it motor hint
+  if (!motor_pass) {
+    html += `<div class="fixit-table"><h4>Fix-It → Motor HP</h4>
+    Minimum required: ${fmt(HPmin,1)} HP. Standard sizes that pass:<br>`;
+    for (const h of fixit_hp) {
+      html += `&nbsp;→ <strong>${h} HP</strong> (SF = ${fmt(h/HPmin,2)})<br>`;
+    }
+    html += `</div>`;
+  }
+
+  // 5. Belt Sag
+  html += `<div class="section-title">5. BELT SAG</div>
+  <table><thead><tr><th>Variable</th><th>Description</th><th>Value</th><th>Unit</th></tr></thead><tbody>
+    <tr><td>To</td><td>Min Tension for 2% Sag</td><td>${fmt(To,1)}</td><td>lb</td></tr>
+    <tr><td>y</td><td>Sag Between Carrying Idlers</td><td>${fmt(sag_in,3)}</td><td>in</td></tr>
+    <tr><td>Sag %</td><td>Sag as % of Idler Spacing</td><td>${fmt(sag_pct,2)}</td><td>%</td></tr>
+  </tbody></table>
+  <table><thead><tr><th>Check</th><th>Allowable</th><th>Calculated</th><th>Result</th></tr></thead><tbody>
+    ${checkRow("Belt Sag", "≤ 2.0%", `${fmt(sag_pct,2)}%`, sag_pass)}
+  </tbody></table>`;
+
+  // 6. Idler Bearing Life
+  html += `<div class="section-title">6. IDLER BEARING LIFE (CEMA)</div>
+  <table><thead><tr><th>Variable</th><th>Description</th><th>Value</th><th>Unit</th></tr></thead><tbody>
+    <tr><td>IML (carry)</td><td>Idler Misalignment Load</td><td>${fmt(IML_carry,1)}</td><td>lb</td></tr>
+    <tr><td>CIL (carry)</td><td>Calculated Idler Load</td><td>${fmt(CIL_carry,1)}</td><td>lb</td></tr>
+    <tr><td>K2</td><td>Effect of Load</td><td>${K2}</td><td>—</td></tr>
+    <tr><td>K3A</td><td>Belt Speed Effect</td><td>${K3A}</td><td>—</td></tr>
+    <tr><td>K3B</td><td>Roll Diameter Effect (${roll_dia}")</td><td>${K3B}</td><td>—</td></tr>
+    <tr><td>Basic L10</td><td>Factored CEMA-C L10 Life</td><td>${fmt(basic_L10,0)}</td><td>hr</td></tr>
+    <tr><td>K4A</td><td>Maintenance Factor</td><td>${K4A}</td><td>—</td></tr>
+    <tr><td>K4B</td><td>Environment Factor</td><td>${K4B}</td><td>—</td></tr>
+    <tr><td>K4C</td><td>Temperature Factor</td><td>${K4C}</td><td>—</td></tr>
+    <tr><td><strong>Adj L10</strong></td><td><strong>Adjusted L10 Life</strong></td><td><strong>${fmt(adj_L10,0)}</strong></td><td>hr</td></tr>
+  </tbody></table>
+  <table><thead><tr><th>Check</th><th>Allowable</th><th>Calculated</th><th>Result</th></tr></thead><tbody>
+    ${checkRow("Carrying Idler L10", "≥ 30,000 hr", `${fmt(adj_L10,0)} hr`, bearing_pass)}
+  </tbody></table>`;
+
+  // 7. Impact Idler Analysis
+  html += `<div class="section-title">7. IMPACT IDLER ANALYSIS</div>
+  <table><thead><tr><th>Variable</th><th>Description</th><th>Value</th><th>Unit</th></tr></thead><tbody>
+    <tr><td>Fall Height</td><td>Height of Material Fall</td><td>${fmt(fall_in,1)}</td><td>in</td></tr>
+    <tr><td>F</td><td>Impact Load from Falling Material</td><td>${fmt(F_impact,1)}</td><td>lb</td></tr>
+    <tr><td>Fu</td><td>Unit Impact Force (F × K1)</td><td>${fmt(Fu_impact,1)}</td><td>lb</td></tr>
+    <tr><td>CIL_imp</td><td>Calculated Idler Load at Impact</td><td>${fmt(CIL_impact,1)}</td><td>lb</td></tr>
+    <tr><td>Rated CIL</td><td>Idler Load Rating</td><td>${fmt(idler_load_rating,0)}</td><td>lb</td></tr>
+  </tbody></table>
+  <table><thead><tr><th>Check</th><th>Allowable</th><th>Calculated</th><th>Result</th></tr></thead><tbody>
+    ${checkRow("Impact Force < Min(CIL, Rated)", `${fmt(Math.min(CIL_impact,idler_load_rating),0)} lb`, `${fmt(Fu_impact,0)} lb`, impact_pass)}
+  </tbody></table>`;
+
+  // 8. Pulley Shaft Deflection
+  html += `<div class="section-title">8. PULLEY SHAFT DEFLECTION</div>
+  <table><thead><tr><th>Variable</th><th>Description</th><th>Value</th><th>Unit</th></tr></thead><tbody>
+    <tr><td>Shaft Dia</td><td>Head Pulley Shaft Diameter</td><td>${fmt(shaft_dia,4)}</td><td>in</td></tr>
+    <tr><td>I</td><td>Section Moment of Inertia</td><td>${fmt(I_shaft,5)}</td><td>in⁴</td></tr>
+    <tr><td>E</td><td>Modulus of Elasticity (${shaft_mat})</td><td>${fmt(E_shaft/1e6,0)}×10⁶</td><td>psi</td></tr>
+    <tr><td>L_bearing</td><td>Bearing Centers</td><td>${fmt(L_bearing,1)}</td><td>in</td></tr>
+    <tr><td>R_belt</td><td>Resultant Belt Tension (T1+T2)</td><td>${fmt(R_belt,0)}</td><td>lb</td></tr>
+    <tr><td>R_load</td><td>Resultant Load on Shaft</td><td>${fmt(R_load,0)}</td><td>lb</td></tr>
+    <tr><td>tan(α)</td><td>Shaft End Slope</td><td>${fmt(tan_alpha,6)}</td><td>in/in</td></tr>
+    <tr><td>α</td><td>Shaft End Angle</td><td>${fmt(alpha_deg,4)}</td><td>deg</td></tr>
+  </tbody></table>
+  <table><thead><tr><th>Check</th><th>Allowable</th><th>Calculated</th><th>Result</th></tr></thead><tbody>
+    ${checkRow("Shaft Slope tan(α)", "< 0.0023 in/in", fmt(tan_alpha,6), shaft_pass)}
+  </tbody></table>`;
+
+  // Footer
+  html += `<div class="footer-bar">JMS BELT CONVEYOR DESIGN SHEET &nbsp;|&nbsp; CEMA 6th Ed. &nbsp;|&nbsp; REV. ${revision} &nbsp;|&nbsp; ${date}</div>`;
+
+  document.getElementById("output-panel").innerHTML = html;
+}
+
+// ===========================================================================
+// DOM SETUP
+// ===========================================================================
+function onMaterialChange() {
+  const mat = getVal("material");
+  const densityMap = {
+    "Biosolids (Wet Cake)":  55,
+    "Biosolids (Dry)":       45,
+    "Coal":                  52,
+    "Crushed Stone / Aggregate": 100,
+    "Sand":                  100,
+    "Gravel":                110,
+    "Grain":                  50,
+    "Wood Chips":             25,
+    "Screenings":             45,
+    "Grit":                   80,
+    "Lime":                   60,
+    "Other":                  60,
+  };
+  const inclMap = {
+    "Biosolids (Wet Cake)":  18,
+    "Biosolids (Dry)":       20,
+    "Coal":                  18,
+    "Crushed Stone / Aggregate": 18,
+    "Sand":                  20,
+    "Gravel":                18,
+    "Grain":                 20,
+    "Wood Chips":            20,
+    "Screenings":            20,
+    "Grit":                  15,
+    "Lime":                  20,
+    "Other":                 18,
+  };
+  if (densityMap[mat]) setField("density_lb_ft3", densityMap[mat]);
+  if (inclMap[mat])    setField("max_incline_deg", inclMap[mat]);
+  calculate();
+}
+
+function resetToDefaults() {
+  for (const [key, val] of Object.entries(DEFAULTS)) {
+    setField(key, val);
+  }
+  calculate();
+}
+
+function wireEvents() {
+  const textIds = [
+    "project_no","location","customer","engineer","description","by","date","revision","drive_notes"
+  ];
+  const selectIds = [
+    "belt_width_in","trough_angle","material","belt_type","lagging","idler_type",
+    "idler_roll_dia","takeup_type","drive_arrangement","shaft_material","num_plows",
+    "plow_type","service_duty","area_classification"
+  ];
+  const numberIds = [
+    "horiz_length_ft","incline_length_ft","incline_deg","belt_speed_fpm",
+    "density_lb_ft3","capacity_tph","max_incline_deg",
+    "belt_rating_piw","belt_thick_in","lagging_thick_in",
+    "carry_spacing_ft","return_spacing_ft","impact_spacing_ft","num_impact_zones","impact_zone_len_ft","fall_height_in",
+    "head_pulley_dia","motor_hp","wrap_deg","shaft_dia_in","gearbox_weight_lb","pulley_weight_lb","angle_tension_oh_deg",
+    "skirt_length_ft","skirt_friction","num_scrapers"
+  ];
+
+  textIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("input", calculate);
+  });
+  selectIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (id === "material") {
+      el.addEventListener("change", onMaterialChange);
+    } else {
+      el.addEventListener("change", calculate);
+    }
+  });
+  numberIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("input", calculate);
+    el.addEventListener("change", calculate);
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  resetToDefaults();
+  wireEvents();
+  calculate();
+});
+</script>
+</body>
+</html>

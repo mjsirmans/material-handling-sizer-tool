@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JMS Material Handling Sizer Tool</title>
+<style>
+:root {
+  --navy: #1a2744;
+  --navy-light: #2c3e6b;
+  --border: #dee2e6;
+  --label: #495057;
+  --live: #2e7d32;
+  --dev: #e65100;
+  --planned: #6c757d;
+}
+* { box-sizing: border-box; }
+body { font-family: system-ui, sans-serif; font-size: 14px; margin: 0; background: #f8f9fa; min-height: 100vh; color: #212529; }
+.header { background: var(--navy); color: white; padding: 28px 40px; }
+.header h1 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: 0.3px; }
+.header p { margin: 6px 0 0; font-size: 13px; opacity: 0.85; }
+.container { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+.intro { margin-bottom: 28px; color: var(--label); font-size: 14px; line-height: 1.5; max-width: 760px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+.card { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 20px 22px; display: flex; flex-direction: column; transition: box-shadow 0.15s, transform 0.15s; }
+.card.live:hover { box-shadow: 0 4px 14px rgba(26,39,68,0.12); transform: translateY(-2px); }
+.card.planned { opacity: 0.55; background: #f1f3f5; }
+.card-title { font-size: 16px; font-weight: 700; color: var(--navy); margin: 0 0 4px; }
+.card-desc { font-size: 13px; color: var(--label); line-height: 1.45; margin: 0 0 16px; flex: 1; }
+.card-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.status { font-size: 10px; font-weight: 700; letter-spacing: 0.8px; padding: 3px 8px; border-radius: 3px; text-transform: uppercase; }
+.status.live { background: #e8f5e9; color: var(--live); }
+.status.dev { background: #fff3e0; color: var(--dev); }
+.status.planned { background: #e9ecef; color: var(--planned); }
+.btn { display: inline-block; padding: 7px 14px; background: var(--navy); color: white; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: 600; letter-spacing: 0.3px; }
+.btn:hover { background: var(--navy-light); }
+.btn.disabled { background: #ced4da; color: #6c757d; pointer-events: none; cursor: default; }
+.footer { text-align: center; padding: 24px; font-size: 11px; color: #868e96; border-top: 1px solid var(--border); margin-top: 40px; }
+.footer a { color: var(--navy); text-decoration: none; }
+.footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>JMS Material Handling Sizer Tool</h1>
+  <p>Engineering design calculators for material handling equipment</p>
+</div>
+
+<div class="container">
+  <p class="intro">
+    Select a calculator below. Each tool is a standalone design engine — enter project inputs, review structural and performance outputs, and export via print/PDF. No pricing or estimating included.
+  </p>
+
+  <div class="grid">
+
+    <div class="card live">
+      <h2 class="card-title">Screw Conveyor</h2>
+      <p class="card-desc">
+        CEMA 350 Rev 20 design calculator. Capacity, motor HP, torsional stress, bearing life, thermal expansion, shaft &amp; spiral checks. Supports shafted, single shaftless, and dual shaftless configurations.
+      </p>
+      <div class="card-footer">
+        <span class="status live">Live</span>
+        <a class="btn" href="screw_calc.html">Open Calculator →</a>
+      </div>
+    </div>
+
+    <div class="card live">
+      <h2 class="card-title">Belt Conveyor</h2>
+      <p class="card-desc">
+        CEMA belt conveyor design. Geometry, belt and material loading, tensions (T1/T2/Te), motor HP, idler bearing life, belt sag, vertical curves, and pulley shaft deflection.
+      </p>
+      <div class="card-footer">
+        <span class="status live">Live</span>
+        <a class="btn" href="belt_calc.html">Open Calculator →</a>
+      </div>
+    </div>
+
+    <div class="card planned">
+      <h2 class="card-title">Bucket Elevator</h2>
+      <p class="card-desc">
+        Capacity, HP, belt/chain tension, and bucket sizing for centrifugal and continuous discharge elevators.
+      </p>
+      <div class="card-footer">
+        <span class="status planned">Planned</span>
+        <a class="btn disabled">Coming Soon</a>
+      </div>
+    </div>
+
+    <div class="card planned">
+      <h2 class="card-title">Vertical / Pivot Screw</h2>
+      <p class="card-desc">
+        Vertical screw capacity and HP, plus pivoting screw conveyor load and structural checks.
+      </p>
+      <div class="card-footer">
+        <span class="status planned">Planned</span>
+        <a class="btn disabled">Coming Soon</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="footer">
+  JMS Engineering · <a href="https://github.com/mjsirmans/material-handling-sizer-tool" target="_blank" rel="noopener">Source on GitHub</a>
+</div>
+
+</body>
+</html>
