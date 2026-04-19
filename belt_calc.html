@@ -76,6 +76,9 @@ button.primary:hover{background:#002244}
 
 .sew-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 @media(max-width:600px){.sew-grid{grid-template-columns:1fr;}}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:start}
+.two-col>.result-box{margin-bottom:0}
+@media(max-width:900px){.two-col{grid-template-columns:1fr;}}
 @media(max-width:800px){#mobile-jump{display:block!important;}}
 @media print{
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -132,7 +135,7 @@ button.primary:hover{background:#002244}
   <div class="field-row"><label>Engineer</label><input type="text" id="engineer"></div>
   <div class="field-row"><label>Description</label><input type="text" id="description"></div>
   <div class="field-row"><label>By</label><input type="text" id="by"></div>
-  <div class="field-row"><label>Date</label><input type="text" id="date"></div>
+  <div class="field-row"><label>Date</label><input type="date" id="date"></div>
   <div class="field-row"><label>Revision</label><input type="text" id="revision"></div>
   </div>
   </div>
@@ -463,13 +466,13 @@ const STD_BELT_PIW = [150, 195, 220, 330, 440, 500, 660, 990, 1260];
 // DEFAULTS
 // ===========================================================================
 const DEFAULTS = {
-  project_no: "EXAMPLE-001",
-  location: "Wastewater Treatment Plant",
-  customer: "Example Municipality",
+  project_no: "",
+  location: "",
+  customer: "",
   engineer: "",
-  description: "Belt Press Discharge - Dewatered Biosolids Conveyor",
+  description: "",
   by: "",
-  date: "2026-04-19",
+  date: new Date().toISOString().slice(0,10),
   revision: "0",
   horiz_length_ft: 60,
   incline_length_ft: 0,
@@ -941,8 +944,9 @@ function calculate() {
   </div>
   </div>`;
 
-  // 1. Geometry & Capacity
-  html += `<div class="result-box">
+  // Row 1: Geometry & Capacity + Belt Loading side by side
+  html += `<div class="two-col">
+  <div class="result-box">
   <h2>1. Geometry &amp; Capacity</h2>
   ${resultRow('L_total', fmt(L_total,1), 'ft', '')}
   ${resultRow('H (lift)', fmt(H,2), 'ft', '')}
@@ -951,10 +955,8 @@ function calculate() {
   ${resultRow('Vol. Required', fmt(vol_required_ft3hr,1), 'ft³/hr', '')}
   ${resultRow('Utilization', fmt(cap_util*100,1)+'%', '', badge(cap_overload ? 'OVERLOAD' : 'OK', cap_overload ? 'fail' : 'ok'))}
   ${resultRow('Incline vs. Max', fmt(incline_deg,1)+'° / '+fmt(max_incl,1)+'°', '', badge(incline_ok ? 'OK' : 'OVER LIMIT', incline_ok ? 'ok' : 'fail'))}
-  </div>`;
-
-  // 2. Belt Loading
-  html += `<div class="result-box">
+  </div>
+  <div class="result-box">
   <h2>2. Belt Loading</h2>
   ${resultRow('Wm', fmt(Wm,3), 'lb/ft', '')}
   ${resultRow('Wb', fmt(Wb,3), 'lb/ft', '')}
@@ -964,6 +966,7 @@ function calculate() {
   ${resultRow('Kx', fmt(Kx,5), 'lb/ft', '')}
   ${resultRow('Ky', fmt(Ky,4), '—', '')}
   ${resultRow('Cw ('+takeup+', '+lagging+' lag)', fmt(Cw,3), '—', '')}
+  </div>
   </div>`;
 
   // 3. Tensions
@@ -1001,8 +1004,9 @@ function calculate() {
     html += `</div>`;
   }
 
-  // 4. Power
-  html += `<div class="result-box">
+  // Row 2: Power + SEW KA side by side
+  html += `<div class="two-col">
+  <div class="result-box">
   <h2>4. Power</h2>
   ${resultRow('HPb (belt)', fmt(HPb,3), 'HP', '')}
   ${resultRow('Drive Eff. (ηm)', fmt(drive_eff,3), '—', '')}
@@ -1013,50 +1017,33 @@ function calculate() {
   ${resultRow('Drum Dia (lagged)', fmt(drum_dia_lagged,3), 'in', '')}
   ${resultRow('Drum RPM', fmt(drum_rpm,2), 'rpm', '')}
   ${resultRow('Req. Torque', fmt(req_torque,0), 'in-lb', '')}
+  ${!motor_pass ? `<div class="fixit-table" style="margin-top:6px"><h4>Fix-It: Motor HP</h4>Min required: ${fmt(HPmin,1)} HP. Passing sizes:<br>${fixit_hp.map(h=>`&nbsp;→ <strong>${h} HP</strong> (SF = ${fmt(h/HPmin,2)})`).join('<br>')}</div>` : ''}
+  </div>
+  <div class="result-box" style="border-left:3px solid #003366">
+  <h2>4b. SEW KA Gearmotor</h2>
+  ${ka_frame ? `
+    ${resultRow('Recommended Frame', '<strong>'+ka_frame.frame+'</strong>', '', '')}
+    ${resultRow('Catalog HP', ka_frame.max_hp+' HP', '', '')}
+    ${resultRow('Catalog Torque', fmt(ka_frame.max_torque_inlb,0), 'in-lb', '')}
+    ${resultRow('Hollow Bore', ka_frame.bore_in+'"', 'ANSI', '')}
+    ${resultRow('Required HP', fmt(HP_std,0)+' HP (≥ '+fmt(HPmin,2)+')', '', '')}
+    ${resultRow('Required Torque', req_torque !== null ? fmt(req_torque,0)+' in-lb' : '—', '', '')}
+    ${resultRow('Output Speed', fmt(drum_rpm,1), 'RPM', '')}
+    <div class="note" style="margin-top:6px">Confirm ratio and f<sub>B</sub> ≥ 1.4 in SEW DriveSelect (60Hz US, KA shaft-mount). Verify bore vs. head pulley shaft (${fmt(shaft_dia,4)}").</div>
+  ` : `<div class="fixit-table">No KA frame for ${fmt(HP_std,0)} HP / ${req_torque !== null ? fmt(req_torque,0)+' in-lb' : '—'}. Consult SEW DriveSelect.</div>`}
+  </div>
   </div>`;
 
-  // Fix-it motor hint
-  if (!motor_pass) {
-    html += `<div class="fixit-table"><h4>Fix-It: Motor HP</h4>
-    Minimum required: ${fmt(HPmin,1)} HP. Standard sizes that pass:<br>`;
-    for (const h of fixit_hp) {
-      html += `&nbsp;→ <strong>${h} HP</strong> (SF = ${fmt(h/HPmin,2)})<br>`;
-    }
-    html += `</div>`;
-  }
-
-  // SEW KA gearmotor recommendation block
-  html += `<div class="result-box" style="border-left:3px solid #003366">
-  <h2>4b. SEW Gearmotor Recommendation (KA Series)</h2>`;
-  if (ka_frame) {
-    html += `
-    ${resultRow('Recommended Frame', '<strong>'+ka_frame.frame+'</strong>', '', '')}
-    ${resultRow('Catalog HP (max)', ka_frame.max_hp+' HP', '', '')}
-    ${resultRow('Catalog Torque (max)', fmt(ka_frame.max_torque_inlb,0), 'in-lb', '')}
-    ${resultRow('Hollow Bore (std)', ka_frame.bore_in+'"', 'ANSI', '')}
-    ${resultRow('Required Motor HP', fmt(HP_std,0)+' HP (≥ '+fmt(HPmin,2)+')', '', '')}
-    ${resultRow('Required Torque', req_torque !== null ? fmt(req_torque,0)+' in-lb' : '—', '', '')}
-    ${resultRow('Required Output Spd', fmt(drum_rpm,1), 'RPM', '')}
-    <div class="note" style="margin-top:6px">
-      Confirm ratio availability and f<sub>B</sub> ≥ 1.4 in SEW DriveSelect (60Hz US catalog, KA series, shaft-mount).
-      Bore size shown is standard ANSI — confirm compatibility with head pulley shaft (${fmt(shaft_dia,4)}").
-    </div>`;
-  } else {
-    html += `<div class="fixit-table">No KA frame found in table for ${fmt(HP_std,0)} HP / ${req_torque !== null ? fmt(req_torque,0)+' in-lb' : '—'} torque. Consult SEW DriveSelect directly.</div>`;
-  }
-  html += `</div>`;
-
-  // 5. Belt Sag
-  html += `<div class="result-box">
+  // Row 3: Belt Sag + Idler Bearing Life side by side
+  html += `<div class="two-col">
+  <div class="result-box">
   <h2>5. Belt Sag</h2>
   ${resultRow('To', fmt(To,1), 'lb', '')}
   ${resultRow('y (sag)', fmt(sag_in,3), 'in', '')}
   ${resultRow('Sag %', fmt(sag_pct,2), '%', badge(sag_pass ? 'PASS' : 'FAIL', sag_pass ? 'ok' : 'fail'))}
   <div style="font-size:11px;color:#888;margin-top:4px">Allowable: ≤ 2.0% of idler spacing</div>
-  </div>`;
-
-  // 6. Idler Bearing Life
-  html += `<div class="result-box">
+  </div>
+  <div class="result-box">
   <h2>6. Idler Bearing Life (CEMA)</h2>
   ${resultRow('IML (carry)', fmt(IML_carry,1), 'lb', '')}
   ${resultRow('CIL (carry)', fmt(CIL_carry,1), 'lb', '')}
@@ -1069,10 +1056,12 @@ function calculate() {
   ${resultRow('K4C', K4C, '—', '')}
   <div class="result-row"><span class="label" style="font-weight:700">Adj. L10</span><span class="val" style="color:#003366">${fmt(adj_L10,0)}</span><span class="unit">hr</span><span>${badge(bearing_pass ? 'PASS' : 'FAIL', bearing_pass ? 'ok' : 'fail')}</span></div>
   <div style="font-size:11px;color:#888;margin-top:4px">Allowable: ≥ 30,000 hr</div>
+  </div>
   </div>`;
 
-  // 7. Impact Idler Analysis
-  html += `<div class="result-box">
+  // Row 4: Impact Idler + Pulley Shaft Deflection side by side
+  html += `<div class="two-col">
+  <div class="result-box">
   <h2>7. Impact Idler Analysis</h2>
   ${resultRow('Fall Height', fmt(fall_in,1), 'in', '')}
   ${resultRow('F (impact load)', fmt(F_impact,1), 'lb', '')}
@@ -1081,10 +1070,8 @@ function calculate() {
   ${resultRow('Rated CIL', fmt(idler_load_rating,0), 'lb', '')}
   <hr style="border:none;border-top:1px solid #d0d4dc;margin:6px 0">
   ${checkResultRow('Fu < Min(CIL, Rated)', fmt(Math.min(CIL_impact,idler_load_rating),0)+' lb', fmt(Fu_impact,0)+' lb', impact_pass)}
-  </div>`;
-
-  // 8. Pulley Shaft Deflection
-  html += `<div class="result-box">
+  </div>
+  <div class="result-box">
   <h2>8. Pulley Shaft Deflection</h2>
   ${resultRow('Shaft Dia.', fmt(shaft_dia,4), 'in', '')}
   ${resultRow('I', fmt(I_shaft,5), 'in⁴', '')}
@@ -1096,6 +1083,7 @@ function calculate() {
   ${resultRow('α', fmt(alpha_deg,4), 'deg', '')}
   <hr style="border:none;border-top:1px solid #d0d4dc;margin:6px 0">
   ${checkResultRow('Shaft Slope tan(α) < 0.0023', '< 0.0023 in/in', fmt(tan_alpha,6), shaft_pass)}
+  </div>
   </div>`;
 
   // Footer
