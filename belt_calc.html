@@ -1133,13 +1133,17 @@ function calculate() {
 }
 
 function validateFields() {
+  const iLen = parseFloat(document.getElementById('incline_length_ft')?.value) || 0;
   document.querySelectorAll('.input-primary').forEach(row => {
     const el = row.querySelector('input, select');
     if (!el) return;
     const empty = el.value === '' || el.value === null ||
       (el.tagName === 'SELECT' && (el.value === '' || el.selectedIndex === 0 && el.options[0].value === ''));
     const acReq = row.hasAttribute('data-ac-req');
-    row.classList.toggle('field-empty',  empty && acReq);
+    // Incline angle is only required when incline length > 0
+    const isInclAngle = el.id === 'incline_deg';
+    const required = isInclAngle ? iLen > 0 : acReq;
+    row.classList.toggle('field-empty',  empty && required);
     row.classList.toggle('field-filled', !empty);
     row.classList.remove('field-pricing');
   });
