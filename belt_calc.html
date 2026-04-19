@@ -3,271 +3,359 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Belt Conveyor Design Calculator</title>
+<title>Belt Conveyor Sizer — CEMA 6th Ed.</title>
 <style>
-:root {
-  --navy: #1a2744;
-  --navy-light: #2c3e6b;
-  --pass-bg: #e8f5e9;
-  --pass-text: #2e7d32;
-  --fail-bg: #ffebee;
-  --fail-text: #c62828;
-  --border: #dee2e6;
-  --label: #495057;
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;font-size:15px;background:#f0f2f5;color:#1a1a1a}
+h1{font-size:17px;font-weight:700;color:#003366}
+h2{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#003366;margin:10px 0 6px;border-bottom:1px solid #ccd;padding-bottom:3px}
+h3{font-size:13px;font-weight:600;color:#555;margin:8px 0 4px}
+.header{background:#003366;color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+@media(max-width:600px){.header{padding:8px 10px;}.header h1{font-size:15px;}.btn-row button{font-size:11px;padding:3px 8px;}}
+.header h1{color:#fff}
+.header .rev{font-size:11px;opacity:.7}
+.main{display:grid;grid-template-columns:380px 1fr;gap:0;min-height:calc(100vh - 42px)}
+@media(max-width:800px){.main{grid-template-columns:1fr;}}
+.left{background:#fff;border-right:1px solid #d0d4dc;padding:12px;overflow-y:auto;max-height:calc(100vh - 42px)}
+.right{background:#f8f9fc;padding:12px;overflow-y:auto;max-height:calc(100vh - 42px)}
+@media(max-width:800px){
+  .left{max-height:none;border-right:none;border-bottom:1px solid #d0d4dc;}
+  .right{max-height:none;}
 }
-* { box-sizing: border-box; }
-body { font-family: system-ui, sans-serif; font-size: 13px; margin: 0; }
-.app { display: flex; height: 100vh; }
-.form-panel { width: 38%; min-width: 320px; overflow-y: auto; padding: 12px; border-right: 2px solid var(--navy); background: #f8f9fa; }
-.output-panel { flex: 1; overflow-y: auto; padding: 16px; }
-.section-title { background: var(--navy); color: white; padding: 6px 10px; font-weight: 600; margin: 12px 0 6px; font-size: 12px; letter-spacing: 0.5px; }
-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 12px; }
-th { background: var(--navy); color: white; padding: 5px 8px; text-align: left; }
-td { padding: 4px 8px; border-bottom: 1px solid var(--border); }
-tr:nth-child(even) td { background: #f8f9fa; }
-.pass { background: var(--pass-bg) !important; color: var(--pass-text); font-weight: 600; }
-.fail { background: var(--fail-bg) !important; color: var(--fail-text); font-weight: 600; }
-.na { color: #888; font-style: italic; }
-.project-header { background: var(--navy); color: white; padding: 10px 14px; margin-bottom: 12px; }
-.project-header h2 { margin: 0; font-size: 15px; }
-.project-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 20px; font-size: 11px; margin-top: 6px; }
-.btn { padding: 7px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; }
-.btn-primary { background: var(--navy); color: white; }
-.btn-secondary { background: #6c757d; color: white; }
-.btn-bar { display: flex; gap: 8px; margin-bottom: 12px; }
-input[type="text"], input[type="number"], select { width: 100%; padding: 4px 6px; border: 1px solid #ced4da; border-radius: 3px; font-size: 12px; }
-label { display: block; font-size: 11px; color: var(--label); margin-bottom: 2px; margin-top: 6px; font-weight: 500; }
-details summary { cursor: pointer; padding: 6px 8px; background: #e9ecef; border-radius: 3px; font-weight: 600; font-size: 12px; margin-bottom: 4px; list-style: none; }
-details summary::-webkit-details-marker { display: none; }
-details summary::before { content: "▶ "; font-size: 10px; }
-details[open] summary::before { content: "▼ "; font-size: 10px; }
-details[open] summary { background: var(--navy-light); color: white; }
-details { margin-bottom: 6px; }
-.form-panel h1 { font-size: 14px; color: var(--navy); margin: 0 0 10px; font-weight: 700; border-bottom: 2px solid var(--navy); padding-bottom: 6px; }
-.footer-bar { background: var(--navy); color: white; padding: 6px 14px; font-size: 11px; font-weight: 600; text-align: center; margin-top: 12px; letter-spacing: 0.5px; }
-.warn { color: #856404; font-size: 11px; }
-.spec-tag { font-size: 9px; font-weight: 600; color: #868e96; letter-spacing: 0.4px; text-transform: uppercase; margin-left: 4px; vertical-align: middle; }
-label.spec { color: #868e96; }
-label.spec input, label.spec select { border-color: #e0e0e0; color: #555; background: #fafafa; }
-.fixit-table { background: #fff8e1; border: 1px solid #ffe082; border-radius: 4px; padding: 8px; margin-top: 8px; font-size: 11px; }
-.fixit-table h4 { margin: 0 0 6px; color: #5f4300; font-size: 12px; }
-.home-link { display: inline-block; font-size: 11px; color: var(--navy); text-decoration: none; margin-bottom: 8px; }
-.home-link:hover { text-decoration: underline; }
-@media print {
-  .form-panel, .btn-bar, .home-link { display: none !important; }
-  .output-panel { width: 100%; padding: 8px; overflow: visible; }
-  .app { display: block; height: auto; }
-  body { font-size: 11px; }
-  table { page-break-inside: avoid; }
+.field-row{display:grid;grid-template-columns:130px 1fr auto;align-items:center;gap:4px;margin-bottom:4px}
+@media(max-width:480px){.field-row{grid-template-columns:110px 1fr auto;}}
+.field-row label{font-size:14px;color:#333;font-weight:500}
+.field-row .std{font-size:12px;color:#666;font-style:italic;white-space:nowrap}
+.field-row input,.field-row select{width:100%;padding:4px 5px;border:1px solid #bbb;border-radius:3px;font-size:14px;background:#fff;min-height:30px}
+.field-row input:focus,.field-row select:focus{outline:none;border-color:#003366;box-shadow:0 0 0 2px rgba(0,51,102,.15)}
+input.overridden,select.overridden{background:#fffbe6;border-color:#f0a800}
+input[disabled],select[disabled]{background:#f0f0f0;color:#888;cursor:not-allowed}
+.warn-inline{font-size:10px;color:#c07000;font-style:italic;grid-column:2/4}
+
+/* color coding per Instructions legend */
+.input-primary input,.input-primary select{background:#cce5ff}
+.input-secondary input,.input-secondary select{background:#ddeeff}
+.input-calculated input,.input-calculated select{background:#f0f0f0;color:#555;font-style:italic}
+.overridden-field input,.overridden-field select{background:#fffbe6!important;border-color:#f0a800!important}
+
+.section{margin-bottom:8px}
+.cema-ref{font-size:10px;color:#888;float:right;font-style:italic}
+
+/* Collapsible sections */
+.sec-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;margin-bottom:0;padding-bottom:3px;border-bottom:1px solid #ccd}
+.sec-header h2{margin:8px 0 0;border-bottom:none;padding-bottom:0;flex:1}
+.sec-toggle{font-size:11px;color:#669;margin-left:6px;transition:transform .15s;flex-shrink:0;margin-top:8px}
+.sec-body{overflow:hidden;transition:max-height .2s ease}
+.sec-body.collapsed{display:none}
+.sec-more{font-size:10px;color:#669;cursor:pointer;margin:2px 0 4px;display:inline-block}
+.sec-more:hover{color:#003366;text-decoration:underline}
+.sec-extra.hidden{display:none}
+.result-box{background:#fff;border:1px solid #d0d4dc;border-radius:4px;padding:8px 10px;margin-bottom:8px}
+.result-box h3{margin-bottom:6px}
+.result-row{display:grid;grid-template-columns:140px 80px 60px 1fr;align-items:center;gap:4px;margin-bottom:3px;font-size:14px}
+@media(max-width:480px){.result-row{grid-template-columns:115px 65px 45px 1fr;font-size:12px;gap:2px;}}
+@media(max-width:380px){.result-row{grid-template-columns:100px 60px 40px 1fr;font-size:11px;}}
+.result-row .label{color:#555}
+.result-row .val{font-weight:600;text-align:right}
+.result-row .unit{color:#888;font-size:11px}
+.badge{display:inline-block;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:700}
+.badge.ok{background:#d4edda;color:#155724}
+.badge.warn{background:#fff3cd;color:#856404}
+.badge.fail{background:#f8d7da;color:#721c24}
+.badge.na{background:#e9ecef;color:#6c757d}
+.highlight-warn{color:#c07000;font-weight:600}
+.highlight-fail{color:#c00;font-weight:600}
+.highlight-ok{color:#155724}
+.weakest-link{font-size:10px;color:#c07000;grid-column:1/5;margin-top:2px;font-style:italic}
+
+button{padding:4px 12px;font-size:12px;border:1px solid #003366;border-radius:3px;cursor:pointer;background:#fff;color:#003366}
+button:hover{background:#003366;color:#fff}
+button.primary{background:#003366;color:#fff}
+button.primary:hover{background:#002244}
+.btn-row{display:flex;gap:8px;margin-top:8px}
+
+.sew-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:600px){.sew-grid{grid-template-columns:1fr;}}
+@media(max-width:800px){#mobile-jump{display:block!important;}}
+@media print{
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .left,.header button,.btn-row{display:none!important}
+  .header{padding:6px 12px}
+  .main{display:block;min-height:unset}
+  .right{padding:8px;overflow:visible;max-height:unset}
+  .result-box{break-inside:avoid;border:1px solid #999;margin-bottom:6px}
+  button{display:none!important}
 }
+.note{font-size:10px;color:#777;margin-top:4px;padding:3px 6px;background:#fffbe6;border-left:2px solid #f0a800;border-radius:0 2px 2px 0}
+
+/* Belt-specific additions */
+.spec-tag{font-size:9px;font-weight:600;color:#868e96;letter-spacing:0.4px;text-transform:uppercase;margin-left:4px;vertical-align:middle}
+.fixit-table{background:#fff8e1;border:1px solid #ffe082;border-radius:4px;padding:8px;margin-top:8px;font-size:11px}
+.fixit-table h4{margin:0 0 6px;color:#5f4300;font-size:12px}
+.project-header{background:#003366;color:white;padding:10px 14px;margin-bottom:12px;border-radius:4px}
+.project-header h2{margin:0;font-size:15px;color:#fff;border-bottom:none;letter-spacing:.5px;text-transform:uppercase}
+.project-meta{display:grid;grid-template-columns:1fr 1fr;gap:2px 20px;font-size:11px;margin-top:6px}
+.footer-bar{background:#003366;color:white;padding:6px 14px;font-size:11px;font-weight:600;text-align:center;margin-top:12px;letter-spacing:.5px;border-radius:4px}
+.result-box h2{margin-bottom:6px}
 </style>
 </head>
 <body>
-<div class="app">
 
-<!-- ===== LEFT PANEL: INPUT FORM ===== -->
-<div class="form-panel">
-  <a class="home-link" href="index.html">← Back to Tool Index</a>
-  <h1>Belt Conveyor Design</h1>
-  <div class="btn-bar">
-    <button class="btn btn-primary" onclick="window.print()">Print / Save as PDF</button>
-    <button class="btn btn-secondary" onclick="resetToDefaults()">Reset to Defaults</button>
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <div>
+    <a href="index.html" style="font-size:11px;color:#aac;text-decoration:none;display:block;margin-bottom:2px;">← Back to Tool Index</a>
+    <h1>Belt Conveyor Sizer</h1>
+    <span class="rev">CEMA 6th Ed.</span>
   </div>
-
-  <!-- 1. Project Info -->
-  <details open>
-    <summary>1. Project Info</summary>
-    <label>Project No.<input type="text" id="project_no"></label>
-    <label>Location<input type="text" id="location"></label>
-    <label>Customer<input type="text" id="customer"></label>
-    <label>Engineer<input type="text" id="engineer"></label>
-    <label>Description<input type="text" id="description"></label>
-    <label>By<input type="text" id="by"></label>
-    <label>Date<input type="text" id="date"></label>
-    <label>Revision<input type="text" id="revision"></label>
-  </details>
-
-  <!-- 2. Conveyor Geometry -->
-  <details open>
-    <summary>2. Conveyor Geometry</summary>
-    <label>Horizontal Length (ft)<input type="number" id="horiz_length_ft" step="1" min="1" oninput="calculate()" onchange="calculate()"></label>
-    <label>Incline Length (ft) — along slope<input type="number" id="incline_length_ft" step="1" min="0" oninput="calculate()" onchange="calculate()"></label>
-    <label>Incline Angle (deg)<input type="number" id="incline_deg" step="0.1" min="0" max="30" oninput="calculate()" onchange="calculate()"></label>
-    <label>Belt Width (in)
-      <select id="belt_width_in" onchange="calculate()">
-        <option value="18">18"</option>
-        <option value="24">24"</option>
-        <option value="30">30"</option>
-        <option value="36" selected>36"</option>
-        <option value="42">42"</option>
-        <option value="48">48"</option>
-      </select>
-    </label>
-    <label>Belt Speed (fpm)<input type="number" id="belt_speed_fpm" step="10" min="50" max="800" oninput="calculate()" onchange="calculate()"></label>
-    <label>Trough Angle (deg)
-      <select id="trough_angle" onchange="calculate()">
-        <option value="0">Flat (0°)</option>
-        <option value="20" selected>20°</option>
-        <option value="35">35°</option>
-        <option value="45">45°</option>
-      </select>
-    </label>
-  </details>
-
-  <!-- 3. Material Properties -->
-  <details open>
-    <summary>3. Material Properties</summary>
-    <label>Material
-      <select id="material" onchange="onMaterialChange()">
-        <option>Biosolids (Wet Cake)</option>
-        <option>Biosolids (Dry)</option>
-        <option>Coal</option>
-        <option>Crushed Stone / Aggregate</option>
-        <option>Sand</option>
-        <option>Gravel</option>
-        <option>Grain</option>
-        <option>Wood Chips</option>
-        <option>Screenings</option>
-        <option>Grit</option>
-        <option>Lime</option>
-        <option>Other</option>
-      </select>
-    </label>
-    <label>Density (lb/ft³)<input type="number" id="density_lb_ft3" step="1" min="10" oninput="calculate()" onchange="calculate()"></label>
-    <label>Design Capacity (ton/hr)<input type="number" id="capacity_tph" step="1" min="0.1" oninput="calculate()" onchange="calculate()"></label>
-    <label>Max Incline for Material (deg)<input type="number" id="max_incline_deg" step="1" min="5" max="30" oninput="calculate()" onchange="calculate()"></label>
-  </details>
-
-  <!-- 4. Belt Design -->
-  <details open>
-    <summary>4. Belt Design</summary>
-    <label>Belt Type
-      <select id="belt_type" onchange="calculate()">
-        <option value="Fabric">Fabric (2-ply, 3-ply, 4-ply)</option>
-        <option value="Steel">Steel Core (ST series)</option>
-      </select>
-    </label>
-    <label>Belt Rating (PIW)<input type="number" id="belt_rating_piw" step="10" min="100" max="2000" oninput="calculate()" onchange="calculate()"></label>
-    <label>Lagging on Head Pulley?
-      <select id="lagging" onchange="calculate()">
-        <option value="Yes">Yes</option>
-        <option value="No">No</option>
-      </select>
-    </label>
-    <label>Lagging Thickness (in)<input type="number" id="lagging_thick_in" step="0.0625" min="0" oninput="calculate()" onchange="calculate()"></label>
-  </details>
-
-  <!-- 5. Idlers -->
-  <details open>
-    <summary>5. Idlers</summary>
-    <label>Idler Roll Diameter (in)
-      <select id="idler_roll_dia" onchange="calculate()">
-        <option value="5" selected>5"</option>
-        <option value="6">6"</option>
-      </select>
-    </label>
-    <label>Carrying Idler Spacing (ft)<input type="number" id="carry_spacing_ft" step="0.5" min="1" max="8" oninput="calculate()" onchange="calculate()"></label>
-    <label># of Impact Zones<input type="number" id="num_impact_zones" step="1" min="0" oninput="calculate()" onchange="calculate()"></label>
-    <label>Length of Impact Zones (ft)<input type="number" id="impact_zone_len_ft" step="1" min="0" oninput="calculate()" onchange="calculate()"></label>
-    <label>Height of Material Fall (in)<input type="number" id="fall_height_in" step="1" min="0" oninput="calculate()" onchange="calculate()"></label>
-  </details>
-
-  <!-- 6. Drive & Pulleys -->
-  <details open>
-    <summary>6. Drive &amp; Pulleys</summary>
-    <label>Drive Arrangement
-      <select id="drive_arrangement" onchange="calculate()">
-        <option value="Shaft Mounted Drive">Shaft Mounted Drive</option>
-        <option value="Chain and Sprocket">Chain and Sprocket</option>
-        <option value="Motorized Drum Pulley">Motorized Drum Pulley</option>
-        <option value="V-Belt">V-Belt</option>
-      </select>
-    </label>
-    <label>Take-Up Type
-      <select id="takeup_type" onchange="calculate()">
-        <option value="Manual">Manual / Screw</option>
-        <option value="Gravity">Gravity</option>
-      </select>
-    </label>
-    <label>Motor HP (selected)<input type="number" id="motor_hp" step="1" min="1" oninput="calculate()" onchange="calculate()"></label>
-    <label>Head Pulley Diameter (in)<input type="number" id="head_pulley_dia" step="2" min="6" oninput="calculate()" onchange="calculate()"></label>
-    <label>Head Pulley Shaft Diameter (in)<input type="number" id="shaft_dia_in" step="0.0625" min="1" oninput="calculate()" onchange="calculate()"></label>
-    <label>Shaft Material
-      <select id="shaft_material" onchange="calculate()">
-        <option>1045</option>
-        <option>1018</option>
-        <option>304 SS</option>
-        <option>316 SS</option>
-        <option>17-4PH</option>
-      </select>
-    </label>
-    <label>Gearbox Weight (lb)<input type="number" id="gearbox_weight_lb" step="10" min="0" oninput="calculate()" onchange="calculate()"></label>
-    <label>Pulley Weight (lb)<input type="number" id="pulley_weight_lb" step="10" min="0" oninput="calculate()" onchange="calculate()"></label>
-  </details>
-
-  <!-- 7. Accessories (all feed Te directly) -->
-  <details open>
-    <summary>7. Accessories</summary>
-    <label>Skirtboard Length — one side (ft)<input type="number" id="skirt_length_ft" step="1" min="0" oninput="calculate()" onchange="calculate()"></label>
-    <label>Skirtboard Friction Factor<input type="number" id="skirt_friction" step="0.01" min="0.05" max="0.5" oninput="calculate()" onchange="calculate()"></label>
-    <label>Plow Type
-      <select id="plow_type" onchange="onPlowChange()">
-        <option value="None">None</option>
-        <option value="Full V">Full V</option>
-        <option value="Partial V">Partial V</option>
-      </select>
-    </label>
-    <label>Quantity of Plows
-      <select id="num_plows" onchange="calculate()">
-        <option value="0">0</option>
-        <option value="1">1</option>
-        <option value="2">2</option>
-      </select>
-    </label>
-    <label>Quantity of Scrapers<input type="number" id="num_scrapers" step="1" min="0" oninput="calculate()" onchange="calculate()"></label>
-  </details>
-
-  <!-- 8. Specifications — scope/spec fields, don't affect calc numbers -->
-  <details>
-    <summary>8. Specifications <span class="spec-tag">scope only</span></summary>
-    <label class="spec">Idler Type <span class="spec-tag">spec</span>
-      <select id="idler_type" onchange="calculate()">
-        <option value="TROUGHING">Troughing</option>
-        <option value="FLAT">Flat</option>
-      </select>
-    </label>
-    <label class="spec">Return Idler Spacing (ft) <span class="spec-tag">spec</span><input type="number" id="return_spacing_ft" step="1" min="2" max="15" oninput="calculate()" onchange="calculate()"></label>
-    <label class="spec">Impact Idler Spacing (ft) <span class="spec-tag">spec</span><input type="number" id="impact_spacing_ft" step="0.5" min="0.5" oninput="calculate()" onchange="calculate()"></label>
-    <label class="spec">Belt Thickness (in) <span class="spec-tag">spec</span><input type="number" id="belt_thick_in" step="0.03125" min="0.1875" oninput="calculate()" onchange="calculate()"></label>
-    <label class="spec">Drive Wrap Angle (deg) <span class="spec-tag">spec</span><input type="number" id="wrap_deg" step="5" min="150" max="240" oninput="calculate()" onchange="calculate()"></label>
-    <label class="spec">Angle — Tension vs Overhung Load (deg) <span class="spec-tag">spec</span><input type="number" id="angle_tension_oh_deg" step="5" min="0" max="360" oninput="calculate()" onchange="calculate()"></label>
-    <label class="spec">Service Duty <span class="spec-tag">spec</span>
-      <select id="service_duty" onchange="calculate()">
-        <option>Light</option>
-        <option selected>Standard</option>
-        <option>Heavy</option>
-      </select>
-    </label>
-    <label class="spec">Area Classification <span class="spec-tag">spec</span>
-      <select id="area_classification" onchange="calculate()">
-        <option>NO</option>
-        <option>Class 1 Div 1</option>
-        <option>Class 1 Div 2</option>
-        <option>Class 2 Div 1</option>
-        <option>Class 2 Div 2</option>
-      </select>
-    </label>
-    <label class="spec">Drive Notes <span class="spec-tag">spec</span><input type="text" id="drive_notes"></label>
-  </details>
-
-</div><!-- end form-panel -->
-
-<!-- ===== RIGHT PANEL: OUTPUT ===== -->
-<div class="output-panel" id="output-panel">
-  <p style="color:#888; font-style:italic;">Loading calculations...</p>
+  <div class="btn-row" style="margin:0">
+    <button class="primary" onclick="window.print()">Print / Save PDF</button>
+    <button onclick="resetToDefaults()">Reset to Defaults</button>
+  </div>
 </div>
 
-</div><!-- end app -->
+<div class="main">
+
+<!-- ===== LEFT PANEL: INPUT FORM ===== -->
+<div class="left">
+
+  <!-- 1. Project Info -->
+  <div class="section">
+  <div class="sec-header" onclick="toggleSec('sec-project')">
+    <h2>1. Project Info</h2><span class="sec-toggle" id="tog-project">▸</span>
+  </div>
+  <div class="sec-body collapsed" id="sec-project">
+  <div style="height:6px"></div>
+  <div class="field-row"><label>Project No.</label><input type="text" id="project_no"></div>
+  <div class="field-row"><label>Location</label><input type="text" id="location"></div>
+  <div class="field-row"><label>Customer</label><input type="text" id="customer"></div>
+  <div class="field-row"><label>Engineer</label><input type="text" id="engineer"></div>
+  <div class="field-row"><label>Description</label><input type="text" id="description"></div>
+  <div class="field-row"><label>By</label><input type="text" id="by"></div>
+  <div class="field-row"><label>Date</label><input type="text" id="date"></div>
+  <div class="field-row"><label>Revision</label><input type="text" id="revision"></div>
+  </div>
+  </div>
+
+  <!-- 2. Conveyor Geometry -->
+  <div class="section">
+  <div class="sec-header" onclick="toggleSec('sec-geometry')">
+    <h2>2. Conveyor Geometry</h2><span class="sec-toggle" id="tog-geometry" style="transform:rotate(90deg)">▸</span>
+  </div>
+  <div class="sec-body" id="sec-geometry">
+  <div style="height:6px"></div>
+  <div class="field-row input-primary"><label>Horiz. Length</label><input type="number" id="horiz_length_ft" step="1" min="1" oninput="calculate()" onchange="calculate()"><span class="std">ft</span></div>
+  <div class="field-row input-primary"><label>Incline Length</label><input type="number" id="incline_length_ft" step="1" min="0" oninput="calculate()" onchange="calculate()"><span class="std">ft</span></div>
+  <div class="field-row input-primary"><label>Incline Angle</label><input type="number" id="incline_deg" step="0.1" min="0" max="30" oninput="calculate()" onchange="calculate()"><span class="std">deg</span></div>
+  <div class="field-row input-primary"><label>Belt Width</label>
+    <select id="belt_width_in" onchange="calculate()">
+      <option value="18">18"</option>
+      <option value="24">24"</option>
+      <option value="30">30"</option>
+      <option value="36" selected>36"</option>
+      <option value="42">42"</option>
+      <option value="48">48"</option>
+    </select>
+    <span class="std">in</span>
+  </div>
+  <div class="field-row input-primary"><label>Belt Speed</label><input type="number" id="belt_speed_fpm" step="10" min="50" max="800" oninput="calculate()" onchange="calculate()"><span class="std">fpm</span></div>
+  <div class="field-row input-primary"><label>Trough Angle</label>
+    <select id="trough_angle" onchange="calculate()">
+      <option value="0">Flat (0°)</option>
+      <option value="20" selected>20°</option>
+      <option value="35">35°</option>
+      <option value="45">45°</option>
+    </select>
+    <span class="std">deg</span>
+  </div>
+  </div>
+  </div>
+
+  <!-- 3. Material Properties -->
+  <div class="section">
+  <div class="sec-header" onclick="toggleSec('sec-material')">
+    <h2>3. Material Properties</h2><span class="sec-toggle" id="tog-material" style="transform:rotate(90deg)">▸</span>
+  </div>
+  <div class="sec-body" id="sec-material">
+  <div style="height:6px"></div>
+  <div class="field-row input-primary"><label>Material</label>
+    <select id="material" onchange="onMaterialChange()">
+      <option>Biosolids (Wet Cake)</option>
+      <option>Biosolids (Dry)</option>
+      <option>Coal</option>
+      <option>Crushed Stone / Aggregate</option>
+      <option>Sand</option>
+      <option>Gravel</option>
+      <option>Grain</option>
+      <option>Wood Chips</option>
+      <option>Screenings</option>
+      <option>Grit</option>
+      <option>Lime</option>
+      <option>Other</option>
+    </select>
+  </div>
+  <div class="field-row input-primary"><label>Density</label><input type="number" id="density_lb_ft3" step="1" min="10" oninput="calculate()" onchange="calculate()"><span class="std">lb/ft³</span></div>
+  <div class="field-row input-primary"><label>Design Cap.</label><input type="number" id="capacity_tph" step="1" min="0.1" oninput="calculate()" onchange="calculate()"><span class="std">ton/hr</span></div>
+  <div class="field-row input-primary"><label>Max Incline</label><input type="number" id="max_incline_deg" step="1" min="5" max="30" oninput="calculate()" onchange="calculate()"><span class="std">deg</span></div>
+  </div>
+  </div>
+
+  <!-- 4. Belt Design -->
+  <div class="section">
+  <div class="sec-header" onclick="toggleSec('sec-belt')">
+    <h2>4. Belt Design</h2><span class="sec-toggle" id="tog-belt" style="transform:rotate(90deg)">▸</span>
+  </div>
+  <div class="sec-body" id="sec-belt">
+  <div style="height:6px"></div>
+  <div class="field-row input-primary"><label>Belt Type</label>
+    <select id="belt_type" onchange="calculate()">
+      <option value="Fabric">Fabric (2-ply, 3-ply, 4-ply)</option>
+      <option value="Steel">Steel Core (ST series)</option>
+    </select>
+  </div>
+  <div class="field-row input-secondary"><label>Belt Rating</label><input type="number" id="belt_rating_piw" step="10" min="100" max="2000" oninput="calculate()" onchange="calculate()"><span class="std">PIW</span></div>
+  <div class="field-row input-secondary"><label>Head Lagging?</label>
+    <select id="lagging" onchange="calculate()">
+      <option value="Yes">Yes</option>
+      <option value="No">No</option>
+    </select>
+  </div>
+  <div class="field-row input-secondary"><label>Lagging Thick.</label><input type="number" id="lagging_thick_in" step="0.0625" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+  </div>
+  </div>
+
+  <!-- 5. Idlers -->
+  <div class="section">
+  <div class="sec-header" onclick="toggleSec('sec-idlers')">
+    <h2>5. Idlers</h2><span class="sec-toggle" id="tog-idlers" style="transform:rotate(90deg)">▸</span>
+  </div>
+  <div class="sec-body" id="sec-idlers">
+  <div style="height:6px"></div>
+  <div class="field-row input-secondary"><label>Roll Diameter</label>
+    <select id="idler_roll_dia" onchange="calculate()">
+      <option value="5" selected>5"</option>
+      <option value="6">6"</option>
+    </select>
+    <span class="std">in</span>
+  </div>
+  <div class="field-row input-secondary"><label>Carry Spacing</label><input type="number" id="carry_spacing_ft" step="0.5" min="1" max="8" oninput="calculate()" onchange="calculate()"><span class="std">ft</span></div>
+  <div class="field-row input-secondary"><label># Impact Zones</label><input type="number" id="num_impact_zones" step="1" min="0" oninput="calculate()" onchange="calculate()"></div>
+  <div class="field-row input-secondary"><label>Impact Zone Len.</label><input type="number" id="impact_zone_len_ft" step="1" min="0" oninput="calculate()" onchange="calculate()"><span class="std">ft</span></div>
+  <div class="field-row input-secondary"><label>Fall Height</label><input type="number" id="fall_height_in" step="1" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+  </div>
+  </div>
+
+  <!-- 6. Drive & Pulleys -->
+  <div class="section">
+  <div class="sec-header" onclick="toggleSec('sec-drive')">
+    <h2>6. Drive &amp; Pulleys</h2><span class="sec-toggle" id="tog-drive" style="transform:rotate(90deg)">▸</span>
+  </div>
+  <div class="sec-body" id="sec-drive">
+  <div style="height:6px"></div>
+  <div class="field-row input-primary"><label>Drive Arrangement</label>
+    <select id="drive_arrangement" onchange="calculate()">
+      <option value="Shaft Mounted Drive">Shaft Mounted Drive</option>
+      <option value="Chain and Sprocket">Chain and Sprocket</option>
+      <option value="Motorized Drum Pulley">Motorized Drum Pulley</option>
+      <option value="V-Belt">V-Belt</option>
+    </select>
+  </div>
+  <div class="field-row input-primary"><label>Take-Up Type</label>
+    <select id="takeup_type" onchange="calculate()">
+      <option value="Manual">Manual / Screw</option>
+      <option value="Gravity">Gravity</option>
+    </select>
+  </div>
+  <div class="field-row input-primary"><label>Motor HP</label><input type="number" id="motor_hp" step="1" min="1" oninput="calculate()" onchange="calculate()"><span class="std">HP</span></div>
+  <div class="field-row input-secondary"><label>Head Pulley Dia.</label><input type="number" id="head_pulley_dia" step="2" min="6" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+  <div class="field-row input-secondary"><label>Shaft Diameter</label><input type="number" id="shaft_dia_in" step="0.0625" min="1" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+  <div class="field-row input-secondary"><label>Shaft Material</label>
+    <select id="shaft_material" onchange="calculate()">
+      <option>1045</option>
+      <option>1018</option>
+      <option>304 SS</option>
+      <option>316 SS</option>
+      <option>17-4PH</option>
+    </select>
+  </div>
+  <div class="field-row input-secondary"><label>Gearbox Weight</label><input type="number" id="gearbox_weight_lb" step="10" min="0" oninput="calculate()" onchange="calculate()"><span class="std">lb</span></div>
+  <div class="field-row input-secondary"><label>Pulley Weight</label><input type="number" id="pulley_weight_lb" step="10" min="0" oninput="calculate()" onchange="calculate()"><span class="std">lb</span></div>
+  </div>
+  </div>
+
+  <!-- 7. Accessories -->
+  <div class="section">
+  <div class="sec-header" onclick="toggleSec('sec-accessories')">
+    <h2>7. Accessories</h2><span class="sec-toggle" id="tog-accessories" style="transform:rotate(90deg)">▸</span>
+  </div>
+  <div class="sec-body" id="sec-accessories">
+  <div style="height:6px"></div>
+  <div class="field-row input-secondary"><label>Skirtboard Len.</label><input type="number" id="skirt_length_ft" step="1" min="0" oninput="calculate()" onchange="calculate()"><span class="std">ft/side</span></div>
+  <div class="field-row input-secondary"><label>Skirt Friction</label><input type="number" id="skirt_friction" step="0.01" min="0.05" max="0.5" oninput="calculate()" onchange="calculate()"></div>
+  <div class="field-row input-secondary"><label>Plow Type</label>
+    <select id="plow_type" onchange="onPlowChange()">
+      <option value="None">None</option>
+      <option value="Full V">Full V</option>
+      <option value="Partial V">Partial V</option>
+    </select>
+  </div>
+  <div class="field-row input-secondary"><label>Qty of Plows</label>
+    <select id="num_plows" onchange="calculate()">
+      <option value="0">0</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+    </select>
+  </div>
+  <div class="field-row input-secondary"><label>Qty of Scrapers</label><input type="number" id="num_scrapers" step="1" min="0" oninput="calculate()" onchange="calculate()"></div>
+  </div>
+  </div>
+
+  <!-- 8. Specifications -->
+  <div class="section">
+  <div class="sec-header" onclick="toggleSec('sec-specs')">
+    <h2>8. Specifications <span class="spec-tag">scope only</span></h2><span class="sec-toggle" id="tog-specs">▸</span>
+  </div>
+  <div class="sec-body collapsed" id="sec-specs">
+  <div style="height:6px"></div>
+  <div class="field-row input-secondary"><label>Idler Type <span class="spec-tag">spec</span></label>
+    <select id="idler_type" onchange="calculate()">
+      <option value="TROUGHING">Troughing</option>
+      <option value="FLAT">Flat</option>
+    </select>
+  </div>
+  <div class="field-row input-secondary"><label>Return Spacing <span class="spec-tag">spec</span></label><input type="number" id="return_spacing_ft" step="1" min="2" max="15" oninput="calculate()" onchange="calculate()"><span class="std">ft</span></div>
+  <div class="field-row input-secondary"><label>Impact Spacing <span class="spec-tag">spec</span></label><input type="number" id="impact_spacing_ft" step="0.5" min="0.5" oninput="calculate()" onchange="calculate()"><span class="std">ft</span></div>
+  <div class="field-row input-calculated"><label>Belt Thickness <span class="spec-tag">spec</span></label><input type="number" id="belt_thick_in" step="0.03125" min="0.1875" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+  <div class="field-row input-secondary"><label>Wrap Angle <span class="spec-tag">spec</span></label><input type="number" id="wrap_deg" step="5" min="150" max="240" oninput="calculate()" onchange="calculate()"><span class="std">deg</span></div>
+  <div class="field-row input-secondary"><label>T vs OH Angle <span class="spec-tag">spec</span></label><input type="number" id="angle_tension_oh_deg" step="5" min="0" max="360" oninput="calculate()" onchange="calculate()"><span class="std">deg</span></div>
+  <div class="field-row input-secondary"><label>Service Duty <span class="spec-tag">spec</span></label>
+    <select id="service_duty" onchange="calculate()">
+      <option>Light</option>
+      <option selected>Standard</option>
+      <option>Heavy</option>
+    </select>
+  </div>
+  <div class="field-row input-secondary"><label>Area Class. <span class="spec-tag">spec</span></label>
+    <select id="area_classification" onchange="calculate()">
+      <option>NO</option>
+      <option>Class 1 Div 1</option>
+      <option>Class 1 Div 2</option>
+      <option>Class 2 Div 1</option>
+      <option>Class 2 Div 2</option>
+    </select>
+  </div>
+  <div class="field-row input-secondary"><label>Drive Notes <span class="spec-tag">spec</span></label><input type="text" id="drive_notes"></div>
+  </div>
+  </div>
+
+</div><!-- end left -->
+
+<!-- ===== RIGHT PANEL: OUTPUT ===== -->
+<div class="right" id="output-panel">
+  <p style="color:#888;font-style:italic;">Loading calculations...</p>
+</div>
+
+</div><!-- end main -->
 
 <script>
 // ===========================================================================
@@ -470,10 +558,16 @@ function beltWeightLookup(width, rating) {
   return row[0];
 }
 
-function checkRow(label, allowStr, calcStr, pass) {
-  const cls = pass ? "pass" : "fail";
-  const lbl = pass ? "PASS" : "FAIL";
-  return `<tr><td>${label}</td><td>${allowStr}</td><td>${calcStr}</td><td class="${cls}">${lbl}</td></tr>`;
+function badge(text, cls) {
+  return `<span class="badge ${cls}">${text}</span>`;
+}
+
+function resultRow(label, val, unit, badgeHtml) {
+  return `<div class="result-row"><span class="label">${label}</span><span class="val">${val}</span><span class="unit">${unit}</span><span>${badgeHtml || ''}</span></div>`;
+}
+
+function checkResultRow(label, allowStr, calcStr, pass) {
+  return resultRow(label, calcStr, allowStr, badge(pass ? 'PASS' : 'FAIL', pass ? 'ok' : 'fail'));
 }
 
 function impactLookup(spacing) {
@@ -482,6 +576,18 @@ function impactLookup(spacing) {
     if (spacing <= tbl[i+1].spacing) return tbl[i];
   }
   return tbl[tbl.length - 1];
+}
+
+// ===========================================================================
+// COLLAPSIBLE SECTIONS
+// ===========================================================================
+function toggleSec(id) {
+  const body = document.getElementById(id);
+  const togId = 'tog-' + id.replace('sec-', '');
+  const tog = document.getElementById(togId);
+  if (!body) return;
+  const collapsed = body.classList.toggle('collapsed');
+  if (tog) tog.style.transform = collapsed ? '' : 'rotate(90deg)';
 }
 
 // ===========================================================================
@@ -793,13 +899,13 @@ function calculate() {
   const fixit_hp    = STD_MOTOR_HP.filter(h => h >= HPmin).slice(0,3);
 
   // ===========================================================================
-  // RENDER
+  // RENDER — result-box / result-row / badge pattern
   // ===========================================================================
   let html = "";
 
   // Project header
   html += `<div class="project-header">
-    <h2>BELT CONVEYOR DESIGN SHEET</h2>
+    <h2>Belt Conveyor Design Sheet</h2>
     <div class="project-meta">
       <span><strong>Project No.:</strong> ${proj_no}</span>
       <span><strong>By:</strong> ${by}</span>
@@ -813,71 +919,80 @@ function calculate() {
   </div>`;
 
   // Conveyor summary
-  html += `<div class="section-title">CONVEYOR PARAMETERS</div>
-  <table><thead><tr><th>Parameter</th><th>Value</th><th>Parameter</th><th>Value</th></tr></thead><tbody>
-    <tr><td>Horizontal Length</td><td>${fmt(horiz_ft,1)} ft</td><td>Incline Length</td><td>${fmt(incl_ft,1)} ft</td></tr>
-    <tr><td>Incline Angle</td><td>${fmt(incline_deg,1)} deg</td><td>Lift Height (H)</td><td>${fmt(H,2)} ft</td></tr>
-    <tr><td>Belt Width</td><td>${bw}"</td><td>Trough Angle</td><td>${trough_ang}°</td></tr>
-    <tr><td>Belt Speed</td><td>${fmt(speed_fpm,1)} fpm</td><td>Drive Arrangement</td><td>${drive_arr}</td></tr>
-    <tr><td>Material</td><td>${material}</td><td>Density</td><td>${fmt(density,1)} lb/ft³</td></tr>
-    <tr><td>Design Capacity</td><td>${fmt(cap_tph,1)} ton/hr</td><td>Belt Type</td><td>${belt_type}</td></tr>
-    <tr><td>Belt Rating</td><td>${fmt(rating_piw,0)} PIW</td><td>Takeup</td><td>${takeup}</td></tr>
-  </tbody></table>`;
+  html += `<div class="result-box">
+  <h2>Conveyor Parameters</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 12px">
+  <div>
+    ${resultRow('Horiz. Length', fmt(horiz_ft,1), 'ft', '')}
+    ${resultRow('Incline Length', fmt(incl_ft,1), 'ft', '')}
+    ${resultRow('Incline Angle', fmt(incline_deg,1), 'deg', '')}
+    ${resultRow('Belt Width', bw+'"', '', '')}
+    ${resultRow('Belt Speed', fmt(speed_fpm,1), 'fpm', '')}
+    ${resultRow('Trough Angle', trough_ang+'°', '', '')}
+  </div>
+  <div>
+    ${resultRow('Material', material, '', '')}
+    ${resultRow('Density', fmt(density,1), 'lb/ft³', '')}
+    ${resultRow('Design Cap.', fmt(cap_tph,1), 'ton/hr', '')}
+    ${resultRow('Belt Type', belt_type, '', '')}
+    ${resultRow('Belt Rating', fmt(rating_piw,0), 'PIW', '')}
+    ${resultRow('Drive', drive_arr, '', '')}
+  </div>
+  </div>
+  </div>`;
 
   // 1. Geometry & Capacity
-  html += `<div class="section-title">1. GEOMETRY &amp; CAPACITY</div>
-  <table><thead><tr><th>Variable</th><th>Description</th><th>Value</th><th>Unit</th></tr></thead><tbody>
-    <tr><td>L_total</td><td>Total Conveyor Length</td><td>${fmt(L_total,1)}</td><td>ft</td></tr>
-    <tr><td>H</td><td>Lift Height</td><td>${fmt(H,2)}</td><td>ft</td></tr>
-    <tr><td>α</td><td>Incline Angle</td><td>${fmt(incline_deg,1)}</td><td>deg</td></tr>
-    <tr><td>Cap/fpm</td><td>Cross-Section Capacity (CEMA table)</td><td>${fmt(cap_per_fpm,3)}</td><td>ft³/hr/fpm</td></tr>
-    <tr><td>Vol Capacity</td><td>Volume Capacity at Design Speed</td><td>${fmt(vol_cap_ft3hr,1)}</td><td>ft³/hr</td></tr>
-    <tr><td>Vol Required</td><td>Required Volume at Design Density</td><td>${fmt(vol_required_ft3hr,1)}</td><td>ft³/hr</td></tr>
-    <tr><td>Utilization</td><td>Capacity Utilization</td><td>${fmt(cap_util*100,1)}%</td><td class="${cap_overload?'fail':'pass'}">${cap_overload?"BELT OVERLOADED":"OK"}</td></tr>
-    <tr><td>Max Incline</td><td>Max Allowable Incline for Material</td><td>${fmt(max_incl,1)}</td><td class="${incline_ok?'pass':'fail'}">${incline_ok?"OK":"OVER LIMIT"}</td></tr>
-  </tbody></table>`;
+  html += `<div class="result-box">
+  <h2>1. Geometry &amp; Capacity</h2>
+  ${resultRow('L_total', fmt(L_total,1), 'ft', '')}
+  ${resultRow('H (lift)', fmt(H,2), 'ft', '')}
+  ${resultRow('Cap/fpm (CEMA)', fmt(cap_per_fpm,3), 'ft³/hr/fpm', '')}
+  ${resultRow('Vol. Capacity', fmt(vol_cap_ft3hr,1), 'ft³/hr', '')}
+  ${resultRow('Vol. Required', fmt(vol_required_ft3hr,1), 'ft³/hr', '')}
+  ${resultRow('Utilization', fmt(cap_util*100,1)+'%', '', badge(cap_overload ? 'OVERLOAD' : 'OK', cap_overload ? 'fail' : 'ok'))}
+  ${resultRow('Incline vs. Max', fmt(incline_deg,1)+'° / '+fmt(max_incl,1)+'°', '', badge(incline_ok ? 'OK' : 'OVER LIMIT', incline_ok ? 'ok' : 'fail'))}
+  </div>`;
 
   // 2. Belt Loading
-  html += `<div class="section-title">2. BELT LOADING</div>
-  <table><thead><tr><th>Variable</th><th>Description</th><th>Value</th><th>Unit</th></tr></thead><tbody>
-    <tr><td>Wm</td><td>Material Weight per ft</td><td>${fmt(Wm,3)}</td><td>lb/ft</td></tr>
-    <tr><td>Wb</td><td>Belt Weight per ft</td><td>${fmt(Wb,3)}</td><td>lb/ft</td></tr>
-    <tr><td>Wm+Wb</td><td>Combined Belt+Material Weight</td><td>${fmt(WmWb,3)}</td><td>lb/ft</td></tr>
-    <tr><td>KT</td><td>Temperature Correction Factor</td><td>${fmt(KT,2)}</td><td>—</td></tr>
-    <tr><td>Ai</td><td>Force to Rotate Idlers</td><td>${fmt(Ai,2)}</td><td>—</td></tr>
-    <tr><td>Kx</td><td>Idler Friction Factor</td><td>${fmt(Kx,5)}</td><td>lb/ft</td></tr>
-    <tr><td>Ky</td><td>Belt/Load Flexure Factor</td><td>${fmt(Ky,4)}</td><td>—</td></tr>
-    <tr><td>Cw</td><td>Wrap Factor (${takeup}, ${lagging} lagging)</td><td>${fmt(Cw,3)}</td><td>—</td></tr>
-  </tbody></table>`;
+  html += `<div class="result-box">
+  <h2>2. Belt Loading</h2>
+  ${resultRow('Wm', fmt(Wm,3), 'lb/ft', '')}
+  ${resultRow('Wb', fmt(Wb,3), 'lb/ft', '')}
+  ${resultRow('Wm+Wb', fmt(WmWb,3), 'lb/ft', '')}
+  ${resultRow('KT', fmt(KT,2), '—', '')}
+  ${resultRow('Ai', fmt(Ai,2), '—', '')}
+  ${resultRow('Kx', fmt(Kx,5), 'lb/ft', '')}
+  ${resultRow('Ky', fmt(Ky,4), '—', '')}
+  ${resultRow('Cw ('+takeup+', '+lagging+' lag)', fmt(Cw,3), '—', '')}
+  </div>`;
 
   // 3. Tensions
-  html += `<div class="section-title">3. BELT TENSIONS</div>
-  <table><thead><tr><th>Variable</th><th>Description</th><th>Value</th><th>Unit</th></tr></thead><tbody>
-    <tr><td>To</td><td>Min Tension for 2% Sag</td><td>${fmt(To,1)}</td><td>lb</td></tr>
-    <tr><td>Tx</td><td>Resistance Carrying &amp; Return Idlers</td><td>${fmt(Tx,1)}</td><td>lb</td></tr>
-    <tr><td>Tyc</td><td>Belt Flex — Carrying Idlers</td><td>${fmt(Tyc,1)}</td><td>lb</td></tr>
-    <tr><td>Tyr</td><td>Belt Flex — Return Idlers</td><td>${fmt(Tyr,1)}</td><td>lb</td></tr>
-    <tr><td>Tym</td><td>Material Flex Over Idlers</td><td>${fmt(Tym,1)}</td><td>lb</td></tr>
-    <tr><td>Tm</td><td>Force to Lift Material (H × Wm)</td><td>${fmt(Tm,1)}</td><td>lb</td></tr>
-    <tr><td>Tp</td><td>Pulley Friction</td><td>${fmt(Tp,1)}</td><td>lb</td></tr>
-    <tr><td>Tam</td><td>Accelerated Material</td><td>${fmt(Tam,1)}</td><td>lb</td></tr>
-    <tr><td>Tsb</td><td>Skirtboard Friction</td><td>${fmt(Tsb,1)}</td><td>lb</td></tr>
-    <tr><td>Tpl</td><td>Plow Resistance</td><td>${fmt(Tpl,1)}</td><td>lb</td></tr>
-    <tr><td>TBC</td><td>Belt Cleaning Resistance</td><td>${fmt(TBC,1)}</td><td>lb</td></tr>
-    <tr><td>Tac</td><td>Total Accessory Resistance</td><td>${fmt(Tac,1)}</td><td>lb</td></tr>
-    <tr><td><strong>Te</strong></td><td><strong>Effective Tension</strong></td><td><strong>${fmt(Te,1)}</strong></td><td>lb</td></tr>
-    <tr><td>Tb</td><td>Belt Bending Tension (H × Wb)</td><td>${fmt(Tb,1)}</td><td>lb</td></tr>
-    <tr><td><strong>T2</strong></td><td><strong>Slack Side Tension (Te × Cw)</strong></td><td><strong>${fmt(T2,1)}</strong></td><td>lb</td></tr>
-    <tr><td><strong>T1</strong></td><td><strong>Tight Side Tension (Te + T2)</strong></td><td><strong>${fmt(T1,1)}</strong></td><td>lb</td></tr>
-    <tr><td>Tr</td><td>Tail Tension</td><td>${fmt(Tr,1)}</td><td>lb</td></tr>
-  </tbody></table>
-  <table><thead><tr><th>Check</th><th>Allowable (lb)</th><th>Calculated (lb)</th><th>Result</th></tr></thead><tbody>
-    ${checkRow(`T1 ≤ Rating (${rating_piw} PIW × ${bw}")`, fmt(belt_allow,0), fmt(T1,0), belt_pass)}
-  </tbody></table>`;
+  html += `<div class="result-box">
+  <h2>3. Belt Tensions</h2>
+  ${resultRow('To', fmt(To,1), 'lb', '')}
+  ${resultRow('Tx', fmt(Tx,1), 'lb', '')}
+  ${resultRow('Tyc', fmt(Tyc,1), 'lb', '')}
+  ${resultRow('Tyr', fmt(Tyr,1), 'lb', '')}
+  ${resultRow('Tym', fmt(Tym,1), 'lb', '')}
+  ${resultRow('Tm', fmt(Tm,1), 'lb', '')}
+  ${resultRow('Tp', fmt(Tp,1), 'lb', '')}
+  ${resultRow('Tam', fmt(Tam,1), 'lb', '')}
+  ${resultRow('Tsb', fmt(Tsb,1), 'lb', '')}
+  ${resultRow('Tpl', fmt(Tpl,1), 'lb', '')}
+  ${resultRow('TBC', fmt(TBC,1), 'lb', '')}
+  ${resultRow('Tac', fmt(Tac,1), 'lb', '')}
+  <div class="result-row"><span class="label" style="font-weight:700">Te (effective)</span><span class="val" style="color:#003366">${fmt(Te,1)}</span><span class="unit">lb</span><span></span></div>
+  ${resultRow('Tb', fmt(Tb,1), 'lb', '')}
+  <div class="result-row"><span class="label" style="font-weight:700">T2 (slack)</span><span class="val" style="color:#003366">${fmt(T2,1)}</span><span class="unit">lb</span><span></span></div>
+  <div class="result-row"><span class="label" style="font-weight:700">T1 (tight)</span><span class="val" style="color:#003366">${fmt(T1,1)}</span><span class="unit">lb</span><span></span></div>
+  ${resultRow('Tr (tail)', fmt(Tr,1), 'lb', '')}
+  <hr style="border:none;border-top:1px solid #d0d4dc;margin:6px 0">
+  ${checkResultRow('T1 ≤ Rating ('+rating_piw+' PIW × '+bw+'")', fmt(belt_allow,0)+' lb', fmt(T1,0)+' lb', belt_pass)}
+  </div>`;
 
   // Fix-it belt hint if failing
   if (!belt_pass) {
-    html += `<div class="fixit-table"><h4>Fix-It → Belt Rating</h4>
+    html += `<div class="fixit-table"><h4>Fix-It: Belt Rating</h4>
     Belt T1 = ${fmt(T1,0)} lb exceeds ${rating_piw} PIW × ${bw}" = ${fmt(belt_allow,0)} lb.<br>
     Minimum passing ratings at this width:<br>`;
     for (const p of fixit_belts) {
@@ -887,25 +1002,22 @@ function calculate() {
   }
 
   // 4. Power
-  html += `<div class="section-title">4. POWER</div>
-  <table><thead><tr><th>Variable</th><th>Description</th><th>Value</th><th>Unit</th></tr></thead><tbody>
-    <tr><td>HPb</td><td>HP at Belt (Te × V / 33000)</td><td>${fmt(HPb,3)}</td><td>HP</td></tr>
-    <tr><td>Drive Eff (ηm)</td><td>Power Transmission Efficiency</td><td>${fmt(drive_eff,3)}</td><td>—</td></tr>
-    <tr><td><strong>HPmin</strong></td><td><strong>Min Required Motor HP</strong></td><td><strong>${fmt(HPmin,3)}</strong></td><td>HP</td></tr>
-    <tr><td>HP_std</td><td>Next Standard Motor HP</td><td>${fmt(HP_std,0)}</td><td>HP</td></tr>
-    <tr><td>Motor HP (selected)</td><td>Selected Motor HP</td><td>${fmt(motor_hp,0)}</td><td>HP</td></tr>
-    <tr><td>Safety Factor</td><td>Motor HP / HPmin</td><td>${motor_SF !== null ? fmt(motor_SF,2) : "—"}</td><td>—</td></tr>
-    <tr><td>Drum Dia (lagged)</td><td>Head Pulley + 2× Lagging</td><td>${fmt(drum_dia_lagged,3)}</td><td>in</td></tr>
-    <tr><td>Drum RPM</td><td>Design Speed at Drum</td><td>${fmt(drum_rpm,2)}</td><td>rpm</td></tr>
-    <tr><td>Req Torque</td><td>Required Torque at Drum</td><td>${fmt(req_torque,0)}</td><td>in-lb</td></tr>
-  </tbody></table>
-  <table><thead><tr><th>Check</th><th>Required</th><th>Selected</th><th>Result</th></tr></thead><tbody>
-    ${checkRow("Motor HP", `≥ ${fmt(HPmin,1)} HP`, `${fmt(motor_hp,0)} HP`, motor_pass)}
-  </tbody></table>`;
+  html += `<div class="result-box">
+  <h2>4. Power</h2>
+  ${resultRow('HPb (belt)', fmt(HPb,3), 'HP', '')}
+  ${resultRow('Drive Eff. (ηm)', fmt(drive_eff,3), '—', '')}
+  <div class="result-row"><span class="label" style="font-weight:700">HPmin (required)</span><span class="val" style="color:#003366">${fmt(HPmin,3)}</span><span class="unit">HP</span><span></span></div>
+  ${resultRow('HP_std (next std)', fmt(HP_std,0), 'HP', '')}
+  ${resultRow('Motor HP (sel.)', fmt(motor_hp,0), 'HP', badge(motor_pass ? 'PASS' : 'FAIL', motor_pass ? 'ok' : 'fail'))}
+  ${resultRow('Safety Factor', motor_SF !== null ? fmt(motor_SF,2) : '—', '—', '')}
+  ${resultRow('Drum Dia (lagged)', fmt(drum_dia_lagged,3), 'in', '')}
+  ${resultRow('Drum RPM', fmt(drum_rpm,2), 'rpm', '')}
+  ${resultRow('Req. Torque', fmt(req_torque,0), 'in-lb', '')}
+  </div>`;
 
   // Fix-it motor hint
   if (!motor_pass) {
-    html += `<div class="fixit-table"><h4>Fix-It → Motor HP</h4>
+    html += `<div class="fixit-table"><h4>Fix-It: Motor HP</h4>
     Minimum required: ${fmt(HPmin,1)} HP. Standard sizes that pass:<br>`;
     for (const h of fixit_hp) {
       html += `&nbsp;→ <strong>${h} HP</strong> (SF = ${fmt(h/HPmin,2)})<br>`;
@@ -914,82 +1026,77 @@ function calculate() {
   }
 
   // SEW KA gearmotor recommendation block
-  html += `<div class="section-title">4b. SEW GEARMOTOR RECOMMENDATION (KA Series)</div>`;
+  html += `<div class="result-box" style="border-left:3px solid #003366">
+  <h2>4b. SEW Gearmotor Recommendation (KA Series)</h2>`;
   if (ka_frame) {
-    html += `<table><thead><tr><th>Parameter</th><th>Value</th></tr></thead><tbody>
-      <tr><td>Recommended Frame</td><td><strong>${ka_frame.frame}</strong></td></tr>
-      <tr><td>Catalog HP (max)</td><td>${ka_frame.max_hp} HP</td></tr>
-      <tr><td>Catalog Torque (max)</td><td>${fmt(ka_frame.max_torque_inlb,0)} in-lb</td></tr>
-      <tr><td>Hollow Bore (standard)</td><td>${ka_frame.bore_in}" ANSI</td></tr>
-      <tr><td>Required Motor HP</td><td>${fmt(HP_std,0)} HP (next std ≥ ${fmt(HPmin,2)} HP)</td></tr>
-      <tr><td>Required Output Torque</td><td>${req_torque !== null ? fmt(req_torque,0) + " in-lb" : "—"}</td></tr>
-      <tr><td>Required Output Speed</td><td>${fmt(drum_rpm,1)} RPM</td></tr>
-    </tbody></table>
-    <div style="font-size:11px;color:#495057;margin-top:6px;padding:6px 8px;background:#f8f9fa;border:1px solid #dee2e6;border-radius:4px;">
+    html += `
+    ${resultRow('Recommended Frame', '<strong>'+ka_frame.frame+'</strong>', '', '')}
+    ${resultRow('Catalog HP (max)', ka_frame.max_hp+' HP', '', '')}
+    ${resultRow('Catalog Torque (max)', fmt(ka_frame.max_torque_inlb,0), 'in-lb', '')}
+    ${resultRow('Hollow Bore (std)', ka_frame.bore_in+'"', 'ANSI', '')}
+    ${resultRow('Required Motor HP', fmt(HP_std,0)+' HP (≥ '+fmt(HPmin,2)+')', '', '')}
+    ${resultRow('Required Torque', req_torque !== null ? fmt(req_torque,0)+' in-lb' : '—', '', '')}
+    ${resultRow('Required Output Spd', fmt(drum_rpm,1), 'RPM', '')}
+    <div class="note" style="margin-top:6px">
       Confirm ratio availability and f<sub>B</sub> ≥ 1.4 in SEW DriveSelect (60Hz US catalog, KA series, shaft-mount).
       Bore size shown is standard ANSI — confirm compatibility with head pulley shaft (${fmt(shaft_dia,4)}").
     </div>`;
   } else {
-    html += `<div class="fixit-table">No KA frame found in table for ${fmt(HP_std,0)} HP / ${req_torque !== null ? fmt(req_torque,0) + " in-lb" : "—"} torque. Consult SEW DriveSelect directly.</div>`;
+    html += `<div class="fixit-table">No KA frame found in table for ${fmt(HP_std,0)} HP / ${req_torque !== null ? fmt(req_torque,0)+' in-lb' : '—'} torque. Consult SEW DriveSelect directly.</div>`;
   }
+  html += `</div>`;
 
   // 5. Belt Sag
-  html += `<div class="section-title">5. BELT SAG</div>
-  <table><thead><tr><th>Variable</th><th>Description</th><th>Value</th><th>Unit</th></tr></thead><tbody>
-    <tr><td>To</td><td>Min Tension for 2% Sag</td><td>${fmt(To,1)}</td><td>lb</td></tr>
-    <tr><td>y</td><td>Sag Between Carrying Idlers</td><td>${fmt(sag_in,3)}</td><td>in</td></tr>
-    <tr><td>Sag %</td><td>Sag as % of Idler Spacing</td><td>${fmt(sag_pct,2)}</td><td>%</td></tr>
-  </tbody></table>
-  <table><thead><tr><th>Check</th><th>Allowable</th><th>Calculated</th><th>Result</th></tr></thead><tbody>
-    ${checkRow("Belt Sag", "≤ 2.0%", `${fmt(sag_pct,2)}%`, sag_pass)}
-  </tbody></table>`;
+  html += `<div class="result-box">
+  <h2>5. Belt Sag</h2>
+  ${resultRow('To', fmt(To,1), 'lb', '')}
+  ${resultRow('y (sag)', fmt(sag_in,3), 'in', '')}
+  ${resultRow('Sag %', fmt(sag_pct,2), '%', badge(sag_pass ? 'PASS' : 'FAIL', sag_pass ? 'ok' : 'fail'))}
+  <div style="font-size:11px;color:#888;margin-top:4px">Allowable: ≤ 2.0% of idler spacing</div>
+  </div>`;
 
   // 6. Idler Bearing Life
-  html += `<div class="section-title">6. IDLER BEARING LIFE (CEMA)</div>
-  <table><thead><tr><th>Variable</th><th>Description</th><th>Value</th><th>Unit</th></tr></thead><tbody>
-    <tr><td>IML (carry)</td><td>Idler Misalignment Load</td><td>${fmt(IML_carry,1)}</td><td>lb</td></tr>
-    <tr><td>CIL (carry)</td><td>Calculated Idler Load</td><td>${fmt(CIL_carry,1)}</td><td>lb</td></tr>
-    <tr><td>K2</td><td>Effect of Load</td><td>${K2}</td><td>—</td></tr>
-    <tr><td>K3A</td><td>Belt Speed Effect</td><td>${K3A}</td><td>—</td></tr>
-    <tr><td>K3B</td><td>Roll Diameter Effect (${roll_dia}")</td><td>${K3B}</td><td>—</td></tr>
-    <tr><td>Basic L10</td><td>Factored CEMA-C L10 Life</td><td>${fmt(basic_L10,0)}</td><td>hr</td></tr>
-    <tr><td>K4A</td><td>Maintenance Factor</td><td>${K4A}</td><td>—</td></tr>
-    <tr><td>K4B</td><td>Environment Factor</td><td>${K4B}</td><td>—</td></tr>
-    <tr><td>K4C</td><td>Temperature Factor</td><td>${K4C}</td><td>—</td></tr>
-    <tr><td><strong>Adj L10</strong></td><td><strong>Adjusted L10 Life</strong></td><td><strong>${fmt(adj_L10,0)}</strong></td><td>hr</td></tr>
-  </tbody></table>
-  <table><thead><tr><th>Check</th><th>Allowable</th><th>Calculated</th><th>Result</th></tr></thead><tbody>
-    ${checkRow("Carrying Idler L10", "≥ 30,000 hr", `${fmt(adj_L10,0)} hr`, bearing_pass)}
-  </tbody></table>`;
+  html += `<div class="result-box">
+  <h2>6. Idler Bearing Life (CEMA)</h2>
+  ${resultRow('IML (carry)', fmt(IML_carry,1), 'lb', '')}
+  ${resultRow('CIL (carry)', fmt(CIL_carry,1), 'lb', '')}
+  ${resultRow('K2', K2, '—', '')}
+  ${resultRow('K3A', K3A, '—', '')}
+  ${resultRow('K3B ('+roll_dia+'")', K3B, '—', '')}
+  ${resultRow('Basic L10', fmt(basic_L10,0), 'hr', '')}
+  ${resultRow('K4A', K4A, '—', '')}
+  ${resultRow('K4B', K4B, '—', '')}
+  ${resultRow('K4C', K4C, '—', '')}
+  <div class="result-row"><span class="label" style="font-weight:700">Adj. L10</span><span class="val" style="color:#003366">${fmt(adj_L10,0)}</span><span class="unit">hr</span><span>${badge(bearing_pass ? 'PASS' : 'FAIL', bearing_pass ? 'ok' : 'fail')}</span></div>
+  <div style="font-size:11px;color:#888;margin-top:4px">Allowable: ≥ 30,000 hr</div>
+  </div>`;
 
   // 7. Impact Idler Analysis
-  html += `<div class="section-title">7. IMPACT IDLER ANALYSIS</div>
-  <table><thead><tr><th>Variable</th><th>Description</th><th>Value</th><th>Unit</th></tr></thead><tbody>
-    <tr><td>Fall Height</td><td>Height of Material Fall</td><td>${fmt(fall_in,1)}</td><td>in</td></tr>
-    <tr><td>F</td><td>Impact Load from Falling Material</td><td>${fmt(F_impact,1)}</td><td>lb</td></tr>
-    <tr><td>Fu</td><td>Unit Impact Force (F × K1)</td><td>${fmt(Fu_impact,1)}</td><td>lb</td></tr>
-    <tr><td>CIL_imp</td><td>Calculated Idler Load at Impact</td><td>${fmt(CIL_impact,1)}</td><td>lb</td></tr>
-    <tr><td>Rated CIL</td><td>Idler Load Rating</td><td>${fmt(idler_load_rating,0)}</td><td>lb</td></tr>
-  </tbody></table>
-  <table><thead><tr><th>Check</th><th>Allowable</th><th>Calculated</th><th>Result</th></tr></thead><tbody>
-    ${checkRow("Impact Force < Min(CIL, Rated)", `${fmt(Math.min(CIL_impact,idler_load_rating),0)} lb`, `${fmt(Fu_impact,0)} lb`, impact_pass)}
-  </tbody></table>`;
+  html += `<div class="result-box">
+  <h2>7. Impact Idler Analysis</h2>
+  ${resultRow('Fall Height', fmt(fall_in,1), 'in', '')}
+  ${resultRow('F (impact load)', fmt(F_impact,1), 'lb', '')}
+  ${resultRow('Fu (unit force)', fmt(Fu_impact,1), 'lb', '')}
+  ${resultRow('CIL_imp', fmt(CIL_impact,1), 'lb', '')}
+  ${resultRow('Rated CIL', fmt(idler_load_rating,0), 'lb', '')}
+  <hr style="border:none;border-top:1px solid #d0d4dc;margin:6px 0">
+  ${checkResultRow('Fu < Min(CIL, Rated)', fmt(Math.min(CIL_impact,idler_load_rating),0)+' lb', fmt(Fu_impact,0)+' lb', impact_pass)}
+  </div>`;
 
   // 8. Pulley Shaft Deflection
-  html += `<div class="section-title">8. PULLEY SHAFT DEFLECTION</div>
-  <table><thead><tr><th>Variable</th><th>Description</th><th>Value</th><th>Unit</th></tr></thead><tbody>
-    <tr><td>Shaft Dia</td><td>Head Pulley Shaft Diameter</td><td>${fmt(shaft_dia,4)}</td><td>in</td></tr>
-    <tr><td>I</td><td>Section Moment of Inertia</td><td>${fmt(I_shaft,5)}</td><td>in⁴</td></tr>
-    <tr><td>E</td><td>Modulus of Elasticity (${shaft_mat})</td><td>${fmt(E_shaft/1e6,0)}×10⁶</td><td>psi</td></tr>
-    <tr><td>L_bearing</td><td>Bearing Centers</td><td>${fmt(L_bearing,1)}</td><td>in</td></tr>
-    <tr><td>R_belt</td><td>Resultant Belt Tension (T1+T2)</td><td>${fmt(R_belt,0)}</td><td>lb</td></tr>
-    <tr><td>R_load</td><td>Resultant Load on Shaft</td><td>${fmt(R_load,0)}</td><td>lb</td></tr>
-    <tr><td>tan(α)</td><td>Shaft End Slope</td><td>${fmt(tan_alpha,6)}</td><td>in/in</td></tr>
-    <tr><td>α</td><td>Shaft End Angle</td><td>${fmt(alpha_deg,4)}</td><td>deg</td></tr>
-  </tbody></table>
-  <table><thead><tr><th>Check</th><th>Allowable</th><th>Calculated</th><th>Result</th></tr></thead><tbody>
-    ${checkRow("Shaft Slope tan(α)", "< 0.0023 in/in", fmt(tan_alpha,6), shaft_pass)}
-  </tbody></table>`;
+  html += `<div class="result-box">
+  <h2>8. Pulley Shaft Deflection</h2>
+  ${resultRow('Shaft Dia.', fmt(shaft_dia,4), 'in', '')}
+  ${resultRow('I', fmt(I_shaft,5), 'in⁴', '')}
+  ${resultRow('E ('+shaft_mat+')', fmt(E_shaft/1e6,0)+'×10⁶', 'psi', '')}
+  ${resultRow('L_bearing', fmt(L_bearing,1), 'in', '')}
+  ${resultRow('R_belt (T1+T2)', fmt(R_belt,0), 'lb', '')}
+  ${resultRow('R_load', fmt(R_load,0), 'lb', '')}
+  ${resultRow('tan(α)', fmt(tan_alpha,6), 'in/in', '')}
+  ${resultRow('α', fmt(alpha_deg,4), 'deg', '')}
+  <hr style="border:none;border-top:1px solid #d0d4dc;margin:6px 0">
+  ${checkResultRow('Shaft Slope tan(α) < 0.0023', '< 0.0023 in/in', fmt(tan_alpha,6), shaft_pass)}
+  </div>`;
 
   // Footer
   html += `<div class="footer-bar">BELT CONVEYOR DESIGN SHEET &nbsp;|&nbsp; CEMA 6th Ed. &nbsp;|&nbsp; REV. ${revision} &nbsp;|&nbsp; ${date}</div>`;
