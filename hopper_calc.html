@@ -97,7 +97,7 @@ button.primary:hover{background:#002244}
   <div>
     <a href="index.html" style="font-size:11px;color:#aac;text-decoration:none;display:block;margin-bottom:2px;">← Back to Tool Index</a>
     <h1>Hopper Design Calculator</h1>
-    <span class="rev">Live-Bottom Biosolids Hopper · Phase 2</span>
+    <span class="rev">Live-Bottom Biosolids Hopper · CEMA 350 / Internal JMS Standards</span>
   </div>
   <div class="btn-row" style="margin:0">
     <button class="primary" onclick="window.print()">Print / Save PDF</button>
@@ -122,8 +122,9 @@ button.primary:hover{background:#002244}
 <div style="height:6px"></div>
 <div class="field-row"><label>Project No.</label><input id="projNo" type="text" oninput="calculate()" onchange="calculate()"></div>
 <div class="field-row"><label>Customer</label><input id="customer" type="text" oninput="calculate()" onchange="calculate()"></div>
-<div class="field-row"><label>Location</label><input id="location" type="text" oninput="calculate()" onchange="calculate()"></div>
 <div class="field-row"><label>Engineer</label><input id="engineer" type="text" oninput="calculate()" onchange="calculate()"></div>
+<div class="field-row"><label>Location</label><input id="location" type="text" oninput="calculate()" onchange="calculate()"></div>
+<div class="field-row"><label>Description</label><input id="desc" type="text" oninput="calculate()" onchange="calculate()"></div>
 <div class="field-row"><label>Date</label><input id="proj_date" type="date" oninput="calculate()" onchange="calculate()"></div>
 <div class="field-row"><label>Revision</label><input id="revision" type="text" oninput="calculate()" onchange="calculate()"></div>
 </div>
@@ -158,6 +159,7 @@ button.primary:hover{background:#002244}
 <div style="height:6px"></div>
 <div class="field-row input-primary"><label>Material</label>
 <select id="material" onchange="onMaterialChange()">
+<option value="">— select —</option>
 <option>Biosolids (Wet Cake)</option>
 <option>Biosolids (Dry)</option>
 <option>Lime</option>
@@ -392,25 +394,26 @@ function inlineR(deg) {
 function calculate() {
   const proj_no   = sv('projNo');
   const customer  = sv('customer');
-  const location  = sv('location');
   const engineer  = sv('engineer');
+  const location  = sv('location');
+  const desc      = sv('desc');
   const proj_date = sv('proj_date');
   const revision  = sv('revision');
 
   const OAL_in  = nv('oal_in');
   const OAW_in  = nv('oaw_in');
   const OAH_in  = nv('oah_in');
-  const slope   = nv('side_slope_deg', 65);
+  const slope   = nv('side_slope_deg');
   const reqVol  = nv('req_volume_yds');
   const dLen_in = nv('discharge_len_in');
   const dWid_in = nv('discharge_wid_in');
-  const density = nv('density_lbft3', 60);
+  const density = nv('density_lbft3');
   const flowrate= nv('flowrate_lbhr');
-  const angRepos= nv('angle_repose_deg', 38);
-  const X       = nv('qty_lb_screws', 2);
-  const D       = nv('lb_screw_dia_in', 14);
-  const NPS     = nv('lb_pipe_nps', 6);
-  const P       = nv('lb_screw_pitch_in', 14);
+  const angRepos= nv('angle_repose_deg');
+  const X       = nv('qty_lb_screws');
+  const D       = nv('lb_screw_dia_in');
+  const NPS     = nv('lb_pipe_nps');
+  const P       = nv('lb_screw_pitch_in');
   const incline = 0;  // LB screws always horizontal
 
   const OAL_ft  = OAL_in  / 12;
@@ -422,7 +425,7 @@ function calculate() {
   // ── Slope warning ──────────────────────────────────────────────────────────
   const slopeOK = slope > 60;
   const warnEl = document.getElementById('slope-warn');
-  if (warnEl) warnEl.style.display = slopeOK ? 'none' : 'block';
+  if (warnEl) warnEl.style.display = (slope > 0 && !slopeOK) ? 'block' : 'none';
 
   // ── Volume check ──────────────────────────────────────────────────────────
   let v_usable_yds=null, v_total_yds=null, v_pct=null, v_pyr=null, v_rect=null;
@@ -455,7 +458,7 @@ function calculate() {
   let hp_per_screw=null, hp_total=null, hp_selected=null, Fd=null;
   let req_torque_inlb=null, sew_frame=null, sew_ratio=null;
 
-  if (flowrate>0 && density>0 && X>0 && D>0 && d>0 && P>0) {
+  if (flowrate>0 && density>0 && X>0 && D>0 && d>0 && P>0 && angRepos>0) {
     const m_per_screw = flowrate / X;
     const v_per_screw = m_per_screw / density;
     const cap_rev = 0.7854 * (D*D - d*d) * P * 1.0 * C1 * R * 60 / 1728 / CF2;
@@ -516,11 +519,12 @@ function calculate() {
     <div class="project-meta">
       <span><strong>Project No.:</strong> ${proj_no || '—'}</span>
       <span><strong>Engineer:</strong> ${engineer || '—'}</span>
-      <span><strong>Location:</strong> ${location || '—'}</span>
-      <span><strong>Date:</strong> ${proj_date || '—'}</span>
       <span><strong>Customer:</strong> ${customer || '—'}</span>
+      <span><strong>Date:</strong> ${proj_date || '—'}</span>
+      <span><strong>Location:</strong> ${location || '—'}</span>
       <span><strong>Revision:</strong> ${revision || '—'}</span>
     </div>
+    <div style="font-size:11px;margin-top:4px;"><strong>Description:</strong> ${desc || '—'}</div>
   </div>`;
 
   // Row 1: Volume Check + Hopper Summary side by side
@@ -544,17 +548,17 @@ function calculate() {
 
   <div class="result-box">
   <h2>2. Hopper Config</h2>
-  ${resultRow('Qty Hoppers', nv('qty_hoppers',1), '#', '')}
+  ${resultRow('Qty Hoppers', nv('qty_hoppers') || '—', '#', '')}
   ${resultRow('Material', sv('mat_construction'), '', '')}
-  ${resultRow('Qty LB Screws', X, '#', '')}
-  ${resultRow('LB Screw Dia', D+'"', '', '')}
+  ${resultRow('Qty LB Screws', X || '—', '#', '')}
+  ${resultRow('LB Screw Dia', D ? D+'"' : '—', '', '')}
   ${resultRow('Discharge Length', dLen_in ? dLen_in+'"' : '—', '', '')}
   ${resultRow('Discharge Width', dWid_in ? fmt(dWid_in,2)+'"' : '—', '', '')}
-  ${resultRow('Qty Dist. Screws', nv('qty_dist_screws',2), '#', '')}
-  ${resultRow('Inlets per Screw', nv('inlets_per_screw',4), '#', '')}
+  ${resultRow('Qty Dist. Screws', nv('qty_dist_screws') || '—', '#', '')}
+  ${resultRow('Inlets per Screw', nv('inlets_per_screw') || '—', '#', '')}
   ${resultRow('Flowrate', flowrate ? fmt(flowrate,0) : '—', 'lb/hr', '')}
-  ${resultRow('Density', density, 'lb/ft³', '')}
-  ${resultRow('Angle of Repose', angRepos+'°', '', '')}
+  ${resultRow('Density', density || '—', 'lb/ft³', '')}
+  ${resultRow('Angle of Repose', angRepos ? angRepos+'°' : '—', '', '')}
   ${resultRow('Area Class', sv('area_class') || '—', '', '')}
   </div>
   </div>`;
@@ -625,6 +629,9 @@ function calculate() {
   </div>`;
 
   // Footer
+  html += `<div class="result-box" style="font-size:11px;color:#555">
+    <strong>Standards &amp; References:</strong> Volume calc per JMS Bio-Hopper worksheet. LB screw capacity per CEMA 350 Rev 20 (Ch. 2). HP per CEMA 350 (Ch. 3) — HPf/HPm/HPi method. Motor HP = next standard size ≥ HP/screw; no 1.4× multiplier (AGMA Class II SF = 1.4 is gearbox duty rating). SEW FA series per SEW-EURODRIVE catalog (60Hz US). Side slope &gt; 60° per JMS internal standard for biosolids flow. Structural (Phase 3) — shaft torsion per CEMA 350-21, bending per ASME shaft formula.
+  </div>`;
   html += `<div class="footer-bar">HOPPER DESIGN SHEET &nbsp;|&nbsp; LIVE-BOTTOM BIOSOLIDS &nbsp;|&nbsp; REV. ${revision || '—'} &nbsp;|&nbsp; ${proj_date || '—'}</div>`;
 
   document.getElementById('output-panel').innerHTML = html;

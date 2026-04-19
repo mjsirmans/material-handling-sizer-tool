@@ -133,11 +133,10 @@ button.primary:hover{background:#002244}
   <div class="sec-body collapsed" id="sec-project">
   <div style="height:6px"></div>
   <div class="field-row"><label>Project No.</label><input type="text" id="project_no"></div>
-  <div class="field-row"><label>Location</label><input type="text" id="location"></div>
   <div class="field-row"><label>Customer</label><input type="text" id="customer"></div>
   <div class="field-row"><label>Engineer</label><input type="text" id="engineer"></div>
+  <div class="field-row"><label>Location</label><input type="text" id="location"></div>
   <div class="field-row"><label>Description</label><input type="text" id="description"></div>
-  <div class="field-row"><label>By</label><input type="text" id="by"></div>
   <div class="field-row"><label>Date</label><input type="date" id="date"></div>
   <div class="field-row"><label>Revision</label><input type="text" id="revision"></div>
   </div>
@@ -218,6 +217,7 @@ button.primary:hover{background:#002244}
   <div style="height:6px"></div>
   <div class="field-row input-primary"><label>Belt Type<span class="req">*</span></label>
     <select id="belt_type" onchange="calculate()">
+      <option value="">— select —</option>
       <option value="Fabric">Fabric (2-ply, 3-ply, 4-ply)</option>
       <option value="Steel">Steel Core (ST series)</option>
     </select>
@@ -225,6 +225,7 @@ button.primary:hover{background:#002244}
   <div class="field-row input-secondary"><label>Belt Rating</label><input type="number" id="belt_rating_piw" step="10" min="100" max="2000" placeholder="std: 220 PIW" oninput="calculate()" onchange="calculate()"><span class="std">PIW</span></div>
   <div class="field-row input-secondary"><label>Head Lagging?</label>
     <select id="lagging" onchange="calculate()">
+      <option value="">— select —</option>
       <option value="Yes">Yes</option>
       <option value="No">No</option>
     </select>
@@ -246,6 +247,7 @@ button.primary:hover{background:#002244}
       <option value="5">5"</option>
       <option value="6">6"</option>
     </select>
+
     <span class="std">in</span>
   </div>
   <div class="field-row input-secondary"><label>Carry Spacing</label><input type="number" id="carry_spacing_ft" step="0.5" min="1" max="8" placeholder="std: 3–4" oninput="calculate()" onchange="calculate()"><span class="std">ft</span></div>
@@ -264,6 +266,7 @@ button.primary:hover{background:#002244}
   <div style="height:6px"></div>
   <div class="field-row input-primary"><label>Drive Arrangement<span class="req">*</span></label>
     <select id="drive_arrangement" onchange="calculate()">
+      <option value="">— select —</option>
       <option value="Shaft Mounted Drive">Shaft Mounted Drive</option>
       <option value="Chain and Sprocket">Chain and Sprocket</option>
       <option value="Motorized Drum Pulley">Motorized Drum Pulley</option>
@@ -272,6 +275,7 @@ button.primary:hover{background:#002244}
   </div>
   <div class="field-row input-primary"><label>Take-Up Type<span class="req">*</span></label>
     <select id="takeup_type" onchange="calculate()">
+      <option value="">— select —</option>
       <option value="Manual">Manual / Screw</option>
       <option value="Gravity">Gravity</option>
     </select>
@@ -281,6 +285,7 @@ button.primary:hover{background:#002244}
   <div class="field-row input-secondary"><label>Shaft Diameter</label><input type="number" id="shaft_dia_in" step="0.0625" min="1" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
   <div class="field-row input-secondary"><label>Shaft Material</label>
     <select id="shaft_material" onchange="calculate()">
+      <option value="">— select —</option>
       <option>1045</option>
       <option>1018</option>
       <option>304 SS</option>
@@ -329,6 +334,7 @@ button.primary:hover{background:#002244}
   <div style="height:6px"></div>
   <div class="field-row input-secondary"><label>Idler Type <span class="spec-tag">spec</span></label>
     <select id="idler_type" onchange="calculate()">
+      <option value="">— select —</option>
       <option value="TROUGHING">Troughing</option>
       <option value="FLAT">Flat</option>
     </select>
@@ -340,6 +346,7 @@ button.primary:hover{background:#002244}
   <div class="field-row input-secondary"><label>T vs OH Angle <span class="spec-tag">spec</span></label><input type="number" id="angle_tension_oh_deg" step="5" min="0" max="360" oninput="calculate()" onchange="calculate()"><span class="std">deg</span></div>
   <div class="field-row input-secondary"><label>Service Duty <span class="spec-tag">spec</span></label>
     <select id="service_duty" onchange="calculate()">
+      <option value="">— select —</option>
       <option>Light</option>
       <option>Standard</option>
       <option>Heavy</option>
@@ -347,6 +354,7 @@ button.primary:hover{background:#002244}
   </div>
   <div class="field-row input-secondary"><label>Area Class. <span class="spec-tag">spec</span></label>
     <select id="area_classification" onchange="calculate()">
+      <option value="">— select —</option>
       <option>NO</option>
       <option>Class 1 Div 1</option>
       <option>Class 1 Div 2</option>
@@ -516,7 +524,7 @@ const DEFAULTS = {
   angle_tension_oh_deg: "",
   skirt_length_ft: "",
   skirt_friction: "",
-  num_plows: "",
+  num_plows: "0",
   plow_type: "",
   num_scrapers: "",
   service_duty: "",
@@ -606,11 +614,10 @@ function toggleSec(id) {
 function calculate() {
   // --- Read inputs ---
   const proj_no     = getVal("project_no");
-  const location    = getVal("location");
   const customer    = getVal("customer");
   const engineer    = getVal("engineer");
+  const location    = getVal("location");
   const description = getVal("description");
-  const by          = getVal("by");
   const date        = getVal("date");
   const revision    = getVal("revision");
 
@@ -917,15 +924,14 @@ function calculate() {
   html += `<div class="project-header">
     <h2>Belt Conveyor Design Sheet</h2>
     <div class="project-meta">
-      <span><strong>Project No.:</strong> ${proj_no}</span>
-      <span><strong>By:</strong> ${by}</span>
-      <span><strong>Location:</strong> ${location}</span>
-      <span><strong>Date:</strong> ${date}</span>
-      <span><strong>Customer:</strong> ${customer}</span>
-      <span><strong>Revision:</strong> ${revision}</span>
-      <span><strong>Engineer:</strong> ${engineer}</span>
+      <span><strong>Project No.:</strong> ${proj_no || '—'}</span>
+      <span><strong>Engineer:</strong> ${engineer || '—'}</span>
+      <span><strong>Customer:</strong> ${customer || '—'}</span>
+      <span><strong>Date:</strong> ${date || '—'}</span>
+      <span><strong>Location:</strong> ${location || '—'}</span>
+      <span><strong>Revision:</strong> ${revision || '—'}</span>
     </div>
-    <div style="font-size:11px;margin-top:4px;"><strong>Description:</strong> ${description}</div>
+    <div style="font-size:11px;margin-top:4px;"><strong>Description:</strong> ${description || '—'}</div>
   </div>`;
 
   // Conveyor summary
@@ -1090,7 +1096,7 @@ function calculate() {
     ${resultRow('Output Speed', fmt(drum_rpm,1), 'RPM', '')}
   </div>
   </div>
-  <div class="note" style="margin-top:6px">Confirm ratio and f<sub>B</sub> ≥ 1.4 in SEW DriveSelect (60Hz US, KA shaft-mount). Verify bore vs. head pulley shaft (${fmt(shaft_dia,4)}").</div>
+  <div class="note" style="margin-top:6px">Motor HP = next standard size ≥ HPmin. No 1.4× motor oversizing — AGMA Class II SF = 1.4 is a gearbox duty class rating, not a motor multiplier (ref: AGMA 6013, KWS Engineering Guide). Confirm ratio and f<sub>B</sub> ≥ 1.4 in SEW DriveSelect (60Hz US, KA shaft-mount). Verify bore vs. head pulley shaft (${fmt(shaft_dia,4)}").</div>
   ` : `<div class="fixit-table">No KA frame found for ${fmt(HP_std,0)} HP / ${req_torque !== null ? fmt(req_torque,0)+' in-lb' : '—'}. Consult SEW DriveSelect directly.</div>`}
   </div>`;
 
@@ -1140,9 +1146,14 @@ function onMaterialChange() {
 
 function resetToDefaults() {
   for (const [key, val] of Object.entries(DEFAULTS)) {
-    setField(key, val);
+    const el = document.getElementById(key);
+    if (!el) continue;
+    if (el.tagName === 'SELECT') {
+      el.selectedIndex = 0;
+    } else {
+      el.value = val;
+    }
   }
-  // Do not call onMaterialChange() — density/max_incline start blank
   calculate();
 }
 

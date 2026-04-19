@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bio-TOOL Estimator</title>
+<title>Equipment Pricing Tool</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',Arial,sans-serif;font-size:15px;background:#f0f2f5;color:#1a1a1a}
@@ -26,7 +26,7 @@ h3{font-size:13px;font-weight:600;color:#555;margin:8px 0 4px}
 .header{background:#003366;color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
 .header h1{color:#fff}
 .header .rev{font-size:11px;opacity:.7}
-.main{display:grid;grid-template-columns:480px 1fr;gap:0;min-height:calc(100vh - 42px)}
+.main{display:grid;grid-template-columns:460px 1fr;gap:0;min-height:calc(100vh - 42px)}
 @media(max-width:860px){.main{grid-template-columns:1fr}}
 .left{background:#fff;border-right:1px solid #d0d4dc;padding:12px;overflow-y:auto;max-height:calc(100vh - 42px)}
 .right{background:#f8f9fc;padding:12px;overflow-y:auto;max-height:calc(100vh - 42px)}
@@ -50,7 +50,7 @@ h3{font-size:13px;font-weight:600;color:#555;margin:8px 0 4px}
 .equip-body.open{display:block}
 
 /* field rows */
-.field-row{display:grid;grid-template-columns:160px 1fr auto;align-items:center;gap:4px;margin-bottom:4px}
+.field-row{display:grid;grid-template-columns:150px 1fr auto;align-items:center;gap:4px;margin-bottom:4px}
 .field-row label{font-size:13px;color:#333;font-weight:500}
 .field-row .unit{font-size:11px;color:#888;white-space:nowrap}
 .field-row input,.field-row select{width:100%;padding:4px 6px;border:1px solid #bbb;border-radius:3px;font-size:13px;background:#fff;min-height:28px}
@@ -115,7 +115,7 @@ button.primary:hover{background:#002244}
 <!-- ── Password Gate ── -->
 <div id="gate" style="position:fixed;inset:0;background:#003366;display:flex;align-items:center;justify-content:center;z-index:9999">
   <div id="gate-box">
-    <h2>Bio-TOOL Estimator</h2>
+    <h2>Equipment Pricing Tool</h2>
     <p>Enter password to access pricing tool</p>
     <input id="gate-pw" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')checkPw()">
     <button id="gate-btn" onclick="checkPw()">Enter</button>
@@ -128,11 +128,12 @@ button.primary:hover{background:#002244}
 <div class="header">
   <div>
     <a href="index.html" style="font-size:11px;color:#aac;text-decoration:none;display:block;margin-bottom:2px;">← Back to Tool Index</a>
-    <h1>Bio-TOOL Estimator</h1>
+    <h1>Equipment Pricing Tool</h1>
     <span class="rev">Rev 1.1</span>
   </div>
   <div class="btn-row" style="margin:0">
     <button onclick="window.print()" class="primary">Print / PDF</button>
+    <button onclick="resetAll()">Reset</button>
   </div>
 </div>
 
@@ -149,10 +150,11 @@ button.primary:hover{background:#002244}
 <div style="height:6px"></div>
 <div class="field-row"><label>Project No.</label><input id="projNo" type="text" placeholder="e.g. 25-001" oninput="render()"></div>
 <div class="field-row"><label>Customer</label><input id="customer" type="text" oninput="render()"></div>
-<div class="field-row"><label>Estimator</label><input id="estimator" type="text" oninput="render()"></div>
-<div class="field-row"><label>Date</label><input id="proj-date" type="date" oninput="render()"></div>
+<div class="field-row"><label>Engineer</label><input id="engineer" type="text" oninput="render()"></div>
 <div class="field-row"><label>Location</label><input id="location" type="text" oninput="render()"></div>
 <div class="field-row"><label>Description</label><input id="desc" type="text" oninput="render()"></div>
+<div class="field-row"><label>Date</label><input id="proj-date" type="date" oninput="render()"></div>
+<div class="field-row"><label>Revision</label><input id="revision" type="text" oninput="render()"></div>
 </div>
 </div>
 
@@ -213,7 +215,6 @@ button.primary:hover{background:#002244}
 
 <script>
 // ── Password ───────────────────────────────────────────────────────────────
-const PW_HASH = '8b4d952b6a06b3e0b5e8b0c9f1c4e2a7d5f3e9c2b8a1d6f4e7c0b3a9d2f5e8c1'; // placeholder — replaced below
 const CORRECT_PW = 'JMS';
 
 function checkPw() {
@@ -529,17 +530,19 @@ function render() {
 
   const out = document.getElementById('summary-out');
   const proj = v('projNo'), cust = v('customer');
-  const est  = v('estimator'), dt = v('proj-date');
+  const eng  = v('engineer'), dt = v('proj-date');
   const loc  = v('location'), desc = v('desc');
+  const rev  = v('revision');
 
   let html = `<div class="result-box">
     <h3>Project Summary</h3>
     ${proj ? `<div class="result-row"><span class="lbl">Project No.</span><span class="val" style="grid-column:2/4">${esc(proj)}</span></div>` : ''}
     ${cust ? `<div class="result-row"><span class="lbl">Customer</span><span class="val" style="grid-column:2/4">${esc(cust)}</span></div>` : ''}
+    ${eng  ? `<div class="result-row"><span class="lbl">Engineer</span><span class="val" style="grid-column:2/4">${esc(eng)}</span></div>` : ''}
     ${loc  ? `<div class="result-row"><span class="lbl">Location</span><span class="val" style="grid-column:2/4">${esc(loc)}</span></div>` : ''}
     ${desc ? `<div class="result-row"><span class="lbl">Description</span><span class="val" style="grid-column:2/4">${esc(desc)}</span></div>` : ''}
-    ${est  ? `<div class="result-row"><span class="lbl">Estimator</span><span class="val" style="grid-column:2/4">${esc(est)}</span></div>` : ''}
     ${dt   ? `<div class="result-row"><span class="lbl">Date</span><span class="val" style="grid-column:2/4">${dt}</span></div>` : ''}
+    ${rev  ? `<div class="result-row"><span class="lbl">Revision</span><span class="val" style="grid-column:2/4">${esc(rev)}</span></div>` : ''}
   </div>`;
 
   if (activeEquip.length === 0) {
@@ -589,6 +592,25 @@ function toggleSec(id) {
   const tog  = document.getElementById('tog-'+id.replace('sec-',''));
   const collapsed = body.classList.toggle('collapsed');
   tog.style.transform = collapsed ? '' : 'rotate(90deg)';
+}
+
+function resetAll() {
+  ['projNo','customer','engineer','location','desc','proj-date','revision'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  EQUIP_TYPES.forEach(e => {
+    equip[e.id].enabled = false;
+    equip[e.id].qty = 1;
+    equip[e.id].mats_offsite  = buildLines(5);
+    equip[e.id].mats_raw      = buildLines(5);
+    equip[e.id].mats_nonmetal = buildLines(3);
+    equip[e.id].purchased_sys = buildLines(3);
+    equip[e.id].purchased_comp= buildLines(3);
+    equip[e.id].eng_hrs = equip[e.id].asm_hrs = equip[e.id].fin_hrs = equip[e.id].proc_hrs = equip[e.id].freight = 0;
+  });
+  buildEquipBlocks();
+  render();
 }
 
 init();
