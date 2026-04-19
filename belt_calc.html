@@ -41,8 +41,6 @@ input[disabled],select[disabled]{background:#f0f0f0;color:#888;cursor:not-allowe
 /* field validation states */
 .field-row.field-empty input,.field-row.field-empty select{border:1px solid #e57373!important;background:#fff8f8!important}
 .field-row.field-filled input,.field-row.field-filled select{border:1px solid #81c784!important;background:#f6fff6!important}
-.field-row.field-pricing input,.field-row.field-pricing select{border:1px solid #ffd54f!important;background:#fffff8!important}
-
 .section{margin-bottom:8px}
 .cema-ref{font-size:10px;color:#888;float:right;font-style:italic}
 
@@ -85,8 +83,6 @@ button.primary:hover{background:#002244}
 .two-col>.result-box{margin-bottom:0}
 @media(max-width:900px){.two-col{grid-template-columns:1fr;}}
 @media(max-width:800px){#mobile-jump{display:block!important;}}
-/* PHASE 2 — pricing hidden until pricing phase */
-#pricing-box,#send-modal-overlay{display:none!important}
 @media print{
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .left,.btn-row{display:none!important}
@@ -122,6 +118,7 @@ button.primary:hover{background:#002244}
   </div>
   <div class="btn-row" style="margin:0">
     <button class="primary" onclick="window.print()">Print / Save PDF</button>
+    <button onclick="autoConfig()" style="background:#1a6b3c;color:#fff;border-color:#1a6b3c">⚙ Auto-Config</button>
     <button onclick="resetToDefaults()">Reset to Defaults</button>
   </div>
 </div>
@@ -486,11 +483,6 @@ const STD_MOTOR_HP = [1, 1.5, 2, 3, 5, 7.5, 10, 15, 20, 25, 30, 40, 50, 60, 75, 
 const STD_BELT_PIW = [150, 195, 220, 330, 440, 500, 660, 990, 1260];
 
 // ===========================================================================
-// PRICING DATA (loaded from costs.json; falls back to nulls)
-// ===========================================================================
-let BELT_COSTS = null;
-
-// ===========================================================================
 // DEFAULTS
 // ===========================================================================
 const DEFAULTS = {
@@ -620,93 +612,6 @@ function toggleSec(id) {
   const collapsed = body.classList.toggle('collapsed');
   if (tog) tog.style.transform = collapsed ? '' : 'rotate(90deg)';
 }
-
-// ===========================================================================
-// PRICING LAYER
-// ===========================================================================
-function beltPricePerFt(widthIn) {
-  if (!BELT_COSTS) return null;
-  const rb = BELT_COSTS.rubber_belt_per_ft;
-  if (!rb) return null;
-  const key = widthIn + 'in_2ply220';
-  return rb[key] ?? null;
-}
-
-function pricingHtml(bw, L_total, HP_std) {
-  if (!BELT_COSTS) {
-    return `<div class="result-box">
-      <h2>Pricing</h2>
-      <p class="note">costs.json not loaded — open <a href="cost-library.html">Cost Library</a> to upload pricing data.</p>
-    </div>`;
-  }
-
-  const belt_len_ft = L_total * 2 + 10; // two-way + 10 ft splice allowance
-  const belt_rate   = beltPricePerFt(bw);
-  const belt_cost   = belt_rate !== null ? belt_len_ft * belt_rate : null;
-
-  // Pull relevant component sections
-  const bp = BELT_COSTS.purchased_components?.belt_purchased || [];
-  const sections = ['DRUM PULLEY - SUPERIOR','PILLOW BLOCK BEARING','BELT CLEANER','BELT ALIGNMENT SWITCH','E-STOP','ZERO SPEED SENSOR','BELT SPLICE KITS'];
-
-  let compRows = '';
-  let compSubtotal = 0;
-  sections.forEach(sec => {
-    const items = bp.filter(x => x.section === sec);
-    if (!items.length) return;
-    // Show cheapest standard option per section as reference price
-    const ref = items.reduce((a,b) => a.unit_cost <= b.unit_cost ? a : b);
-    compRows += `<tr>
-      <td style="padding:3px 6px;border:1px solid #e4e8ee;font-size:11px">${sec}</td>
-      <td style="padding:3px 6px;border:1px solid #e4e8ee;font-size:11px;color:#666">${ref.description}</td>
-      <td style="padding:3px 6px;border:1px solid #e4e8ee;font-size:11px;color:#666">${ref.vendor||'—'}</td>
-      <td style="padding:3px 6px;border:1px solid #e4e8ee;font-size:11px;text-align:right">$${ref.unit_cost.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
-    </tr>`;
-  });
-
-  const fmtD = n => n != null ? '$'+n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}) : '—';
-
-  // Build send-to-estimator payload
-  const payload = {
-    type: 'belt',
-    name: '',
-    mats_offsite: [
-      {desc: `Rubber Belt ${bw}" × ${belt_len_ft.toFixed(0)} ft (2-ply 220 MOR)`, vendor:'', qty: belt_len_ft, unit_cost: belt_rate ?? 0},
-    ],
-    mats_raw: [{desc:'',vendor:'',qty:0,unit_cost:0}],
-    mats_nonmetal: [{desc:'',vendor:'',qty:0,unit_cost:0}],
-    purchased_sys: [{desc:'',vendor:'',qty:0,unit_cost:0}],
-    purchased_comp: sections.map(sec => {
-      const items = bp.filter(x => x.section === sec);
-      if (!items.length) return {desc:'',vendor:'',qty:0,unit_cost:0};
-      const ref = items.reduce((a,b) => a.unit_cost <= b.unit_cost ? a : b);
-      return {desc: ref.description, vendor: ref.vendor, qty:1, unit_cost: ref.unit_cost};
-    }).filter(r => r.desc),
-    eng_hrs:0, asm_hrs:0, fin_hrs:0, proc_hrs:0, freight:0, fs_days:0,
-  };
-
-  return `<div class="result-box">
-    <h2>Pricing <span style="font-size:10px;font-weight:400;color:#888">— reference from costs.json</span></h2>
-    <div class="result-row">
-      <span class="label">Belt (${bw}" × ${belt_len_ft.toFixed(0)} ft)</span>
-      <span class="val">${fmtD(belt_cost)}</span>
-      <span class="unit"></span>
-      <span style="font-size:10px;color:#888">${belt_rate != null ? '$'+belt_rate+'/ft' : 'no rate'}</span>
-    </div>
-    <div style="margin-top:8px;font-size:11px;font-weight:700;color:#003366;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px">Component Reference Prices</div>
-    <table style="width:100%;border-collapse:collapse;margin-bottom:8px">
-      <thead><tr>
-        <th style="padding:3px 6px;background:#eef2f8;border:1px solid #dde;color:#003366;font-size:10px;text-align:left">Section</th>
-        <th style="padding:3px 6px;background:#eef2f8;border:1px solid #dde;color:#003366;font-size:10px;text-align:left">Description</th>
-        <th style="padding:3px 6px;background:#eef2f8;border:1px solid #dde;color:#003366;font-size:10px;text-align:left">Vendor</th>
-        <th style="padding:3px 6px;background:#eef2f8;border:1px solid #dde;color:#003366;font-size:10px;text-align:right">Unit Cost</th>
-      </tr></thead>
-      <tbody>${compRows}</tbody>
-    </table>
-    <p class="note" style="margin-bottom:8px">Prices from costs.json — lowest-cost option shown per section. Adjust quantities in the Estimator.</p>
-    <button class="primary" onclick="openSendModal()" style="width:100%">Send to Equipment Pricing Tool →</button>
-  </div>`;
-}
-
 
 // ===========================================================================
 // MAIN CALCULATION
@@ -899,6 +804,7 @@ function calculate() {
   const HPb = (Te * speed_fpm) / 33000;
   const drive_eff = DRIVE_EFF[drive_arr] || 0.95;
   const HPmin = HPb / drive_eff;
+  window._lastHPmin = HPmin;
   const HP_std = nextStdHP(HPmin);
   const motor_pass = motor_hp >= HPmin;
   const motor_SF = motor_hp > 0 ? motor_hp / HPmin : null;
@@ -1213,9 +1119,6 @@ function calculate() {
   ` : `<div class="fixit-table">No KA frame found for ${fmt(HP_std,0)} HP / ${req_torque !== null ? fmt(req_torque,0)+' in-lb' : '—'}. Consult SEW DriveSelect directly.</div>`}
   </div>`;
 
-  // Pricing
-  html += pricingHtml(bw, L_total, HP_std);
-
   // Footer
   html += `<div class="footer-bar">BELT CONVEYOR DESIGN SHEET &nbsp;|&nbsp; CEMA 6th Ed. &nbsp;|&nbsp; REV. ${revision} &nbsp;|&nbsp; ${date}</div>`;
 
@@ -1234,7 +1137,6 @@ function validateFields() {
     row.classList.toggle('field-filled', !empty);
     row.classList.remove('field-pricing');
   });
-  // Affects pricing: input-secondary → yellow if empty
   document.querySelectorAll('.input-secondary').forEach(row => {
     const el = row.querySelector('input, select');
     if (!el) return;
@@ -1242,11 +1144,6 @@ function validateFields() {
     row.classList.toggle('field-pricing', empty);
     row.classList.remove('field-empty', 'field-filled');
   });
-  // Disable Send button if any required field is empty
-  const anyEmpty = document.querySelectorAll('.input-primary.field-empty').length > 0;
-  const sendBtn = document.querySelector('#pricing-box button, .result-box button[onclick*="SendModal"]');
-  // Send button in pricing HTML is re-rendered, so gate via a flag instead
-  window._pricingReady = !anyEmpty;
 }
 
 // ===========================================================================
@@ -1285,6 +1182,96 @@ function onMaterialChange() {
   if (mat && densityMap[mat] !== undefined) setField("density_lb_ft3", densityMap[mat]);
   if (mat && inclMap[mat]    !== undefined) setField("max_incline_deg", inclMap[mat]);
   calculate();
+}
+
+function autoConfig() {
+  const cap  = parseFloat(document.getElementById('capacity_tph')?.value);
+  const hLen = parseFloat(document.getElementById('horiz_length_ft')?.value);
+  const iLen = parseFloat(document.getElementById('incline_length_ft')?.value);
+  const iDeg = parseFloat(document.getElementById('incline_deg')?.value) || 0;
+  const mat  = document.getElementById('material')?.value;
+
+  const missing = [];
+  if (!cap  || isNaN(cap))  missing.push('Design Capacity');
+  if (!hLen || isNaN(hLen)) missing.push('Horizontal Length');
+  if (isNaN(iLen))          missing.push('Incline Length');
+  if (!mat)                 missing.push('Material');
+  if (missing.length) {
+    alert('Auto-Config needs: ' + missing.join(', ') + '\nFill these fields first, then click Auto-Config.');
+    return;
+  }
+
+  // Step 1 — density & max incline from material
+  const densityMap = {
+    'Biosolids (Wet Cake)':55,'Biosolids (Dry)':45,'Coal':52,
+    'Crushed Stone / Aggregate':100,'Sand':100,'Gravel':110,
+    'Grain':50,'Wood Chips':25,'Screenings':45,'Grit':80,'Lime':60,'Other':60,
+  };
+  const inclMap = {
+    'Biosolids (Wet Cake)':18,'Biosolids (Dry)':20,'Coal':18,
+    'Crushed Stone / Aggregate':18,'Sand':20,'Gravel':18,
+    'Grain':20,'Wood Chips':20,'Screenings':20,'Grit':15,'Lime':20,'Other':18,
+  };
+  const density    = densityMap[mat] || 60;
+  const maxIncline = inclMap[mat]    || 18;
+  setField('density_lb_ft3',  density);
+  setField('max_incline_deg', maxIncline);
+
+  // Step 2 — trough angle: 35° if inclined, 20° flat
+  const trough = iDeg > 5 ? 35 : 20;
+  setSelectVal('trough_angle', String(trough));
+
+  // Step 3 — belt speed: start 75 fpm, bump to 100 for high cap
+  let speed = cap > 300 ? 100 : 75;
+
+  // Step 4 — belt width: smallest CEMA table width that handles required volume
+  const volRequired = (cap * 2000) / density; // ft³/hr
+  const widths = [18, 24, 30, 36, 42, 48];
+  let selWidth = 48;
+  for (const w of widths) {
+    const capPerFpm = CAPACITY_TABLE[trough]?.[w] || 0;
+    if (capPerFpm * speed >= volRequired) { selWidth = w; break; }
+  }
+  // If 75 fpm doesn't fit smallest, try 100 fpm
+  if (selWidth === 48 && speed === 75) {
+    speed = 100;
+    for (const w of widths) {
+      const capPerFpm = CAPACITY_TABLE[trough]?.[w] || 0;
+      if (capPerFpm * speed >= volRequired) { selWidth = w; break; }
+    }
+  }
+  setSelectVal('belt_width_in', String(selWidth));
+  setField('belt_speed_fpm', speed);
+
+  // Step 5 — belt type: Fabric for light duty, Steel Core for heavy
+  setSelectVal('belt_type', cap >= 300 ? 'Steel Core' : 'Fabric');
+
+  // Step 6 — belt rating: conservative starting PIW
+  setField('belt_rating_piw', selWidth <= 24 ? 220 : selWidth <= 36 ? 330 : 440);
+
+  // Step 7 — standard idler/drive defaults
+  setSelectVal('idler_roll_dia', '5');
+  setField('carry_spacing_ft', selWidth <= 24 ? 3.5 : 4.0);
+  setField('return_spacing_ft', 10);
+  setSelectVal('lagging', 'Yes');
+  setSelectVal('takeup_type', 'Manual');
+  setSelectVal('drive_arrangement', 'Single Drive, Tail Not Driven');
+
+  // Step 8 — run calculate to get HPmin, then pick standard motor
+  calculate();
+  const hpMin = window._lastHPmin || 0;
+  const stdHPs = [1,1.5,2,3,5,7.5,10,15,20,25,30,40,50,60,75,100,125,150,200];
+  const stdHP = stdHPs.find(h => h >= hpMin * 1.15) || stdHPs[stdHPs.length - 1];
+  setField('motor_hp', stdHP);
+
+  calculate();
+}
+
+function setSelectVal(id, val) {
+  const el = document.getElementById(id);
+  if (!el || el.tagName !== 'SELECT') return;
+  const opt = [...el.options].find(o => o.value === val || o.text === val);
+  if (opt) { el.value = opt.value; el.dispatchEvent(new Event('change')); }
 }
 
 function resetToDefaults() {
@@ -1356,148 +1343,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const dateEl = document.getElementById('date');
   if (dateEl) dateEl.value = iso;
   wireEvents();
-
-  // Load costs.json — localStorage override takes precedence
-  const override = localStorage.getItem('jms_costs_override');
-  if (override) {
-    try { BELT_COSTS = JSON.parse(override); } catch(e) {}
-    calculate();
-  } else {
-    fetch('costs.json')
-      .then(r => r.json())
-      .then(c => { BELT_COSTS = c; calculate(); })
-      .catch(() => calculate());
-  }
+  calculate();
 });
 
-// ── Send-to-Estimator modal ───────────────────────────────────────────────
-function nextAvailableTag(prefix, projNo) {
-  if (!projNo) return prefix + '-01';
-  const data = JSON.parse(localStorage.getItem('ept_proj_' + projNo) || '{}');
-  const used = (data.instances || []).map(i => i.name);
-  for (let n = 1; n <= 99; n++) {
-    const tag = prefix + '-' + String(n).padStart(2,'0');
-    if (!used.includes(tag)) return tag;
-  }
-  return prefix + '-01';
-}
-
-function openSendModal() {
-  if (!window._pricingReady) {
-    alert('Please fill all required fields (highlighted in red) before sending to the estimator.');
-    return;
-  }
-  const keys = Object.keys(localStorage).filter(k => k.startsWith('ept_proj_')).sort();
-  const projOpts = keys.map(k => {
-    const pn = k.replace('ept_proj_','');
-    return `<option value="${pn}">${pn}</option>`;
-  }).join('');
-  document.getElementById('send-modal-proj').innerHTML =
-    `<option value="">— New project —</option>${projOpts}`;
-  const curProj = document.getElementById('project_no')?.value?.trim() || '';
-  if (curProj) {
-    const opt = [...document.getElementById('send-modal-proj').options].find(o => o.value === curProj);
-    if (opt) opt.selected = true;
-  }
-  document.getElementById('send-modal-newproj-row').style.display = '';
-  const selProj = document.getElementById('send-modal-proj').value;
-  document.getElementById('send-modal-tag').value = nextAvailableTag('BC', selProj);
-  updateSendModal();
-  document.getElementById('send-modal-overlay').style.display = 'flex';
-  document.getElementById('send-modal-tag').focus();
-}
-
-function updateSendModal(projChanged) {
-  const proj = document.getElementById('send-modal-proj').value;
-  const newRow = document.getElementById('send-modal-newproj-row');
-  newRow.style.display = proj === '' ? '' : 'none';
-  const tagEl = document.getElementById('send-modal-tag');
-  if (projChanged) tagEl.value = nextAvailableTag('BC', proj);
-  const tag = tagEl.value.trim();
-  const newProj = document.getElementById('send-modal-newproj').value.trim();
-  const projOk = proj !== '' || newProj !== '';
-  const tagOk  = tag !== '';
-  // show existing tags for selected project
-  const hint = document.getElementById('send-modal-tags-hint');
-  if (proj) {
-    const data = JSON.parse(localStorage.getItem('ept_proj_' + proj) || '{}');
-    const tags = (data.instances || []).map(i => i.name).filter(Boolean);
-    hint.textContent = tags.length ? 'Used: ' + tags.join(', ') : '';
-    const isDupe = tags.includes(tag);
-    hint.style.color = isDupe ? '#c55' : '#888';
-    document.getElementById('send-modal-btn').disabled = !(projOk && tagOk) || isDupe;
-  } else {
-    hint.textContent = '';
-    document.getElementById('send-modal-btn').disabled = !(projOk && tagOk);
-  }
-}
-
-function confirmSend() {
-  const selProj  = document.getElementById('send-modal-proj').value;
-  const newProj  = document.getElementById('send-modal-newproj').value.trim();
-  const projNo   = selProj || newProj;
-  const tag      = document.getElementById('send-modal-tag').value.trim();
-  if (!projNo || !tag) return;
-  closeSendModal();
-
-  const bw        = parseInt(document.getElementById('belt_width_in')?.value) || 0;
-  const horiz_ft  = parseFloat(document.getElementById('horiz_length_ft')?.value) || 0;
-  const incl_ft   = parseFloat(document.getElementById('incline_length_ft')?.value) || 0;
-  const L_total   = horiz_ft + incl_ft;
-  const belt_len_ft = L_total * 2 + 10;
-  const belt_rate = typeof beltPricePerFt === 'function' ? beltPricePerFt(bw) : 0;
-  const bp = BELT_COSTS?.purchased_components?.belt_purchased || [];
-  const sections = ['DRUM PULLEY - SUPERIOR','PILLOW BLOCK BEARING','BELT CLEANER','BELT ALIGNMENT SWITCH','E-STOP','ZERO SPEED SENSOR','BELT SPLICE KITS'];
-
-  const instance = {
-    type: 'belt', name: tag,
-    notes: `${bw}" belt, ${L_total.toFixed(0)}ft`,
-    mats_offsite: [
-      {desc:`Rubber Belt ${bw}" × ${belt_len_ft.toFixed(0)} ft (2-ply 220 MOR)`, vendor:'', qty:belt_len_ft, unit_cost:belt_rate??0},
-      {desc:'',vendor:'',qty:0,unit_cost:0},{desc:'',vendor:'',qty:0,unit_cost:0},
-      {desc:'',vendor:'',qty:0,unit_cost:0},{desc:'',vendor:'',qty:0,unit_cost:0},
-    ],
-    mats_raw:[{desc:'',vendor:'',qty:0,unit_cost:0},{desc:'',vendor:'',qty:0,unit_cost:0},{desc:'',vendor:'',qty:0,unit_cost:0},{desc:'',vendor:'',qty:0,unit_cost:0},{desc:'',vendor:'',qty:0,unit_cost:0}],
-    mats_nonmetal:[{desc:'',vendor:'',qty:0,unit_cost:0},{desc:'',vendor:'',qty:0,unit_cost:0},{desc:'',vendor:'',qty:0,unit_cost:0}],
-    purchased_sys:[{desc:'',vendor:'',qty:0,unit_cost:0},{desc:'',vendor:'',qty:0,unit_cost:0},{desc:'',vendor:'',qty:0,unit_cost:0}],
-    purchased_comp: sections.map(sec => {
-      const items = bp.filter(x => x.section === sec);
-      if (!items.length) return null;
-      const ref = items.reduce((a,b) => a.unit_cost <= b.unit_cost ? a : b);
-      return {desc:ref.description, vendor:ref.vendor||'', qty:1, unit_cost:ref.unit_cost};
-    }).filter(Boolean).concat([{desc:'',vendor:'',qty:0,unit_cost:0}]),
-    eng_hrs:0, asm_hrs:0, fin_hrs:0, proc_hrs:0, freight:0, fs_days:0,
-  };
-
-  const isExisting = selProj !== '';
-  localStorage.setItem('ept_incoming', JSON.stringify({ projNo, instance, loadExisting: isExisting, bypass: true }));
-  window.location.href = 'estimator.html';
-}
-
-function closeSendModal() {
-  document.getElementById('send-modal-overlay').style.display = 'none';
-}
 </script>
-
-<!-- Send-to-Estimator modal -->
-<div id="send-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;align-items:center;justify-content:center">
-  <div style="background:#fff;border-radius:8px;padding:28px 32px;width:360px;box-shadow:0 8px 32px rgba(0,0,0,.3)">
-    <h2 style="margin:0 0 6px;font-size:16px;color:#003366">Send to Equipment Pricing Tool</h2>
-    <p style="font-size:12px;color:#888;margin-bottom:18px">Select an existing project or create a new one. The equipment will be added without overwriting other items.</p>
-    <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Project</label>
-    <select id="send-modal-proj" onchange="updateSendModal(true)" style="width:100%;padding:6px 8px;border:1px solid #bbb;border-radius:4px;font-size:13px;margin-bottom:10px"></select>
-    <div id="send-modal-newproj-row">
-      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">New Project No.</label>
-      <input id="send-modal-newproj" type="text" placeholder="e.g. 25-001" oninput="updateSendModal()" style="width:100%;padding:6px 8px;border:1px solid #bbb;border-radius:4px;font-size:13px;margin-bottom:10px">
-    </div>
-    <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px">Equipment Tag</label>
-    <input id="send-modal-tag" type="text" placeholder="e.g. BC-01" oninput="updateSendModal()" style="width:100%;padding:6px 8px;border:1px solid #bbb;border-radius:4px;font-size:13px;margin-bottom:4px">
-    <div id="send-modal-tags-hint" style="font-size:11px;color:#888;min-height:16px;margin-bottom:12px"></div>
-    <div style="display:flex;gap:10px;justify-content:flex-end">
-      <button onclick="closeSendModal()" style="padding:7px 16px;border:1px solid #bbb;border-radius:4px;background:#fff;font-size:13px;cursor:pointer">Cancel</button>
-      <button id="send-modal-btn" onclick="confirmSend()" disabled style="padding:7px 16px;background:#003366;color:#fff;border:none;border-radius:4px;font-size:13px;font-weight:600;cursor:pointer">Send →</button>
-    </div>
-  </div>
-</div>
 </body>
 </html>
