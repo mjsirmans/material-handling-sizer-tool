@@ -3,1060 +3,2462 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Screw Conveyor Design Calculator</title>
+<title>Screw Conveyor Sizer — CEMA 350 Rev 20</title>
 <style>
-:root {
-  --navy: #1a2744;
-  --navy-light: #2c3e6b;
-  --pass-bg: #e8f5e9;
-  --pass-text: #2e7d32;
-  --fail-bg: #ffebee;
-  --fail-text: #c62828;
-  --border: #dee2e6;
-  --label: #495057;
-}
-* { box-sizing: border-box; }
-body { font-family: system-ui, sans-serif; font-size: 13px; margin: 0; }
-.app { display: flex; height: 100vh; }
-.form-panel { width: 38%; min-width: 320px; overflow-y: auto; padding: 12px; border-right: 2px solid var(--navy); background: #f8f9fa; }
-.output-panel { flex: 1; overflow-y: auto; padding: 16px; }
-.section-title { background: var(--navy); color: white; padding: 6px 10px; font-weight: 600; margin: 12px 0 6px; font-size: 12px; letter-spacing: 0.5px; }
-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 12px; }
-th { background: var(--navy); color: white; padding: 5px 8px; text-align: left; }
-td { padding: 4px 8px; border-bottom: 1px solid var(--border); }
-tr:nth-child(even) td { background: #f8f9fa; }
-.pass { background: var(--pass-bg) !important; color: var(--pass-text); font-weight: 600; }
-.fail { background: var(--fail-bg) !important; color: var(--fail-text); font-weight: 600; }
-.na { color: #888; font-style: italic; }
-.project-header { background: var(--navy); color: white; padding: 10px 14px; margin-bottom: 12px; }
-.project-header h2 { margin: 0; font-size: 15px; }
-.project-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 20px; font-size: 11px; margin-top: 6px; }
-.btn { padding: 7px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; }
-.btn-primary { background: var(--navy); color: white; }
-.btn-secondary { background: #6c757d; color: white; }
-.btn-bar { display: flex; gap: 8px; margin-bottom: 12px; }
-input[type="text"], input[type="number"], select { width: 100%; padding: 4px 6px; border: 1px solid #ced4da; border-radius: 3px; font-size: 12px; }
-input[type="checkbox"] { width: auto; margin-right: 6px; }
-.checkbox-row { display: flex; align-items: center; margin-top: 6px; }
-.checkbox-row label { margin: 0; font-size: 11px; color: var(--label); font-weight: 500; }
-label { display: block; font-size: 11px; color: var(--label); margin-bottom: 2px; margin-top: 6px; font-weight: 500; }
-details summary { cursor: pointer; padding: 6px 8px; background: #e9ecef; border-radius: 3px; font-weight: 600; font-size: 12px; margin-bottom: 4px; list-style: none; }
-details summary::-webkit-details-marker { display: none; }
-details summary::before { content: "▶ "; font-size: 10px; }
-details[open] summary::before { content: "▼ "; font-size: 10px; }
-details[open] summary { background: var(--navy-light); color: white; }
-details { margin-bottom: 6px; }
-.form-panel h1 { font-size: 14px; color: var(--navy); margin: 0 0 10px; font-weight: 700; border-bottom: 2px solid var(--navy); padding-bottom: 6px; }
-.footer-bar { background: var(--navy); color: white; padding: 6px 14px; font-size: 11px; font-weight: 600; text-align: center; margin-top: 12px; letter-spacing: 0.5px; }
-.warn { color: #856404; font-size: 11px; }
+.memo-only { display: none; }
 @media print {
-  .form-panel, .btn-bar { display: none !important; }
-  .output-panel { width: 100%; padding: 8px; overflow: visible; }
-  .app { display: block; height: auto; }
-  body { font-size: 11px; }
-  table { page-break-inside: avoid; }
+  body.printing-memo .ds-only { display: none !important; }
+  body.printing-memo .memo-only { display: block !important; }
+  body.printing-memo .no-print { display: none !important; }
 }
+#design-memo {
+  font-family: Arial, 'Segoe UI', sans-serif;
+  font-size: 11px;
+  padding: 24px 36px;
+  line-height: 1.6;
+  color: #1a1a1a;
+  max-width: 820px;
+}
+#design-memo h2 {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin: 14px 0 5px;
+  border-bottom: 1.5px solid #003366;
+  padding-bottom: 2px;
+  color: #003366;
+}
+#design-memo .memo-row {
+  margin: 3px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 24px;
+}
+#design-memo .memo-pair {
+  display: flex;
+  gap: 6px;
+  min-width: 200px;
+}
+#design-memo .memo-label {
+  font-weight: 700;
+  color: #444;
+  white-space: nowrap;
+}
+#design-memo .memo-val {
+  color: #1a1a1a;
+}
+@media print {
+  #design-memo { padding: 10px 20px; font-size: 10px; }
+  #design-memo h2 { margin: 7px 0 3px; font-size: 10px; }
+  #design-memo .memo-row { margin: 2px 0; gap: 0 16px; }
+  #design-memo .memo-pair { min-width: 160px; }
+}
+</style>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;font-size:15px;background:#f0f2f5;color:#1a1a1a}
+h1{font-size:17px;font-weight:700;color:#003366}
+h2{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#003366;margin:10px 0 6px;border-bottom:1px solid #ccd;padding-bottom:3px}
+h3{font-size:13px;font-weight:600;color:#555;margin:8px 0 4px}
+.header{background:#003366;color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+@media(max-width:600px){.header{padding:8px 10px;}.header h1{font-size:15px;}.btn-row button{font-size:11px;padding:3px 8px;}}
+.header h1{color:#fff}
+.header .rev{font-size:11px;opacity:.7}
+.main{display:grid;grid-template-columns:380px 1fr;gap:0;min-height:calc(100vh - 42px)}
+@media(max-width:800px){.main{grid-template-columns:1fr;}}
+.left{background:#fff;border-right:1px solid #d0d4dc;padding:12px;overflow-y:auto;max-height:calc(100vh - 42px)}
+.right{background:#f8f9fc;padding:12px;overflow-y:auto;max-height:calc(100vh - 42px)}
+@media(max-width:800px){
+  .left{max-height:none;border-right:none;border-bottom:1px solid #d0d4dc;}
+  .right{max-height:none;}
+}
+.field-row{display:grid;grid-template-columns:130px 1fr auto;align-items:center;gap:4px;margin-bottom:4px}
+@media(max-width:480px){.field-row{grid-template-columns:110px 1fr auto;}}
+.field-row label{font-size:14px;color:#333;font-weight:500}
+.field-row .std{font-size:12px;color:#666;font-style:italic;white-space:nowrap}
+.field-row input,.field-row select{width:100%;padding:4px 5px;border:1px solid #bbb;border-radius:3px;font-size:14px;background:#fff;min-height:30px}
+.field-row input:focus,.field-row select:focus{outline:none;border-color:#003366;box-shadow:0 0 0 2px rgba(0,51,102,.15)}
+input.overridden,select.overridden{background:#fffbe6;border-color:#f0a800}
+input[disabled],select[disabled]{background:#f0f0f0;color:#888;cursor:not-allowed}
+.warn-inline{font-size:10px;color:#c07000;font-style:italic;grid-column:2/4}
+
+/* color coding per Instructions legend */
+.input-primary input,.input-primary select{background:#cce5ff}
+.input-secondary input,.input-secondary select{background:#ddeeff}
+.input-calculated input,.input-calculated select{background:#f0f0f0;color:#555;font-style:italic}
+.overridden-field input,.overridden-field select{background:#fffbe6!important;border-color:#f0a800!important}
+
+.section{margin-bottom:8px}
+.cema-ref{font-size:10px;color:#888;float:right;font-style:italic}
+
+/* Collapsible sections */
+.sec-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;margin-bottom:0;padding-bottom:3px;border-bottom:1px solid #ccd}
+.sec-header h2{margin:8px 0 0;border-bottom:none;padding-bottom:0;flex:1}
+.sec-toggle{font-size:11px;color:#669;margin-left:6px;transition:transform .15s;flex-shrink:0;margin-top:8px}
+.sec-body{overflow:hidden;transition:max-height .2s ease}
+.sec-body.collapsed{display:none}
+.sec-more{font-size:10px;color:#669;cursor:pointer;margin:2px 0 4px;display:inline-block}
+.sec-more:hover{color:#003366;text-decoration:underline}
+.sec-extra.hidden{display:none}
+.result-box{background:#fff;border:1px solid #d0d4dc;border-radius:4px;padding:8px 10px;margin-bottom:8px}
+.result-box h3{margin-bottom:6px}
+.result-row{display:grid;grid-template-columns:140px 80px 60px 1fr;align-items:center;gap:4px;margin-bottom:3px;font-size:14px}
+@media(max-width:480px){.result-row{grid-template-columns:115px 65px 45px 1fr;font-size:12px;gap:2px;}}
+@media(max-width:380px){.result-row{grid-template-columns:100px 60px 40px 1fr;font-size:11px;}}
+.result-row .label{color:#555}
+.result-row .val{font-weight:600;text-align:right}
+.result-row .unit{color:#888;font-size:11px}
+.badge{display:inline-block;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:700}
+.badge.ok{background:#d4edda;color:#155724}
+.badge.warn{background:#fff3cd;color:#856404}
+.badge.fail{background:#f8d7da;color:#721c24}
+.badge.na{background:#e9ecef;color:#6c757d}
+.highlight-warn{color:#c07000;font-weight:600}
+.highlight-fail{color:#c00;font-weight:600}
+.highlight-ok{color:#155724}
+.weakest-link{font-size:10px;color:#c07000;grid-column:1/5;margin-top:2px;font-style:italic}
+
+.datasheet{background:#fff;border:1px solid #ccd;padding:16px;margin-top:10px;font-size:11px;display:none}
+.datasheet.visible{display:block}
+.datasheet table{width:100%;border-collapse:collapse;margin-bottom:10px}
+.datasheet td{padding:2px 6px;border:1px solid #ccc}
+.datasheet .hdr{background:#003366;color:#fff;font-weight:700;text-align:center}
+.datasheet .lbl{background:#e8ecf0;font-weight:600;width:140px}
+
+button{padding:4px 12px;font-size:12px;border:1px solid #003366;border-radius:3px;cursor:pointer;background:#fff;color:#003366}
+button:hover{background:#003366;color:#fff}
+button.primary{background:#003366;color:#fff}
+button.primary:hover{background:#002244}
+.btn-row{display:flex;gap:8px;margin-top:8px}
+
+.sew-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:600px){.sew-grid{grid-template-columns:1fr;}}
+@media(max-width:800px){#mobile-jump{display:block!important;}}
+@media print{
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .left,.header button,.btn-row{display:none!important}
+  .header{padding:6px 12px}
+  .main{display:block;min-height:unset}
+  .right{padding:8px;overflow:visible;max-height:unset}
+  .result-box{break-inside:avoid;border:1px solid #999;margin-bottom:6px}
+  .datasheet{display:block!important;border:none;padding:0;margin-top:8px}
+  .datasheet table{font-size:10px}
+  .datasheet td{padding:2px 4px}
+  button{display:none!important}
+}
+.note{font-size:10px;color:#777;margin-top:4px;padding:3px 6px;background:#fffbe6;border-left:2px solid #f0a800;border-radius:0 2px 2px 0}
 </style>
 </head>
 <body>
-<div class="app">
-
-<!-- ===== LEFT PANEL: INPUT FORM ===== -->
-<div class="form-panel">
-  <h1>Screw Conveyor Design</h1>
-  <div class="btn-bar">
-    <button class="btn btn-primary" onclick="window.print()">Print / Save as PDF</button>
-    <button class="btn btn-secondary" onclick="resetToDefaults()">Reset to Defaults</button>
+<div class="header ds-only">
+  <div>
+    <a href="index.html" style="font-size:11px;color:#aac;text-decoration:none;display:block;margin-bottom:2px;">← Back to Tool Index</a>
+    <h1>Screw Conveyor Sizer</h1>
+    <span class="rev">Tool v37</span>
   </div>
-
-  <!-- 1. Project Info -->
-  <details open>
-    <summary>1. Project Info</summary>
-    <label>Project No.<input type="text" id="project_no"></label>
-    <label>Location<input type="text" id="location"></label>
-    <label>Customer<input type="text" id="customer"></label>
-    <label>Engineer<input type="text" id="engineer"></label>
-    <label>Description<input type="text" id="description"></label>
-    <label>By<input type="text" id="by"></label>
-    <label>Date<input type="text" id="date"></label>
-    <label>Revision<input type="text" id="revision"></label>
-  </details>
-
-  <!-- 2. Conveyor Parameters -->
-  <details open>
-    <summary>2. Conveyor Parameters</summary>
-    <label>Length (ft)<input type="number" id="length_ft" step="0.5" min="1"></label>
-    <label>Incline (deg)<input type="number" id="incline_deg" step="0.5" min="0" max="45"></label>
-    <label>Flow Direction
-      <select id="flow_direction">
-        <option>Push</option><option>Pull</option><option>Reversing</option>
-      </select>
-    </label>
-    <label>Service Duty
-      <select id="service_duty">
-        <option>Light</option><option>Standard</option><option>Heavy</option>
-      </select>
-    </label>
-    <div class="checkbox-row">
-      <input type="checkbox" id="live_bottom">
-      <label for="live_bottom">Live Bottom</label>
-    </div>
-    <label>Area Classification
-      <select id="area_classification">
-        <option>NO</option><option>Class I Div 1</option><option>Class I Div 2</option>
-        <option>Class II Div 1</option><option>Class II Div 2</option><option>Zone 1</option><option>Zone 2</option>
-      </select>
-    </label>
-  </details>
-
-  <!-- 3. Material Properties -->
-  <details open>
-    <summary>3. Material Properties</summary>
-    <label>Material
-      <select id="material">
-        <option>Wet Sludge</option>
-        <option>Wet Sludge + Lime</option>
-        <option>Partially Dried Sludge/Paste</option>
-        <option>Dry Biosolids</option>
-        <option>Raw Screenings</option>
-        <option>Compacted Screenings</option>
-        <option>Submerged Grit</option>
-        <option>Dewatered Grit</option>
-        <option>Lime Pebble</option>
-        <option>Lime Powder/Hydrated</option>
-        <option>Other</option>
-      </select>
-    </label>
-    <label>Density (lb/ft³)<input type="number" id="density_lb_ft3" step="0.5" min="1"></label>
-    <label>Solids (%)<input type="number" id="solids_pct" step="0.5" min="0" max="100"></label>
-    <label>Size Class
-      <select id="size_class">
-        <option>Fine</option><option>Medium</option><option>Coarse</option><option>Lumpy</option>
-      </select>
-    </label>
-    <label>Flowability
-      <select id="flowability">
-        <option>Free Flowing</option><option>Average</option><option>Sluggish</option>
-      </select>
-    </label>
-    <label>Abrasiveness
-      <select id="abrasiveness">
-        <option>Mild</option><option>Moderate</option><option>Extreme</option>
-      </select>
-    </label>
-    <label>Temp Min (°F)<input type="number" id="temp_min_f" step="1"></label>
-    <label>Temp Max (°F)<input type="number" id="temp_max_f" step="1"></label>
-  </details>
-
-  <!-- 4. Screw Design -->
-  <details open>
-    <summary>4. Screw Design</summary>
-    <label>Screw Diameter (in)
-      <select id="screw_dia_in">
-        <option value="6">6"</option>
-        <option value="9">9"</option>
-        <option value="10">10"</option>
-        <option value="12">12"</option>
-        <option value="14">14"</option>
-        <option value="16">16"</option>
-        <option value="18">18"</option>
-        <option value="20">20"</option>
-        <option value="24">24"</option>
-      </select>
-    </label>
-    <label>Screw Type
-      <select id="screw_type">
-        <option>Shafted</option>
-        <option>Single Shaftless</option>
-        <option>Dual Shaftless</option>
-      </select>
-    </label>
-    <label>Pitch Type
-      <select id="pitch_type">
-        <option>Full</option><option>Short</option><option>Half</option><option>Long</option>
-      </select>
-    </label>
-    <label>Flight Type
-      <select id="flight_type">
-        <option>Shafted</option>
-        <option>Single Shaftless</option>
-        <option>Dual Shaftless</option>
-        <option>Cut</option>
-        <option>Cut &amp; Folded</option>
-        <option>Ribbon</option>
-        <option>Paddle 1x</option>
-        <option>Paddle 2x</option>
-        <option>Paddle 3x</option>
-        <option>Paddle 4x</option>
-      </select>
-    </label>
-    <label>Trough Fill (%)<input type="number" id="trough_fill_pct" step="1" min="1" max="100"></label>
-    <label>Design Capacity (ft³/hr)<input type="number" id="design_capacity_ft3hr" step="10" min="1"></label>
-  </details>
-
-  <!-- 5. Drive -->
-  <details>
-    <summary>5. Drive</summary>
-    <label>Drive Arrangement
-      <select id="drive_arrangement">
-        <option>Screw Conveyor Drive</option>
-        <option>Direct Coupled In-line</option>
-        <option>Shaft Mount Drive</option>
-        <option>Gearbox with Chain &amp; Sprocket</option>
-        <option>Gearbox with Belt &amp; Sheave</option>
-        <option>Open Spur Gear</option>
-      </select>
-    </label>
-    <label>Gearbox Model<input type="text" id="gearbox_model"></label>
-    <label>Motor HP<input type="number" id="motor_hp" step="0.5" min="0.5"></label>
-    <label>Motor RPM<input type="number" id="motor_rpm" step="1" min="100"></label>
-    <label>Gearbox Ratio<input type="number" id="gearbox_ratio" step="0.01" min="1"></label>
-    <label>Gearbox Service Factor<input type="number" id="gearbox_sf" step="0.05" min="1"></label>
-  </details>
-
-  <!-- 6. Shaft & Coupling -->
-  <details>
-    <summary>6. Shaft &amp; Coupling</summary>
-    <label>Shaft Diameter (in)<input type="number" id="shaft_dia_in" step="0.125" min="0.5"></label>
-    <label>Shaft Material
-      <select id="shaft_material">
-        <option>1018 CS</option>
-        <option>1045 CS</option>
-        <option>4140 Alloy</option>
-        <option>4140 Hardened</option>
-        <option>304 SS</option>
-        <option>316 SS</option>
-        <option>17-4PH -A</option>
-        <option>17-4PH -H900</option>
-        <option>17-4PH -H1150</option>
-      </select>
-    </label>
-    <label>Pipe Size
-      <select id="pipe_size">
-        <option>2" SCH 40</option>
-        <option>2" SCH 80</option>
-        <option>2.5" SCH 40</option>
-        <option>2.5" SCH 80</option>
-        <option>3" SCH 40</option>
-        <option>3" SCH 80</option>
-        <option>3.5" SCH 40</option>
-        <option>3.5" SCH 80</option>
-        <option>4" SCH 40</option>
-        <option>4" SCH 80</option>
-        <option>5" SCH 40</option>
-        <option>5" SCH 80</option>
-        <option>6" SCH 40</option>
-        <option>6" SCH 80</option>
-        <option>8" SCH 40</option>
-        <option>8" SCH 80</option>
-        <option>10" SCH 40</option>
-        <option>12" SCH 40</option>
-        <option>12" SCH 80</option>
-      </select>
-    </label>
-    <label>Pipe Material<input type="text" id="pipe_material"></label>
-    <label>Coupling Type
-      <select id="coupling_type">
-        <option>Cross-Bolt Coupling</option>
-        <option>Flanged Coupling</option>
-        <option>Welded Stub</option>
-        <option>Keyed</option>
-      </select>
-    </label>
-    <label>Bolt Size (in)<input type="number" id="bolt_size_in" step="0.0625" min="0.25"></label>
-    <label>Bolt Material
-      <select id="bolt_material">
-        <option>A325</option>
-        <option>A307</option>
-        <option>304 SS</option>
-        <option>316 SS</option>
-      </select>
-    </label>
-    <label>Number of Bolts<input type="number" id="num_bolts" step="1" min="1"></label>
-    <label>Bolt Pad (in)<input type="number" id="bolt_pad_in" step="0.0625" min="0"></label>
-  </details>
-
-  <!-- 7. Component Selections -->
-  <details>
-    <summary>7. Component Selections</summary>
-    <label>Flight Material<input type="text" id="flight_material"></label>
-    <label>Trough Type
-      <select id="trough_type">
-        <option value="U">U-Trough</option>
-        <option value="Tube">Tube</option>
-        <option value="Flared">Flared</option>
-        <option value="Other">Other</option>
-      </select>
-    </label>
-    <label>Trough Material<input type="text" id="trough_material"></label>
-    <label>Trough Gauge
-      <select id="trough_gauge">
-        <option>16 ga</option><option>14 ga</option><option>12 ga</option>
-        <option>10 ga</option><option>3/16</option><option>1/4</option>
-        <option>3/8</option><option>1/8</option>
-      </select>
-    </label>
-    <label>Cover Type
-      <select id="cover_type">
-        <option>Flat</option><option>Curved</option><option>Hinged</option>
-        <option>Bolted</option><option>None</option>
-      </select>
-    </label>
-    <label>Cover Material<input type="text" id="cover_material"></label>
-    <label>Cover Gauge
-      <select id="cover_gauge">
-        <option>16 ga</option><option>14 ga</option><option>12 ga</option>
-        <option>10 ga</option><option>3/16</option><option>1/4</option>
-        <option>3/8</option><option>1/8</option>
-      </select>
-    </label>
-    <div class="checkbox-row">
-      <input type="checkbox" id="liner">
-      <label for="liner">Liner</label>
-    </div>
-    <label>Liner Material<input type="text" id="liner_material"></label>
-    <label>Liner Thickness<input type="text" id="liner_thickness"></label>
-    <label>Shaft Bearing Type
-      <select id="shaft_bearing_type">
-        <option>Pillow Block Roller</option>
-        <option>Pillow Block Spherical</option>
-        <option>Ball</option>
-        <option>Flange Block</option>
-      </select>
-    </label>
-    <label>Hanger Bearing Type
-      <select id="hanger_bearing_type">
-        <option>Bronze</option>
-        <option>Bronze with Graphite</option>
-        <option>None</option>
-        <option>Ball</option>
-        <option>Babbit</option>
-        <option>Ceramic</option>
-        <option>Graphite</option>
-        <option>Hard Iron</option>
-        <option>Stellite</option>
-        <option>Plastech</option>
-        <option>Nylon</option>
-        <option>Teflon</option>
-        <option>UHMW</option>
-      </select>
-    </label>
-    <label>Tail Bearing Type
-      <select id="tail_bearing_type">
-        <option>Pillow Block Spherical</option>
-        <option>Pillow Block Roller</option>
-        <option>Ball</option>
-        <option>Flange Block</option>
-      </select>
-    </label>
-    <label>Number of Hanger Bearings<input type="number" id="num_hanger_bearings" step="1" min="0"></label>
-    <label>Drive End Seal<input type="text" id="drive_end_seal"></label>
-    <label>Tail End Seal<input type="text" id="tail_end_seal"></label>
-    <label>Inlet Type<input type="text" id="inlet_type"></label>
-    <label>Outlet Type<input type="text" id="outlet_type"></label>
-    <label>Cover Holddown<input type="text" id="cover_holddown"></label>
-    <label>Zero Speed Switch (ZSS)<input type="text" id="zss"></label>
-    <label>E-Stop<input type="text" id="estop"></label>
-    <label>GB-to-Shaft Coupling<input type="text" id="gb_to_shaft_coupling"></label>
-    <label>Trough CTE Material
-      <select id="trough_cte_material">
-        <option>Carbon Steel</option>
-        <option>Stainless Steel</option>
-      </select>
-    </label>
-  </details>
-
-</div><!-- end form-panel -->
-
-<!-- ===== RIGHT PANEL: OUTPUT ===== -->
-<div class="output-panel" id="output-panel">
-  <p style="color:#888; font-style:italic;">Loading calculations...</p>
+  <div class="btn-row" style="margin:0">
+    <button onclick="toggleDatasheet()">Data Sheet</button>
+    <button onclick="printMemo()" style="font-size:11px;padding:3px 10px;background:#fff;color:#003366;border:1px solid #6699cc;border-radius:3px;cursor:pointer;margin-right:8px">Print Memo</button>
+    <button onclick="window.print()">Print</button>
+  </div>
 </div>
 
-</div><!-- end app -->
+<div class="main ds-only">
+<!-- ===== LEFT: INPUTS ===== -->
+<div class="left" id="inputPanel">
+<div id="mobile-jump" style="display:none;text-align:center;padding:4px 0 8px">
+  <a href="#results-panel" style="font-size:12px;color:#003366;text-decoration:none;background:#e8f0ff;padding:4px 16px;border-radius:12px;border:1px solid #aac">Jump to Results ↓</a>
+</div>
+
+<div class="section">
+<div class="sec-header" onclick="toggleSec('sec-project')">
+  <h2>Project Info</h2><span class="sec-toggle" id="tog-project">▸</span>
+</div>
+<div class="sec-body collapsed" id="sec-project">
+<div style="height:6px"></div>
+<div class="field-row"><label>Project No.</label><input id="projNo" type="text" placeholder="e.g. 25-001"></div>
+<div class="field-row"><label>Customer</label><input id="customer" type="text"></div>
+<div class="field-row"><label>Engineer</label><input id="engineer" type="text"></div>
+<div class="field-row"><label>Description</label><input id="desc" type="text"></div>
+</div>
+</div>
+
+<div class="section">
+<div class="sec-header" onclick="toggleSec('sec-material')">
+  <h2>Material <span class="cema-ref">CEMA 550</span></h2><span class="sec-toggle" id="tog-material" style="transform:rotate(90deg)">▸</span>
+</div>
+<div class="sec-body" id="sec-material">
+<div style="height:6px"></div>
+<div class="field-row input-primary"><label>Material</label>
+<select id="material" onchange="onMaterialChange()">
+<option value="">— select —</option>
+<option>Wet Sludge</option><option>Wet Sludge + Lime</option><option>Partially Dried Sludge/Paste</option>
+<option>Dry Biosolids</option><option>Raw Screenings</option><option>Compacted Screenings</option>
+<option>Submerged Grit</option><option>Dewatered Grit</option><option>Lime Pebble</option>
+<option>Lime Powder/Hydrated</option><option>Other</option>
+</select></div>
+<div class="field-row input-secondary"><label>Density (lb/ft³)</label><input id="density" type="number" step="0.1" onchange="markOverride('density');recalc()"></div>
+<div class="field-row input-secondary"><label>Size Class</label>
+<select id="sizeClass" onchange="recalc()">
+<option>Very Fine</option><option>Fine</option><option>Granular</option><option>Lumpy</option><option>Irregular</option>
+</select></div>
+<div class="field-row input-secondary"><label>Flowability</label>
+<select id="flowability" onchange="recalc()">
+<option>Very Free Flowing</option><option>Free Flowing</option><option>Average</option><option>Sluggish</option>
+</select></div>
+<div class="field-row input-secondary"><label>Abrasiveness</label>
+<select id="abrasiveness" onchange="recalc()">
+<option>Mild</option><option>Moderate</option><option>Extreme</option>
+</select></div>
+<span class="sec-more" onclick="toggleExtra('extra-material',this)">▸ More material properties</span>
+<div class="sec-extra hidden" id="extra-material">
+<div class="field-row input-secondary"><label>Solids Content (%)</label><input id="pctDS" type="number" step="0.1" onchange="recalc()"></div>
+<div class="field-row input-secondary"><label>Other Props 1</label>
+<select id="otherProp1" onchange="recalc()">
+<option>--</option><option>Build Up / Harden</option><option>Generate Static Electricity</option>
+<option>Decomposes in Storage</option><option>Flammability</option><option>Becomes Plastic / Softens</option>
+<option>Very Dusty</option><option>Aerates / Becomes Fluid</option><option>Explosiveness</option>
+<option>Stickiness / Adhesive</option><option>Harmful / Toxic Gas or Fumes</option>
+<option>Highly Corrosive</option><option>Mildly Corrosive</option><option>Packs Under Pressure</option>
+<option>Elevated Temperature</option>
+</select></div>
+<div class="field-row input-secondary"><label>Min Temp (°F)</label><input id="tempMin" type="number" value="60" onchange="recalc()"></div>
+<div class="field-row input-secondary"><label>Max Temp (°F)</label><input id="tempMax" type="number" value="100" onchange="recalc()"></div>
+</div>
+<div id="cemaCode" style="font-size:10px;color:#555;margin-top:4px;padding:2px 6px;background:#f0f4f8;border-radius:2px"></div>
+</div>
+</div>
+
+<div class="section">
+<div class="sec-header" onclick="toggleSec('sec-capacity')">
+  <h2>Capacity &amp; Geometry <span class="cema-ref">CEMA 350 Ch. 2</span></h2><span class="sec-toggle" id="tog-capacity" style="transform:rotate(90deg)">▸</span>
+</div>
+<div class="sec-body" id="sec-capacity">
+<div style="height:6px"></div>
+<div class="field-row input-primary"><label>Required Cap. (ft³/hr)</label><input id="Cr" type="number" step="1" value="" onchange="recalc()"></div>
+<div class="field-row input-primary"><label>Length (ft)</label><input id="length" type="number" step="0.5" value="" onchange="recalc()"></div>
+<div class="field-row input-primary"><label>Incline (°)</label><input id="incline" type="number" step="1" value="0" min="0" max="45" onchange="onInclineChange()"></div>
+<div id="inclineWarn" class="warn-inline" style="display:none"></div>
+<div class="field-row input-primary"><label>Trough Fill K (%)</label><input id="K" type="number" step="1" value="30" onchange="markOverride('K');recalc()">
+<span class="std" id="Kstd"></span></div>
+<div id="KwarnRow" class="warn-inline" style="display:none"></div>
+<div class="field-row input-secondary"><label>Max Fill K (%)</label><input id="Kmax" type="number" step="1" value="100" onchange="recalc()"></div>
+</div><!-- end sec-body capacity -->
+</div><!-- end section -->
+
+<div class="section">
+<div class="sec-header" onclick="toggleSec('sec-screw')">
+  <h2>Screw Configuration</h2><span class="sec-toggle" id="tog-screw" style="transform:rotate(90deg)">▸</span>
+</div>
+<div class="sec-body" id="sec-screw">
+<div style="height:6px"></div>
+<button id="btn-autoconfig" onclick="autoConfig()" style="font-size:11px;padding:2px 10px;margin:4px 0;background:#003366;color:#fff;border:none;border-radius:3px;cursor:pointer">&#9881; Auto-Config</button>
+<div class="field-row input-primary"><label>Type</label>
+<select id="spiralType" onchange="onTypeChange();recalc()">
+<option>Shafted</option><option>Single Shaftless</option><option>Dual Shaftless</option>
+</select></div>
+<div class="field-row input-primary"><label>Diameter (in)</label>
+<select id="Ds" onchange="onScrewChange()">
+<option value="">— select —</option>
+<option>6</option><option>9</option><option>10</option><option>12</option>
+<option>14</option><option>16</option><option>18</option><option>20</option><option>24</option>
+</select></div>
+<div id="diamSuggest" style="display:none;font-size:10px;padding:3px 6px;background:#e8f4e8;border-left:2px solid #2a7a2a;border-radius:0 2px 2px 0;margin-bottom:4px;color:#1a4a1a"></div>
+<div class="field-row input-secondary"><label>Service Duty</label>
+<select id="duty" onchange="onScrewChange()">
+<option>Light</option><option selected>Standard</option><option>Heavy</option>
+</select></div>
+<div class="field-row input-primary"><label>Pitch</label>
+<select id="pitch" onchange="recalc()">
+<option>Full</option><option>Short</option><option>Half</option><option>Long</option>
+</select></div>
+<div class="field-row input-secondary"><label>Pipe Shaft</label>
+<select id="pipeSize" onchange="markOverride('pipeSize');recalc()">
+<option>None</option><option>2" SCH 40</option><option>2" SCH 80</option>
+<option>2.5" SCH 40</option><option>2.5" SCH 80</option><option>3" SCH 40</option><option>3" SCH 80</option>
+<option>3.5" SCH 40</option><option>3.5" SCH 80</option><option>4" SCH 40</option><option>4" SCH 80</option>
+<option>5" SCH 40</option><option>5" SCH 80</option><option>6" SCH 40</option><option>6" SCH 80</option>
+<option>8" SCH 40</option><option>8" SCH 80</option>
+</select>
+<span class="std" id="pipeSizeStd"></span></div>
+<div class="field-row input-secondary" style="grid-template-columns:130px 1fr"><label>Flight Thickness</label>
+<select id="flightT" onchange="markOverride('flightT');recalc()" style="min-width:0;width:100%">
+<option>0.1875</option><option>0.25</option><option>0.375</option>
+<option>0.75" x 2.5"</option><option>1" x 3"</option><option>1" x 4"</option>
+<option>0.75" x 2.5" / 0.5" X 1"</option><option>1" x 3" / 0.75" X 1.75"</option>
+<option>1" x 3" / 0.75" X 2.5"</option><option>1" x 4" / 0.75" X 3"</option>
+</select></div>
+<div style="padding-left:134px;margin-top:-2px;margin-bottom:3px"><span class="std" id="flightTStd"></span></div>
+<div id="screwWarn" class="note" style="display:none"></div>
+</div><!-- end sec-body screw -->
+</div><!-- end section -->
+
+<div class="section">
+<div class="sec-header" onclick="toggleSec('sec-drive')">
+  <h2>Drive <span class="cema-ref">CEMA 350 Ch. 3</span></h2><span class="sec-toggle" id="tog-drive" style="transform:rotate(90deg)">▸</span>
+</div>
+<div class="sec-body" id="sec-drive">
+<div style="height:6px"></div>
+<div class="field-row input-primary"><label>Drive Arrangement</label>
+<select id="driveArrangement" onchange="recalc()">
+<option>Direct Coupled In-line</option><option>Screw Conveyor Drive</option>
+<option selected>Shaft Mount Drive</option><option>Gearbox with Chain &amp; Sprocket</option>
+<option>Gearbox with Belt &amp; Sheave</option><option>Open Spur Gear</option>
+</select></div>
+<div class="field-row input-secondary"><label>Flow Direction</label>
+<select id="flowDir"><option>Push</option><option>Pull</option><option>Reversing</option></select></div>
+<div class="field-row input-secondary"><label>Area Classification</label>
+<select id="explosion"><option>NO</option><option>CLASS 1 DIV 1</option><option>CLASS 1 DIV 2</option><option>CLASS 2 DIV 1</option><option>CLASS 2 DIV 2</option></select></div>
+</div><!-- end sec-body drive -->
+</div><!-- end section -->
+
+<div class="section">
+<div class="sec-header" onclick="toggleSec('sec-torsional')">
+  <h2>Torsional Inputs <span class="cema-ref">CEMA 350-21</span></h2><span class="sec-toggle" id="tog-torsional" style="transform:rotate(90deg)">▸</span>
+</div>
+<div class="sec-body" id="sec-torsional">
+<div style="height:6px"></div>
+<div class="field-row input-secondary"><label>Connection Type</label>
+<select id="connType" onchange="onConnTypeChange();recalc()">
+<option>Cross-Bolt Coupling</option><option>Flange</option>
+</select>
+<span class="std" id="connTypeStd"></span></div>
+<div class="field-row input-secondary"><label>Shaft Size (in)</label>
+<select id="shaftSize" onchange="onShaftChange();recalc()">
+<option>1</option><option>1.188</option><option>1.25</option><option>1.375</option><option>1.438</option>
+<option>1.5</option><option>1.938</option><option>2</option><option>2.375</option><option>2.4375</option>
+<option>2.75</option><option>2.875</option><option>2.938</option><option>3</option><option>3.25</option>
+<option>3.438</option><option>3.625</option><option>3.75</option><option>3.875</option><option>4</option><option>4.5</option>
+</select>
+<span class="std" id="shaftSizeStd"></span></div>
+<div id="shaft-sew-warn" style="font-size:10px;color:#c07000;font-style:italic;padding:0 0 3px 130px;display:none">⚠ Shaft exceeds SEW output — step up gearbox frame or use adapter coupling</div>
+<div class="field-row input-secondary"><label>Shaft Material</label>
+<select id="shaftMat" onchange="recalc()">
+<option>1045 CS</option><option>1018 CS</option><option>4140 Alloy</option><option>4140 Hardened</option>
+<option>304 SS</option><option>316 SS</option><option>17-4PH -A</option><option>17-4PH -H900</option><option>17-4PH -H1150</option>
+</select></div>
+<div id="row-boltSize" class="field-row input-secondary"><label>Bolt Size (in)</label>
+<select id="boltSize" onchange="markOverride('boltSize');recalc()">
+<option>None</option><option>0.375</option><option>0.5</option><option>0.625</option><option>0.75</option><option>0.875</option><option>1</option><option>1.125</option><option>1.25</option>
+</select>
+<span class="std" id="boltSizeStd"></span></div>
+<div id="row-boltMat" class="field-row input-secondary"><label>Bolt Material</label>
+<select id="boltMat" onchange="recalc()">
+<option>A307</option><option>A325</option><option>304 SS</option><option>316 SS</option>
+</select></div>
+<div id="row-boltQty" class="field-row input-secondary"><label>Bolt Qty</label>
+<input id="boltQty" type="number" value="3" min="1" max="8" onchange="recalc()"></div>
+<div id="row-boltPad" class="field-row input-secondary"><label>Bolt Pad (in)</label>
+<select id="boltPad" onchange="recalc()">
+<option value="0">None</option><option value="0.25">0.25</option><option value="0.375">0.375</option><option value="0.5">0.5</option>
+</select></div>
+<div id="row-pipeMat" class="field-row input-secondary"><label>Pipe Material</label>
+<select id="pipeMat" onchange="recalc()">
+<option>A53-77a</option><option>Carbon Steel</option><option>304 SS</option><option>316 SS</option>
+</select></div>
+<div class="field-row input-secondary"><label>Gearbox Speed (RPM)</label>
+<input id="gbSpeed" type="number" value="0" onchange="markOverride('gbSpeed');recalc()">
+<span class="std" id="gbSpeedStd"></span></div>
+<div class="field-row input-secondary"><label>Motor HP (nameplate)</label>
+<input id="motorHP" type="number" value="0" onchange="markOverride('motorHP');recalc()">
+<span class="std" id="motorHPStd"></span></div>
+<div id="gb-auto-note" style="font-size:11px;color:#888;font-style:italic;grid-column:1/4;margin-bottom:2px;display:none">
+  Auto-filled from SEW recommendation. <a href="#" onclick="clearGbOverrides();return false;" style="color:#003366;font-style:normal">↺ Reset to recommended</a>
+</div>
+</div><!-- end sec-body torsional -->
+</div><!-- end section -->
+
+<div class="section">
+<div class="sec-header" onclick="toggleSec('sec-components')">
+  <h2>Components &amp; Datasheet Fields</h2><span class="sec-toggle" id="tog-components">▸</span>
+</div>
+<div class="sec-body collapsed" id="sec-components">
+<div style="height:6px"></div>
+<div class="field-row input-secondary"><label>Hanger Bearing</label>
+<select id="hangerBearing" onchange="markOverride('hangerBearing');recalc()">
+<option>None</option><option>Babbit</option><option>Bronze</option><option>Bronze with Graphite</option>
+<option>Hard Iron</option><option>Stellite</option><option>Plastech</option><option>Nylon</option>
+<option>Teflon</option><option>UHMW</option>
+</select>
+<span class="std" id="hangerStd"></span></div>
+<div class="field-row input-secondary"><label>Hanger Qty</label>
+<input id="hangerQty" type="number" value="0" min="0" onchange="markOverride('hangerQty');recalc()">
+<span class="std" id="hangerQtyStd"></span></div>
+<div class="field-row input-secondary"><label>Flight Material</label>
+<select id="flightMat" onchange="recalc()">
+<option>Alloy 8620</option><option>Carbon Steel</option><option>304 SS</option><option>316 SS</option><option>T1</option><option>AR400</option>
+</select></div>
+<div class="field-row input-secondary"><label>Trough Style</label>
+<select id="troughStyle" onchange="recalc()">
+<option>U</option><option>Tube</option><option>Flared</option><option>Other</option>
+</select></div>
+<div class="field-row input-secondary"><label>Trough Thickness</label>
+<select id="troughT" onchange="recalc()">
+<option>16 ga</option><option>14 ga</option><option>12 ga</option><option selected>10 ga</option><option>3/16</option><option>1/4</option><option>3/8</option>
+</select></div>
+<div class="field-row input-secondary"><label>Trough Material</label>
+<select id="troughMat" onchange="recalc()"><option>Carbon Steel</option><option>304 SS</option><option>316 SS</option></select></div>
+<div class="field-row input-secondary"><label>Cover</label>
+<select id="coverStyle"><option>Flat</option><option>Ridged</option><option>Flanged</option><option>Hinged</option><option>None</option></select></div>
+<div class="field-row input-secondary"><label>Inlet</label>
+<select id="inlet"><option>Square Flange</option><option>Round Flange</option><option>Open</option><option>None</option></select></div>
+<div class="field-row input-secondary"><label>Outlet</label>
+<select id="outlet"><option>Square Flange</option><option>Round Flange</option><option>Open</option><option>None</option></select></div>
+</div><!-- end sec-body components -->
+</div><!-- end section -->
+
+</div><!-- end left -->
+
+<!-- ===== RIGHT: OUTPUTS ===== -->
+<div class="right" id="results-panel">
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+
+<div class="result-box">
+<h3>Capacity &amp; Speed <span class="cema-ref">CEMA 350 Ch. 2 — Table 2-4</span></h3>
+<div class="result-row"><span class="label">Eq. Capacity Ceq</span><span class="val" id="o-Ceq">—</span><span class="unit">ft³/hr</span><span></span></div>
+<div class="result-row"><span class="label">Cap. per Rev Cr/N</span><span class="val" id="o-CrN">—</span><span class="unit">ft³/hr/rpm</span><span></span></div>
+<div class="result-row"><span class="label">Speed N</span><span class="val" id="o-N">—</span><span class="unit">rpm</span><span id="o-N-badge"></span></div>
+<div id="o-N-suggest" style="font-size:10px;color:#555;padding:0 0 3px 4px"></div>
+<div class="result-row"><span class="label">Actual Cap. C</span><span class="val" id="o-C">—</span><span class="unit">ft³/hr</span><span></span></div>
+<div class="result-row"><span class="label">Cap. at Max Fill</span><span class="val" id="o-Cmax">—</span><span class="unit">ft³/hr</span><span></span></div>
+<div class="result-row"><span class="label">Pitch (in)</span><span class="val" id="o-P">—</span><span class="unit">in</span><span></span></div>
+<div class="result-row"><span class="label">Lift Height Lh</span><span class="val" id="o-Lh">—</span><span class="unit">ft</span><span></span></div>
+<div class="result-row"><span class="label">Screw tip speed</span><span class="val" id="o-STS">—</span><span class="unit">ft/min</span><span></span></div>
+</div>
+
+<div class="result-box">
+<h3>HP &amp; Motor <span class="cema-ref">CEMA 350 Ch. 3 &amp; 7</span></h3>
+<div class="result-row"><span class="label">HPf (friction)</span><span class="val" id="o-HPf">—</span><span class="unit">HP</span><span></span></div>
+<div class="result-row"><span class="label">HPm (material)</span><span class="val" id="o-HPm">—</span><span class="unit">HP</span><span></span></div>
+<div class="result-row"><span class="label">HPl (lift)</span><span class="val" id="o-HPl">—</span><span class="unit">HP</span><span></span></div>
+<div class="result-row"><span class="label">Overload Fo</span><span class="val" id="o-Fo">—</span><span class="unit"></span><span></span></div>
+<div class="result-row"><span class="label">HPt (total)</span><span class="val" id="o-HPt">—</span><span class="unit">HP</span><span></span></div>
+<div class="result-row"><span class="label">HPt max fill</span><span class="val" id="o-HPtm">—</span><span class="unit">HP</span><span></span></div>
+<div class="result-row"><span class="label">Motor (SEW)</span><span class="val" id="o-motor" style="color:#003366;font-size:14px">—</span><span class="unit">HP</span><span></span></div>
+<div class="result-row"><span class="label">Drive Efficiency</span><span class="val" id="o-eff">—</span><span class="unit"></span><span></span></div>
+</div>
+
+<div class="result-box">
+<h3>Factors</h3>
+<div class="result-row"><span class="label">Pitch (in)</span><span class="val" id="o-Pfact">—</span><span class="unit">in</span><span></span></div>
+<div class="result-row"><span class="label">CF2 (flight)</span><span class="val" id="o-CF2">—</span><span class="unit"></span><span></span></div>
+<div class="result-row"><span class="label">CF3 (mixing)</span><span class="val" id="o-CF3">—</span><span class="unit"></span><span></span></div>
+<div class="result-row"><span class="label">Ri (incline)</span><span class="val" id="o-Ri">—</span><span class="unit"></span><span></span></div>
+<div class="result-row"><span class="label">Fd (diameter)</span><span class="val" id="o-Fd">—</span><span class="unit"></span><span></span></div>
+<div class="result-row"><span class="label">Fb (bearing)</span><span class="val" id="o-Fb">—</span><span class="unit"></span><span></span></div>
+<div class="result-row"><span class="label">Fm (material)</span><span class="val" id="o-Fm">—</span><span class="unit"></span><span></span></div>
+<div class="result-row"><span class="label">C1 (mass flow)</span><span class="val" id="o-C1">—</span><span class="unit"></span><span></span></div>
+</div>
+
+<div class="result-box">
+<h3>Torsional <span class="cema-ref">CEMA 350-21</span></h3>
+<div class="result-row"><span class="label">Motor Torque Tm</span><span class="val" id="o-Tm">—</span><span class="unit">in-lbf</span><span></span></div>
+<div class="result-row"><span class="label">Torque w/ SF 1.4</span><span class="val" id="o-Tmf">—</span><span class="unit">in-lbf</span><span></span></div>
+<div class="result-row"><span class="label">Drive Shaft</span><span class="val" id="o-ds-ratio">—</span><span class="unit">ratio</span><span id="o-ds-badge"></span></div>
+<div id="o-ds-hint" style="font-size:10px;color:#c00;padding:2px 0 5px 4px;display:none;background:#fff8f8;border-left:2px solid #c00;margin-bottom:4px"></div>
+<div class="result-row"><span class="label">Pipe Shaft</span><span class="val" id="o-ps-ratio">—</span><span class="unit">ratio</span><span id="o-ps-badge"></span></div>
+<div class="result-row"><span class="label">Coupling Bolt</span><span class="val" id="o-cb-ratio">—</span><span class="unit">ratio</span><span id="o-cb-badge"></span></div>
+<div class="result-row"><span class="label">Pipe &amp; Bushing</span><span class="val" id="o-pb-ratio">—</span><span class="unit">ratio</span><span id="o-pb-badge"></span></div>
+<div class="result-row weakest-link" id="o-weakest" style="display:none"><span></span></div>
+</div>
+
+</div><!-- grid -->
+
+<div class="result-box" style="margin-top:8px">
+<h3>Additional Checks</h3>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+<div>
+<div style="font-size:10px;color:#888;margin-bottom:2px">Screw Deflection</div>
+<div class="result-row" style="grid-template-columns:1fr auto"><span class="val" id="o-defl">—</span><span id="o-defl-badge"></span></div>
+<div style="font-size:10px;color:#888">allow 0.25 in</div>
+</div>
+<div>
+<div style="font-size:10px;color:#888;margin-bottom:2px">Shaft End Angle</div>
+<div class="result-row" style="grid-template-columns:1fr auto"><span class="val" id="o-angle">—</span><span id="o-angle-badge"></span></div>
+<div style="font-size:10px;color:#888">allow 0.135–0.15°</div>
+</div>
+<div>
+<div style="font-size:10px;color:#888;margin-bottom:2px">Screw Thermal Exp.</div>
+<div class="result-row" style="grid-template-columns:1fr auto"><span class="val" id="o-stherm">—</span><span id="o-stherm-badge"></span></div>
+<div style="font-size:10px;color:#888">allow 0.125 in</div>
+</div>
+<div>
+<div style="font-size:10px;color:#888;margin-bottom:2px">Trough Thermal (per section)</div>
+<div class="result-row" style="grid-template-columns:1fr auto"><span class="val" id="o-ttherm">—</span><span id="o-ttherm-badge"></span></div>
+<div style="font-size:10px;color:#888">allow 0.125 in</div>
+</div>
+<div>
+<div style="font-size:10px;color:#888;margin-bottom:2px">Screw Abrasion Score</div>
+<div class="result-row" style="grid-template-columns:1fr auto"><span class="val" id="o-sabr">—</span><span id="o-sabr-badge"></span></div>
+<div style="font-size:10px;color:#888">warn &gt; 2000</div>
+</div>
+<div>
+<div style="font-size:10px;color:#888;margin-bottom:2px">Trough Abrasion Score</div>
+<div class="result-row" style="grid-template-columns:1fr auto"><span class="val" id="o-tabr">—</span><span id="o-tabr-badge"></span></div>
+<div style="font-size:10px;color:#888">warn &gt; 2000</div>
+</div>
+<div>
+<div style="font-size:10px;color:#888;margin-bottom:2px">Spiral Compression</div>
+<div class="result-row" style="grid-template-columns:1fr auto"><span class="val" id="o-scomp">—</span><span id="o-scomp-badge"></span></div>
+<div style="font-size:10px;color:#888">allow 0.08 in/ft</div>
+</div>
+<div>
+<div style="font-size:10px;color:#888;margin-bottom:2px">Spiral Stress</div>
+<div class="result-row" style="grid-template-columns:1fr auto"><span class="val" id="o-sstress">—</span><span id="o-sstress-badge"></span></div>
+<div id="o-sstress-hint" style="font-size:10px;color:#c00;padding:2px 0 5px 4px;display:none;background:#fff8f8;border-left:2px solid #c00;margin-bottom:4px"></div>
+<div style="font-size:10px;color:#888">allow 30% yield</div>
+</div>
+</div>
+</div>
+
+<div class="result-box" style="margin-top:8px">
+<h3>CEMA Material Code</h3>
+<div id="o-cema-full" style="font-size:12px;color:#333;font-family:monospace;padding:4px"></div>
+</div>
+
+<div class="result-box" style="margin-top:8px;border-left:3px solid #003366">
+<h3>SEW-Eurodrive FAZ Recommendation <span class="cema-ref">B14 Flange · 1750 RPM · SF = motor/HPtm</span></h3>
+<div class="sew-grid" style="margin-top:4px">
+<div>
+  <div class="result-row"><span class="label">Gearmotor Model</span><span class="val" id="o-sew-model" style="color:#003366;font-size:13px">—</span></div>
+  <div class="result-row"><span class="label">Gear Ratio</span><span class="val" id="o-sew-ratio">—</span><span class="unit">:1</span></div>
+  <div class="result-row"><span class="label">Output Speed</span><span class="val" id="o-sew-speed">—</span><span class="unit">RPM</span></div>
+  <div class="result-row"><span class="label">SEW Output Shaft</span><span class="val" id="o-sew-shaft-size">—</span><span id="o-sew-shaft-badge"></span></div>
+</div>
+<div>
+  <div class="result-row"><span class="label">SEW Motor HP</span><span class="val" id="o-sew-hp">—</span><span class="unit">HP</span></div>
+  <div class="result-row"><span class="label">Required Ratio</span><span class="val" id="o-sew-reqratio">—</span><span class="unit">:1</span></div>
+  <div style="font-size:10px;color:#555;margin-bottom:4px">Specify AGMA Class II rated unit · Confirm <strong>fB ≥ 1.4</strong> in SEW DriveSelect</div>
+</div>
+</div>
+<div style="font-size:11px;margin-top:4px;color:#555" id="o-sew-shaft-note"></div>
+<div id="o-sew-frame-note" style="font-size:10px;color:#c07000;font-style:italic;margin-top:2px"></div>
+<div style="font-size:11px;color:#888;margin-top:4px;font-style:italic">Frame size is approximate — verify final selection with SEW DriveSelect or catalog.<br>
+<a id="o-sew-link" href="https://www.seweurodrive.com/home.html" target="_blank" rel="noopener" style="color:#003366;font-style:normal;font-weight:600">→ SEW-EURODRIVE</a>
+&nbsp;|&nbsp;
+<a href="https://www.seweurodrive.com/os/ecs/?language=en_US" target="_blank" rel="noopener" style="color:#003366;font-style:normal;font-weight:600">→ SEW DriveSelect</a>
+</div>
+</div>
+
+<!-- Data Sheet -->
+<div class="datasheet" id="datasheet">
+<table><tr><td class="hdr" colspan="6">SCREW CONVEYOR DATA SHEET</td></tr>
+<tr><td class="lbl">Project No.</td><td id="ds-projNo"></td><td class="lbl">By</td><td id="ds-engr"></td><td class="lbl">Date</td><td id="ds-date"></td></tr>
+<tr><td class="lbl">Customer</td><td id="ds-cust" colspan="3"></td><td class="lbl">Revision</td><td>1</td></tr>
+<tr><td class="lbl">Description</td><td id="ds-desc" colspan="5"></td></tr>
+</table>
+<table><tr><td class="hdr" colspan="4">CONVEYOR GENERAL INFORMATION</td></tr>
+<tr><td class="lbl">Identification</td><td id="ds-id"></td><td class="lbl">Conveyed Material</td><td id="ds-mat"></td></tr>
+<tr><td class="lbl">Length</td><td id="ds-len"></td><td class="lbl">Density (lb/ft³)</td><td id="ds-dens"></td></tr>
+<tr><td class="lbl">Drive Arrangement</td><td id="ds-drive"></td><td class="lbl">Flowability</td><td id="ds-flow"></td></tr>
+<tr><td class="lbl">Flow Direction</td><td id="ds-flowdir"></td><td class="lbl">Size Class</td><td id="ds-size"></td></tr>
+<tr><td class="lbl">Service Duty</td><td id="ds-duty"></td><td class="lbl">Abrasiveness</td><td id="ds-abr"></td></tr>
+</table>
+<table><tr><td class="hdr" colspan="4">DESIGN INFORMATION</td></tr>
+<tr><td class="lbl">Design Capacity</td><td id="ds-cap"></td><td class="lbl">Screw Diameter</td><td id="ds-Ds"></td></tr>
+<tr><td class="lbl">Conveyor Speed</td><td id="ds-N"></td><td class="lbl">Screw Pitch</td><td id="ds-pitch"></td></tr>
+<tr><td class="lbl">Screw Type</td><td id="ds-type"></td><td class="lbl">Trough Fill</td><td id="ds-K"></td></tr>
+<tr><td class="lbl">Motor (recommended)</td><td id="ds-motor"></td><td class="lbl">Total HP (max fill)</td><td id="ds-HPt"></td></tr>
+<tr><td class="lbl">SEW Gearmotor</td><td id="ds-sew-model" colspan="3"></td></tr>
+<tr><td class="lbl">Gear Ratio</td><td id="ds-sew-ratio"></td><td class="lbl">Output Speed</td><td id="ds-sew-speed"></td></tr>
+<tr><td class="lbl">Pipe Shaft</td><td id="ds-pipe"></td><td class="lbl">Shaft Size</td><td id="ds-shaft"></td></tr>
+<tr><td class="lbl">Connection Type</td><td id="ds-conn"></td><td class="lbl">Bolt Size</td><td id="ds-bolt"></td></tr>
+</table>
+</div>
+
+</div><!-- end right -->
+</div><!-- end main -->
+
+<!-- ===== DESIGN MEMO (print only) ===== -->
+<div id="design-memo" class="memo-only">
+  <div style="text-align:center;margin-bottom:18px;border-bottom:2px solid #003366;padding-bottom:10px">
+    <div style="font-size:18px;font-weight:700;color:#003366;letter-spacing:.5px">SCREW CONVEYOR — BASIS OF DESIGN</div>
+    <div style="font-size:10px;color:#777;margin-top:3px;text-transform:uppercase;letter-spacing:.5px">CEMA 350 Rev 20 &nbsp;·&nbsp; Tool v37</div>
+  </div>
+
+  <div class="memo-row">
+    <span class="memo-pair"><span class="memo-label">Project:</span><span class="memo-val" id="m-proj"></span></span>
+    <span class="memo-pair"><span class="memo-label">Customer:</span><span class="memo-val" id="m-cust"></span></span>
+    <span class="memo-pair"><span class="memo-label">Date:</span><span class="memo-val" id="m-date"></span></span>
+  </div>
+  <div class="memo-row">
+    <span class="memo-pair"><span class="memo-label">Engineer:</span><span class="memo-val" id="m-engr"></span></span>
+    <span class="memo-pair" style="flex:1"><span class="memo-label">Description:</span><span class="memo-val" id="m-desc"></span></span>
+  </div>
+
+  <h2>Conveyor</h2>
+  <div class="memo-row">
+    <span class="memo-pair" style="flex:2"><span class="memo-label">Configuration:</span><span class="memo-val" id="m-conv-desc"></span></span>
+    <span class="memo-pair"><span class="memo-label">Incline:</span><span class="memo-val" id="m-incline"></span></span>
+    <span class="memo-pair"><span class="memo-label">Drive:</span><span class="memo-val" id="m-drive"></span></span>
+  </div>
+
+  <h2>Material</h2>
+  <div class="memo-row">
+    <span class="memo-pair"><span class="memo-label">Material:</span><span class="memo-val" id="m-mat"></span></span>
+    <span class="memo-pair"><span class="memo-label">Density:</span><span class="memo-val"><span id="m-dens"></span> lb/ft³</span></span>
+    <span class="memo-pair"><span class="memo-label">Flowability:</span><span class="memo-val" id="m-flow"></span></span>
+    <span class="memo-pair"><span class="memo-label">Abrasiveness:</span><span class="memo-val" id="m-abr"></span></span>
+  </div>
+  <div class="memo-row">
+    <span class="memo-pair"><span class="memo-label">CEMA Code:</span><span class="memo-val" id="m-cema"></span></span>
+  </div>
+
+  <h2>Capacity &amp; Speed</h2>
+  <div class="memo-row">
+    <span class="memo-pair"><span class="memo-label">Required:</span><span class="memo-val"><span id="m-Cr"></span> ft³/hr</span></span>
+    <span class="memo-pair"><span class="memo-label">Design:</span><span class="memo-val"><span id="m-C"></span> ft³/hr</span></span>
+    <span class="memo-pair"><span class="memo-label">Max Fill:</span><span class="memo-val"><span id="m-Cmax"></span> ft³/hr</span></span>
+    <span class="memo-pair"><span class="memo-label">Speed:</span><span class="memo-val"><span id="m-N"></span> RPM</span></span>
+    <span class="memo-pair"><span class="memo-label">Trough Fill:</span><span class="memo-val"><span id="m-K"></span>%</span></span>
+  </div>
+
+  <h2>Power</h2>
+  <div class="memo-row">
+    <span class="memo-pair"><span class="memo-label">HPf (friction):</span><span class="memo-val" id="m-HPf"></span></span>
+    <span class="memo-pair"><span class="memo-label">HPm (material):</span><span class="memo-val" id="m-HPm"></span></span>
+    <span class="memo-pair"><span class="memo-label">HPl (lift):</span><span class="memo-val" id="m-HPl"></span></span>
+    <span class="memo-pair"><span class="memo-label">Fo:</span><span class="memo-val" id="m-Fo"></span></span>
+  </div>
+  <div class="memo-row">
+    <span class="memo-pair"><span class="memo-label">HPt (total):</span><span class="memo-val" id="m-HPt"></span></span>
+    <span class="memo-pair"><span class="memo-label">Motor:</span><span class="memo-val"><span id="m-motor"></span> HP</span></span>
+  </div>
+
+  <h2>Torsional <span style="font-size:9px;font-weight:400;color:#777">(CEMA 350-21)</span></h2>
+  <div class="memo-row">
+    <span class="memo-pair"><span class="memo-label">Torque Tm:</span><span class="memo-val"><span id="m-Tm"></span> in-lbf</span></span>
+    <span class="memo-pair"><span class="memo-label">Torque Tmf:</span><span class="memo-val"><span id="m-Tmf"></span> in-lbf</span></span>
+  </div>
+  <div class="memo-row">
+    <span class="memo-pair"><span class="memo-label">Drive Shaft:</span><span class="memo-val" id="m-ds-ratio"></span></span>
+    <span class="memo-pair"><span class="memo-label">Pipe Shaft:</span><span class="memo-val" id="m-ps-ratio"></span></span>
+    <span class="memo-pair"><span class="memo-label">Coupling Bolt:</span><span class="memo-val" id="m-cb-ratio"></span></span>
+    <span class="memo-pair"><span class="memo-label">Pipe &amp; Bushing:</span><span class="memo-val" id="m-pb-ratio"></span></span>
+  </div>
+
+  <h2>Checks</h2>
+  <div class="memo-row">
+    <span class="memo-pair"><span class="memo-label">Deflection:</span><span class="memo-val" id="m-defl"></span></span>
+    <span class="memo-pair"><span class="memo-label">End Angle:</span><span class="memo-val" id="m-angle"></span></span>
+    <span class="memo-pair"><span class="memo-label">Screw Thermal:</span><span class="memo-val" id="m-stherm"></span></span>
+    <span class="memo-pair"><span class="memo-label">Trough Thermal:</span><span class="memo-val" id="m-ttherm"></span></span>
+  </div>
+  <div class="memo-row">
+    <span class="memo-pair"><span class="memo-label">Screw Abrasion:</span><span class="memo-val" id="m-sabr"></span></span>
+    <span class="memo-pair"><span class="memo-label">Trough Abrasion:</span><span class="memo-val" id="m-tabr"></span></span>
+  </div>
+
+  <h2>Gearbox <span style="font-size:9px;font-weight:400;color:#777">(SEW FAZ)</span></h2>
+  <div class="memo-row">
+    <span class="memo-pair"><span class="memo-label">Model:</span><span class="memo-val" id="m-sew-model"></span></span>
+    <span class="memo-pair"><span class="memo-label">Ratio:</span><span class="memo-val"><span id="m-sew-ratio"></span>:1</span></span>
+    <span class="memo-pair"><span class="memo-label">Output Speed:</span><span class="memo-val"><span id="m-sew-speed"></span> RPM</span></span>
+    <span class="memo-pair"><span class="memo-label">Motor:</span><span class="memo-val"><span id="m-sew-hp"></span> HP</span></span>
+  </div>
+
+  <h2>Standards</h2>
+  <div class="memo-row" style="color:#555">
+    Capacity: CEMA 350 Ch. 2 &nbsp;·&nbsp; HP: CEMA 350 Ch. 3 &nbsp;·&nbsp; Lift HP: CEMA 350 Ch. 7 &nbsp;·&nbsp; Torsional: CEMA 350-21 &nbsp;·&nbsp; Material: CEMA 550
+  </div>
+  <div style="margin-top:20px;font-size:9px;color:#aaa;border-top:1px solid #eee;padding-top:8px">
+    Generated by Screw Conveyor Sizer Tool v37 — For engineering reference only. Verify with SEW DriveSelect for final selection.
+  </div>
+</div>
 
 <script>
-// ===========================================================================
-// LOOKUP TABLES
-// ===========================================================================
-const CF2_TABLE = {
-  "Shafted":          {CF15_: 1.00, CF30_: 1.00, CF45_: 1.00},
-  "Single Shaftless": {CF15_: 1.00, CF30_: 1.00, CF45_: 1.00},
-  "Dual Shaftless":   {CF15_: 1.00, CF30_: 1.00, CF45_: 1.00},
-  "Cut":              {CF15_: 1.95, CF30_: 1.57, CF45_: 1.43},
-  "Cut & Folded":     {CF15_: 1.00, CF30_: 3.75, CF45_: 2.54},
-  "Ribbon":           {CF15_: 1.04, CF30_: 1.37, CF45_: 1.62},
-  "Paddle 1x":        {CF15_: 1.00, CF30_: 1.00, CF45_: 1.00},
-  "Paddle 2x":        {CF15_: 1.00, CF30_: 1.00, CF45_: 1.00},
-  "Paddle 3x":        {CF15_: 1.00, CF30_: 1.00, CF45_: 1.00},
-  "Paddle 4x":        {CF15_: 1.00, CF30_: 1.00, CF45_: 1.00},
+// ============================================================
+// Screw Conveyor Sizer — Tool v37 — build 2026-04-16
+// ============================================================
+// LOOKUP TABLES (verbatim from Reference sheet)
+// ============================================================
+
+const MATERIAL_CHARS = {
+  'Wet Sludge':                   {density:65, pctDS:21, size:'Granular',  flow:'Sluggish',       abr:'Mild',     p1:'--',                      p2:'--'},
+  'Wet Sludge + Lime':            {density:75, pctDS:32, size:'Granular',  flow:'Sluggish',       abr:'Moderate', p1:'Stickiness / Adhesive',   p2:'--'},
+  'Partially Dried Sludge/Paste': {density:55, pctDS:55, size:'Granular',  flow:'Average',        abr:'Mild',     p1:'Stickiness / Adhesive',   p2:'--'},
+  'Dry Biosolids':                {density:45, pctDS:94, size:'Fine',      flow:'Free Flowing',   abr:'Moderate', p1:'--',                      p2:'--'},
+  'Raw Screenings':               {density:65, pctDS:18, size:'Irregular', flow:'Sluggish',       abr:'Moderate', p1:'Build Up / Harden',       p2:'Harmful / Toxic Gas or Fumes'},
+  'Compacted Screenings':         {density:75, pctDS:38, size:'Irregular', flow:'Sluggish',       abr:'Moderate', p1:'Build Up / Harden',       p2:'Harmful / Toxic Gas or Fumes'},
+  'Submerged Grit':               {density:100,pctDS:5,  size:'Granular',  flow:'Free Flowing',   abr:'Extreme',  p1:'--',                      p2:'--'},
+  'Dewatered Grit':               {density:120,pctDS:20, size:'Granular',  flow:'Sluggish',       abr:'Extreme',  p1:'--',                      p2:'--'},
+  'Lime Pebble':                  {density:45, pctDS:94, size:'Granular',  flow:'Average',        abr:'Moderate', p1:'Very Dusty',              p2:'--'},
+  'Lime Powder/Hydrated':         {density:45, pctDS:94, size:'Fine',      flow:'Free Flowing',   abr:'Moderate', p1:'Very Dusty',              p2:'--'},
+  'Other':                        {density:65, pctDS:20, size:'Granular',  flow:'Average',        abr:'',         p1:'',                        p2:''}
 };
-const CF3_TABLE = {0:1.00, 1:1.08, 2:1.16, 3:1.24, 4:1.32};
-const FD_TABLE = {6:18, 9:31, 10:37, 12:55, 14:78, 16:106, 18:135, 20:165, 24:235};
-const FB_TABLE = {
-  "None":1.0, "Ball":1.0, "Babbit":1.7, "Bronze":1.7,
-  "Bronze with Graphite":1.7, "Ceramic":1.7, "Graphite":1.0,
-  "Hard Iron":4.4, "Stellite":4.4, "Plastech":2.0,
-  "Nylon":2.0, "Teflon":2.0, "UHMW":2.0
+
+const FM = {
+  'Wet Sludge':1.5,'Wet Sludge + Lime':1.5,'Partially Dried Sludge/Paste':2.0,
+  'Dry Biosolids':2.6,'Raw Screenings':2.0,'Compacted Screenings':1.5,
+  'Submerged Grit':1.5,'Dewatered Grit':2.6,'Lime Pebble':2.0,'Lime Powder/Hydrated':2.0,'Other':1.5
 };
-const FM_TABLE = {
-  "Wet Sludge":1.5, "Wet Sludge + Lime":1.5,
-  "Partially Dried Sludge/Paste":2.0, "Dry Biosolids":2.6,
-  "Raw Screenings":2.0, "Compacted Screenings":1.5,
-  "Submerged Grit":1.5, "Dewatered Grit":2.6,
-  "Lime Pebble":2.0, "Lime Powder/Hydrated":2.0, "Other":1.5
-};
-const FF_TABLE = {
-  "Shafted":1.0, "Single Shaftless":1.0, "Dual Shaftless":1.0,
-  "Ribbon":1.0, "Cut":1.15, "Cut & Folded":1.20,
-  "Paddle 1x":1.0, "Paddle 2x":1.0, "Paddle 3x":1.0, "Paddle 4x":1.0
-};
-const FP_TABLE = {0:1.00, 1:1.29, 2:1.58, 3:1.87, 4:2.16};
-const INCLINE_SHAFTED = {0:1.00, 10:0.90, 15:0.70, 20:0.55, 25:0.42, 30:0.30, 35:0.22, 40:0.15, 45:0.10};
-const INCLINE_SHAFTLESS = {0:1.00, 10:1.00, 15:0.90, 20:0.80, 25:0.70, 30:0.60, 35:0.54, 40:0.50, 45:0.50};
-const DRIVE_EFF = {
-  "Direct Coupled In-line":0.95, "Screw Conveyor Drive":0.95,
-  "Shaft Mount Drive":0.95, "Gearbox with Chain & Sprocket":0.88,
-  "Gearbox with Belt & Sheave":0.89, "Open Spur Gear":0.86
-};
+
+// Screw geometry keyed by C2 = size+typeShort+duty
+// Columns: [outerT, outerW, innerT, innerW, spiralDesc, wt_per_ft, stdShaft, stdPipe, shaftlessID, flBC, bs, hs]
+// Shafted1/2/3 = Light/Standard/Heavy duty
 const SCREW_GEOM = {
-  6:[6,2.375,2.067,7.5,7.00], 9:[9,2.375,2.067,9.5,7.00],
-  10:[10,2.375,2.067,12.0,7.75], 12:[12,2.875,2.469,13.0,8.50],
-  14:[14,3.500,3.068,18.0,10.50], 16:[16,4.000,3.548,20.0,12.50],
-  18:[18,4.000,3.548,21.0,14.50], 20:[20,4.000,3.548,26.0,16.50],
-  24:[24,4.500,4.026,30.0,20.50]
+  // Shafted [col index from A]: flightT(B), wt/ft(H=col8), shaft(I=col9), pipe(J=col10), bc(L=col12), bs(M=col13), hs(N=col14)
+  // For shafted: only flightT and wt/ft, shaft, pipe are relevant
+  '6Shafted1': {ft:'0.1875',wt:7.5,  shaft:1.5,    pipe:'2" SCH 40', bc:null, bs:null, hs:null},
+  '9Shafted1': {ft:'0.1875',wt:9.5,  shaft:1.5,    pipe:'2" SCH 40', bc:null, bs:null, hs:null},
+  '10Shafted1':{ft:'0.1875',wt:12,   shaft:1.5,    pipe:'2" SCH 40', bc:null, bs:null, hs:null},
+  '12Shafted1':{ft:'0.1875',wt:13,   shaft:2,      pipe:'2.5" SCH 40',bc:null,bs:null, hs:null},
+  '14Shafted1':{ft:'0.1875',wt:18,   shaft:2.4375, pipe:'3" SCH 40',  bc:null,bs:null, hs:null},
+  '16Shafted1':{ft:'0.1875',wt:20,   shaft:2.938,  pipe:'3.5" SCH 40',bc:null,bs:null, hs:null},
+  '18Shafted1':{ft:'0.1875',wt:21,   shaft:2.938,  pipe:'3.5" SCH 40',bc:null,bs:null, hs:null},
+  '20Shafted1':{ft:'0.1875',wt:26,   shaft:2.938,  pipe:'3.5" SCH 40',bc:null,bs:null, hs:null},
+  '24Shafted1':{ft:'0.25',  wt:37,   shaft:3.4375, pipe:'4" SCH 40',  bc:null,bs:null, hs:null},
+  '6Shafted2': {ft:'0.25',  wt:8,    shaft:1.5,    pipe:'2" SCH 40', bc:null, bs:null, hs:null},
+  '9Shafted2': {ft:'0.25',  wt:13,   shaft:2,      pipe:'2.5" SCH 40',bc:null,bs:null, hs:null},
+  '10Shafted2':{ft:'0.25',  wt:13.5, shaft:2,      pipe:'2.5" SCH 40',bc:null,bs:null, hs:null},
+  '12Shafted2':{ft:'0.25',  wt:17,   shaft:2.4375, pipe:'3" SCH 40',  bc:null,bs:null, hs:null},
+  '14Shafted2':{ft:'0.25',  wt:20,   shaft:2.938,  pipe:'3" SCH 40',  bc:null,bs:null, hs:null},
+  '16Shafted2':{ft:'0.25',  wt:24,   shaft:2.938,  pipe:'3.5" SCH 40',bc:null,bs:null, hs:null},
+  '18Shafted2':{ft:'0.25',  wt:25,   shaft:2.938,  pipe:'3.5" SCH 40',bc:null,bs:null, hs:null},
+  '20Shafted2':{ft:'0.25',  wt:31,   shaft:3.4375, pipe:'3.5" SCH 40',bc:null,bs:null, hs:null},
+  '24Shafted2':{ft:'0.25',  wt:43,   shaft:3.4375, pipe:'4" SCH 40',  bc:null,bs:null, hs:null},
+  '6Shafted3': {ft:'0.25',  wt:8,    shaft:1.5,    pipe:'2" SCH 40', bc:null, bs:null, hs:null},
+  '9Shafted3': {ft:'0.375', wt:16,   shaft:2,      pipe:'2.5" SCH 40',bc:null,bs:null, hs:null},
+  '10Shafted3':{ft:'0.375', wt:16.5, shaft:2,      pipe:'2.5" SCH 40',bc:null,bs:null, hs:null},
+  '12Shafted3':{ft:'0.375', wt:22.3, shaft:2.938,  pipe:'3.5" SCH 40',bc:null,bs:null, hs:null},
+  '14Shafted3':{ft:'0.375', wt:27.5, shaft:2.938,  pipe:'3.5" SCH 40',bc:null,bs:null, hs:null},
+  '16Shafted3':{ft:'0.375', wt:31,   shaft:2.938,  pipe:'3.5" SCH 40',bc:null,bs:null, hs:null},
+  '18Shafted3':{ft:'0.375', wt:36,   shaft:3.4375, pipe:'4" SCH 40',  bc:null,bs:null, hs:null},
+  '20Shafted3':{ft:'0.375', wt:33.4, shaft:3.4375, pipe:'4" SCH 40',  bc:null,bs:null, hs:null},
+  '24Shafted3':{ft:'0.375', wt:50,   shaft:3.4375, pipe:'4" SCH 40',  bc:null,bs:null, hs:null},
+  // Dual shaftless: sid = inner bore Dp (col10 from ref table A5:N49), used as Dp in capacity calc per CEMA
+  '6Dual':  {ft:'',                         wt:15,  shaft:1.5,    pipe:'None', bc:7,    bs:0,     hs:0,    sid:0},
+  '9Dual':  {ft:'0.75" x 2.5" / 0.5" X 1"',wt:17.2,shaft:2,     pipe:'None', bc:7,    bs:0.625, hs:3.5,  sid:1.5},
+  '10Dual': {ft:'0.75" x 2.5" / 0.5" X 1"',wt:25,  shaft:2,     pipe:'None', bc:7.75, bs:0.625, hs:3.5,  sid:3.5},
+  '12Dual': {ft:'1" x 3" / 0.75" X 1.75"', wt:31,  shaft:2.4375,pipe:'None', bc:8.5,  bs:0.875, hs:4.75, sid:2},
+  '14Dual': {ft:'1" x 3" / 0.75" X 2.5"',  wt:35.7,shaft:2.938, pipe:'None', bc:10.5, bs:0.875, hs:5.5,  sid:2.5},
+  '16Dual': {ft:'1" x 3" / 0.75" X 2.5"',  wt:39.2,shaft:2.938, pipe:'None', bc:12.5, bs:0.875, hs:5.5,  sid:4.5},
+  '18Dual': {ft:'1" x 4" / 0.75" X 3"',    wt:45.4,shaft:2.938, pipe:'None', bc:14.5, bs:0.875, hs:7,    sid:3.5},
+  '20Dual': {ft:'1" x 4" / 0.75" X 3"',    wt:48.6,shaft:3.4375,pipe:'None', bc:16.5, bs:0.875, hs:7,    sid:5.5},
+  '24Dual': {ft:'1" x 4" / 0.75" X 3"',    wt:53.6,shaft:3.4375,pipe:'None', bc:20.5, bs:0.875, hs:7,    sid:9.5},
+  // Single shaftless: no inner element, Dp=0 (full bore)
+  '6Single': {ft:'',          wt:10.8,shaft:1.5,   pipe:'None', bc:7,    bs:0,    hs:0,    sid:0},
+  '9Single': {ft:'0.75" x 2.5"',wt:13.6,shaft:2,  pipe:'None', bc:7,    bs:0.75, hs:2.5,  sid:0},
+  '10Single':{ft:'0.75" x 2.5"',wt:18,  shaft:2,  pipe:'None', bc:7.75, bs:0.75, hs:2.5,  sid:0},
+  '12Single':{ft:'1" x 3"',  wt:24.4,shaft:2.4375,pipe:'None', bc:8.5,  bs:1,    hs:3,    sid:0},
+  '14Single':{ft:'1" x 3"',  wt:26.4,shaft:2.938, pipe:'None', bc:10.5, bs:1,    hs:3,    sid:0},
+  '16Single':{ft:'1" x 3"',  wt:27.9,shaft:2.938, pipe:'None', bc:12.5, bs:1,    hs:3,    sid:0},
+  '18Single':{ft:'1" x 4"',  wt:33.8,shaft:2.938, pipe:'None', bc:14.5, bs:1,    hs:4,    sid:0},
+  '20Single':{ft:'1" x 4"',  wt:35.5,shaft:3.4375,pipe:'None', bc:16.5, bs:1,    hs:4,    sid:0},
+  '24Single':{ft:'1" x 4"',  wt:38.1,shaft:3.4375,pipe:'None', bc:20.5, bs:1,    hs:4,    sid:0},
 };
-const PIPE_SIZES = {
-  '2" SCH 40':[2.375,2.067], '2" SCH 80':[2.375,1.939],
-  '2.5" SCH 40':[2.875,2.469], '2.5" SCH 80':[2.875,2.323],
-  '3" SCH 40':[3.500,3.068], '3" SCH 80':[3.500,2.900],
-  '3.5" SCH 40':[4.000,3.548], '3.5" SCH 80':[4.000,3.364],
-  '4" SCH 40':[4.500,4.026], '4" SCH 80':[4.500,3.826],
-  '5" SCH 40':[5.563,5.047], '5" SCH 80':[5.563,4.813],
-  '6" SCH 40':[6.625,6.065], '6" SCH 80':[6.625,5.761],
-  '8" SCH 40':[8.625,7.981], '8" SCH 80':[8.625,7.625],
-  '10" SCH 40':[10.750,10.020],
-  '12" SCH 40':[12.750,11.938], '12" SCH 80':[12.750,11.374]
+
+const PIPE_TABLE = {
+  'None':         {od:0,    id:0},
+  '2" SCH 40':    {od:2.375,id:2.067},
+  '2" SCH 80':    {od:2.375,id:1.939},
+  '2.5" SCH 40':  {od:2.875,id:2.469},
+  '2.5" SCH 80':  {od:2.875,id:2.323},
+  '3" SCH 40':    {od:3.5,  id:3.068},
+  '3" SCH 80':    {od:3.5,  id:2.9},
+  '3.5" SCH 40':  {od:4,    id:3.548},
+  '3.5" SCH 80':  {od:4,    id:3.364},
+  '4" SCH 40':    {od:4.5,  id:4.026},
+  '4" SCH 80':    {od:4.5,  id:3.826},
+  '5" SCH 40':    {od:5.563,id:5.047},
+  '5" SCH 80':    {od:5.563,id:4.813},
+  '6" SCH 40':    {od:6.625,id:6.065},
+  '6" SCH 80':    {od:6.625,id:5.761},
+  '8" SCH 40':    {od:8.625,id:7.981},
+  '8" SCH 80':    {od:8.625,id:7.625},
+  '10" SCH 40':   {od:10.75,id:10.02},
+  '10" SCH 60':   {od:10.75,id:9.75},
+  '12" SCH 40':   {od:12.75,id:11.938},
+  '12" SCH 80':   {od:12.75,id:11.374},
 };
-const SHAFT_MATERIALS = {
-  "1018 CS":{Sy:58000,E:28e6,CTE:6.33e-6},
-  "1045 CS":{Sy:70000,E:28e6,CTE:6.33e-6},
-  "4140 Alloy":{Sy:70000,E:28e6,CTE:6.33e-6},
-  "4140 Hardened":{Sy:125000,E:28e6,CTE:6.33e-6},
-  "304 SS":{Sy:30000,E:29e6,CTE:9.6e-6},
-  "316 SS":{Sy:30000,E:29e6,CTE:9.6e-6},
-  "17-4PH -A":{Sy:115000,E:28.5e6,CTE:6.0e-6},
-  "17-4PH -H900":{Sy:185000,E:28.5e6,CTE:6.0e-6},
-  "17-4PH -H1150":{Sy:130000,E:28.5e6,CTE:6.0e-6}
+
+// CF2: [type][fillBucket] -> factor
+const CF2 = {
+  'Shafted':           {CF15_:1,    CF30_:1,    CF45_:1},
+  'Single Shaftless':  {CF15_:1,    CF30_:1,    CF45_:1},
+  'Dual Shaftless':    {CF15_:1,    CF30_:1,    CF45_:1},
+  'Cut':               {CF15_:1.95, CF30_:1.57, CF45_:1.43},
+  'Cut & Folded':      {CF15_:1,    CF30_:3.75, CF45_:2.54},
+  'Ribbon':            {CF15_:1.04, CF30_:1.37, CF45_:1.62},
+  'Paddle 1x':         {CF15_:1,    CF30_:1,    CF45_:1},
+  'Paddle 2x':         {CF15_:1,    CF30_:1,    CF45_:1},
+  'Paddle 3x':         {CF15_:1,    CF30_:1,    CF45_:1},
+  'Paddle 4x':         {CF15_:1,    CF30_:1,    CF45_:1},
 };
-const BOLT_MATERIALS = {
-  "A307":{Sy:36000,Ss:6200}, "A325":{Sy:92000,Ss:15500},
-  "304 SS":{Sy:30000,Ss:6000}, "316 SS":{Sy:30000,Ss:6000}
+
+const CF3 = {'None':1,1:1.08,2:1.16,3:1.24,4:1.32};
+
+const FD = {6:18,9:31,10:37,12:55,14:78,16:106,18:135,20:165,24:235};
+
+const FB = {
+  'None':1,'Ball':1,'Babbit':1.7,'Bronze':1.7,'Bronze with Graphite':1.7,
+  'Hard Iron':4.4,'Stellite':4.4,'Plastech':2,'Nylon':2,'Teflon':2,'UHMW':2,
+  'Ceramic':null,'Graphite':null
 };
+
+// Incline factor [incline degrees][pitch column]
+const RI_TABLE = [
+  {deg:0,  Full:1,    Short:1,    Half:1,    Long:1,    Shaftless:1},
+  {deg:10, Full:0.9,  Short:1,    Half:1,    Long:0.9,  Shaftless:1},
+  {deg:15, Full:0.7,  Short:1,    Half:1,    Long:0.7,  Shaftless:0.9},
+  {deg:20, Full:0.55, Short:1,    Half:1,    Long:0.55, Shaftless:0.8},
+  {deg:25, Full:0.42, Short:0.87, Half:1,    Long:0.42, Shaftless:0.7},
+  {deg:30, Full:0.3,  Short:0.67, Half:0.8,  Long:0.3,  Shaftless:0.6},
+  {deg:35, Full:0.22, Short:0.5,  Half:0.65, Long:0.22, Shaftless:0.54},
+  {deg:40, Full:0.15, Short:0.37, Half:0.48, Long:0.15, Shaftless:0.5},
+  {deg:45, Full:0.1,  Short:0.28, Half:0.36, Long:0.1,  Shaftless:0.5},
+];
+
+const BOLT_BY_SHAFT = [
+  {shaft:1,bolt:0.375},{shaft:1.5,bolt:0.5},{shaft:2,bolt:0.625},
+  {shaft:2.4375,bolt:0.625},{shaft:3,bolt:0.75},{shaft:3.4375,bolt:0.875},
+  {shaft:4,bolt:0.875},{shaft:4.5,bolt:1.0}  // 4.5" shaft → 1" bolt per CEMA 350 Table
+];
+
+const BOLT_STRESS = {
+  'None':    {yield:0,   shear:0},
+  'A307':    {yield:36000,shear:6200},
+  'A325':    {yield:92000,shear:15500},
+  '304 SS':  {yield:30000,shear:6000},
+  '316 SS':  {yield:30000,shear:6000},
+};
+
+const SHAFT_STRESS = {
+  '1018 CS':      {yield:58000, shear:7000},
+  '1045 CS':      {yield:70000, shear:8750},
+  '4140 Alloy':   {yield:70000, shear:8750},
+  '4140 Hardened':{yield:125000,shear:15625},
+  '304 SS':       {yield:30000, shear:6000},
+  '316 SS':       {yield:30000, shear:6000},
+  '17-4PH -A':    {yield:115000,shear:14375},
+  '17-4PH -H900': {yield:185000,shear:23125},
+  '17-4PH -H1150':{yield:130000,shear:16250},
+};
+
 const FLIGHT_YIELD = {
-  "Carbon Steel":58000, "304 SS":30000, "316 SS":30000,
-  "Alloy 8620":80000, "T1":100000, "AR400":40000
-};
-const PITCH_MULT = {"Full":1.0, "Short":2/3, "Half":0.5, "Long":1.5};
-const CTE_TROUGH = {"Carbon Steel":6.33e-6, "Stainless Steel":9.6e-6};
-
-// ===========================================================================
-// DEFAULTS
-// ===========================================================================
-const DEFAULTS = {
-  project_no: "EXAMPLE-001",
-  location: "Wastewater Treatment Plant",
-  customer: "Example Municipality",
-  engineer: "",
-  description: "Belt Press Discharge - Dewatered Sludge Conveyor",
-  by: "",
-  date: "2025-04-15",
-  revision: "0",
-  length_ft: 25,
-  incline_deg: 0,
-  flow_direction: "Push",
-  service_duty: "Standard",
-  live_bottom: false,
-  area_classification: "NO",
-  material: "Wet Sludge",
-  density_lb_ft3: 62,
-  solids_pct: 18,
-  size_class: "Fine",
-  flowability: "Average",
-  abrasiveness: "Mild",
-  temp_min_f: 50,
-  temp_max_f: 100,
-  screw_dia_in: 14,
-  screw_type: "Shafted",
-  pitch_type: "Full",
-  flight_type: "Shafted",
-  trough_fill_pct: 30,
-  design_capacity_ft3hr: 800,
-  drive_arrangement: "Screw Conveyor Drive",
-  gearbox_model: "F87",
-  motor_hp: 10,
-  motor_rpm: 1750,
-  gearbox_ratio: 46.12,
-  gearbox_sf: 1.5,
-  shaft_dia_in: 2.5,
-  shaft_material: "1045 CS",
-  pipe_size: '3.5" SCH 40',
-  pipe_material: "Carbon Steel",
-  coupling_type: "Cross-Bolt Coupling",
-  bolt_size_in: 0.625,
-  bolt_material: "A325",
-  num_bolts: 2,
-  bolt_pad_in: 0,
-  flight_material: "Carbon Steel",
-  trough_type: "U",
-  trough_material: "Carbon Steel",
-  trough_gauge: "12 ga",
-  cover_type: "Flat",
-  cover_material: "Carbon Steel",
-  cover_gauge: "14 ga",
-  liner: false,
-  liner_material: "",
-  liner_thickness: "",
-  shaft_bearing_type: "Pillow Block Roller",
-  hanger_bearing_type: "Bronze",
-  tail_bearing_type: "Pillow Block Spherical",
-  num_hanger_bearings: 1,
-  drive_end_seal: "Flanged Gland",
-  tail_end_seal: "Flanged Gland",
-  inlet_type: "Square Flange",
-  outlet_type: "Square Flange",
-  cover_holddown: "Bolted",
-  zss: "Magnetic Zero Speed Switch",
-  estop: "E-Stop Pull Cord",
-  gb_to_shaft_coupling: "Jaw Coupling",
-  trough_cte_material: "Carbon Steel"
+  'Carbon Steel':58000,'304 SS':30000,'316 SS':30000,
+  'Alloy 8620':80000,'T1':100000,
+  'AR400':40000  // Per JMS workbook BQ10 — conservative allowable for abrasive-service plate (raw yield ~170 ksi; 40k reflects impact/fatigue service factor)
 };
 
-// ===========================================================================
-// HELPERS
-// ===========================================================================
-function fmt(v, digits) {
-  if (v === null || v === undefined || isNaN(v) || !isFinite(v)) return "—";
-  return Number(v).toFixed(digits !== undefined ? digits : 4);
+const CTE = {
+  'Carbon Steel':6.33e-6,'304/316 SS':9.6e-6,'304 SS':9.6e-6,'316 SS':9.6e-6,
+  'A53-77a':6.33e-6,'T1':7.2e-6,'AR400':3.6e-6
+};
+
+const GAUGE_THK = {
+  '16 ga':0.060,'14 ga':0.0751,'12 ga':0.105,'10 ga':0.135,
+  '1/8':0.125,'3/16':0.1875,'1/4':0.25,'3/8':0.375
+};
+
+const DRIVE_EFF = {
+  'Direct Coupled In-line':0.95,'Screw Conveyor Drive':0.95,'Shaft Mount Drive':0.95,
+  'Gearbox with Chain & Sprocket':0.88,'Gearbox with Belt & Sheave':0.89,'Open Spur Gear':0.86
+};
+
+const MOTOR_SIZES = [1,1.5,2,3,5,7.5,10,15,20,25,30,40,50,60,75,100];
+
+// Standard shaft sizes (ANSI) — global so fixDriveShaft() and calculate() both use this
+const SHAFT_SIZES = [1,1.188,1.25,1.375,1.438,1.5,1.938,2,2.375,2.4375,2.75,2.875,2.938,3,3.25,3.438,3.625,3.75,3.875,4,4.5];
+
+// Priority order for "cheapest" shaft material fix
+const SHAFT_MAT_PRIORITY = ['1045 CS','4140 Alloy','4140 Hardened','17-4PH -H1150','17-4PH -A','17-4PH -H900','304 SS','316 SS','1018 CS'];
+
+// SEW FAZ standard gear ratios (parallel shaft, B14 flange, foot mount)
+// Source: SEW-Eurodrive FA/FAZ series standard ratio steps
+const SEW_FAZ_RATIOS = [
+  3.11,3.55,4.06,4.65,5.30,6.08,6.95,7.96,9.10,10.4,11.9,13.6,15.6,
+  17.8,20.4,23.3,26.7,30.5,34.9,39.9,45.7,52.2,59.8,68.4,78.3,89.6,
+  103,118,135,154,176,202,231,264,302,345,395,452,517,592,677,775
+];
+
+// SEW FAZ frame sizes by HP with standard output shaft diameters (IEC, in inches)
+// shafts: available hollow bore / solid output shaft diameters for that frame
+const SEW_FAZ_FRAME = [
+  {maxHP:1,   frame:'FA37',  shafts:[1.102, 1.181]},           // 28mm, 30mm (estimated)
+  {maxHP:2,   frame:'FA47',  shafts:[1.181, 1.378]},           // 30mm, 35mm (estimated)
+  {maxHP:3,   frame:'FA57',  shafts:[1.378, 1.575]},           // 35mm, 40mm (estimated)
+  {maxHP:5,   frame:'FA67',  shafts:[1.438, 1.500]},           // confirmed ANSI: 1.438", 1.500"
+  {maxHP:10,  frame:'FA77',  shafts:[1.938, 2.000]},           // confirmed ANSI: 1.938", 2.000"
+  {maxHP:20,  frame:'FA87',  shafts:[2.375, 2.438]},           // confirmed ANSI: 2.375", 2.438"
+  {maxHP:40,  frame:'FA97',  shafts:[2.750, 2.938]},           // confirmed ANSI: 2.750", 2.938"
+  {maxHP:100, frame:'FA107', shafts:[3.250, 3.438, 3.625]},    // confirmed ANSI: 3.250", 3.438", 3.625"
+  {maxHP:150, frame:'FA127', shafts:[4.000]},                  // confirmed ANSI: 4.000"
+  {maxHP:200, frame:'FA157', shafts:[4.500]},                  // confirmed ANSI: 4.500"
+];
+
+// Find the best matching SEW hollow shaft for a given conveyor shaft diameter (inches)
+// Shaft sizes are confirmed ANSI inch values from SEW DriveSelect (60Hz US catalog).
+// Flag if conveyor shaft is larger than max available hollow shaft on that frame.
+function sewShaftCheck(convShaftIn, frameEntry) {
+  if (!convShaftIn || !frameEntry) return {ok: true, note: '—'};
+  const maxSEW = Math.max(...frameEntry.shafts);
+  if (convShaftIn > maxSEW + 0.001) {
+    return {ok: false, note: `Conveyor shaft ${convShaftIn}" > max SEW hollow shaft ${maxSEW}" — step up frame`, matchedShaft: null};
+  }
+  // Find the smallest available ANSI hollow shaft that accommodates the conveyor shaft
+  const match = frameEntry.shafts.find(s => s >= convShaftIn - 0.001) || maxSEW;
+  const matchMM = Math.round(match * 25.4);
+  return {ok: true, note: `${match}" (${matchMM}mm) hollow shaft`, matchedShaft: match};
 }
 
-function interpIncline(angle, table) {
-  const keys = Object.keys(table).map(Number).sort((a,b)=>a-b);
-  if (angle <= keys[0]) return table[keys[0]];
-  if (angle >= keys[keys.length-1]) return table[keys[keys.length-1]];
-  for (let i=0; i<keys.length-1; i++) {
-    if (keys[i] <= angle && angle <= keys[i+1]) {
-      const frac = (angle - keys[i]) / (keys[i+1] - keys[i]);
-      return table[keys[i]] + frac * (table[keys[i+1]] - table[keys[i]]);
+function sewFAZRecommendation(HPtm, N, motorSize, convShaftIn) {
+  if (!HPtm || !N || HPtm <= 0 || N <= 0) return null;
+  const motorBaseRPM = 1750;
+
+
+
+
+
+  // Motor HP: next standard size >= HPtm. No SF multiplier applied here.
+  // AGMA Class II SF = 1.4 is a gearbox catalog rating descriptor (duty class),
+  // not a motor oversizing multiplier. Gearbox is selected as AGMA Class II rated
+  // unit whose catalog HP at output speed >= motor nameplate HP.
+  let motorHP = null, SF = 0;
+  for (const m of MOTOR_SIZES) {
+    if (m >= HPtm) { motorHP = m; SF = m / HPtm; break; }
+  }
+  if (!motorHP) { motorHP = MOTOR_SIZES[MOTOR_SIZES.length - 1]; SF = motorHP / HPtm; }
+
+  // Gear ratio
+  const reqRatio = motorBaseRPM / N;
+  const ratio = SEW_FAZ_RATIOS.find(r => r >= reqRatio) || SEW_FAZ_RATIOS[SEW_FAZ_RATIOS.length - 1];
+  const actualN = motorBaseRPM / ratio;
+
+  // Start with the frame that fits the motor HP
+  let frameIdx = SEW_FAZ_FRAME.findIndex(f => f.maxHP >= motorHP);
+  if (frameIdx < 0) frameIdx = SEW_FAZ_FRAME.length - 1;
+  const originalFrameIdx = frameIdx;
+
+  // Bump frame up if conveyor shaft exceeds that frame's max output shaft
+  if (convShaftIn > 0) {
+    while (frameIdx < SEW_FAZ_FRAME.length - 1 &&
+           Math.max(...SEW_FAZ_FRAME[frameIdx].shafts) < convShaftIn - 0.001) {
+      frameIdx++;
     }
   }
-  return 1.0;
+
+  const frameEntry = SEW_FAZ_FRAME[frameIdx];
+  const frame = frameEntry.frame;
+  const motorFrame = sewMotorFrame(motorHP);
+  const model = `${frame} / DRN${motorFrame} B14`;
+  const sfOK = SF >= 1.0 ? 'OK' : 'WARN';  // SF < 1.0 = undersized; Kmax headroom is the design SF
+  const shaftCheck = sewShaftCheck(convShaftIn, frameEntry);
+
+  return {
+    ratio:     ratio.toFixed(1),
+    actualN:   actualN.toFixed(1),
+    motorHP,
+    frame,
+    model,
+    SF:        SF.toFixed(2),
+    sfOK,
+    reqRatio:  reqRatio.toFixed(1),
+    shaftNote:     shaftCheck.note,
+    shaftOK:       shaftCheck.ok,
+    matchedShaft:  shaftCheck.matchedShaft,
+    frameSteppedUp: frameIdx > originalFrameIdx,
+    originalFrame:  originalFrameIdx >= 0 ? SEW_FAZ_FRAME[originalFrameIdx].frame : null,
+  };
 }
 
-function overloadFactor(hp) {
-  if (hp <= 0) return 1.0;
-  return hp < 5.2 ? Math.log(hp) * -0.6115 + 2.024 : 1.0;
+function sewMotorFrame(hp) {
+  // IEC frame designation for SEW DRN motor series
+  if (hp <= 1)   return '71S4';
+  if (hp <= 1.5) return '80S4';
+  if (hp <= 2)   return '80M4';
+  if (hp <= 3)   return '90S4';
+  if (hp <= 5)   return '100L4';
+  if (hp <= 7.5) return '112M4';
+  if (hp <= 10)  return '132S4';
+  if (hp <= 15)  return '132M4';
+  if (hp <= 20)  return '160M4';
+  if (hp <= 25)  return '160L4';
+  if (hp <= 30)  return '180M4';
+  if (hp <= 40)  return '200L4';
+  if (hp <= 50)  return '225S4';
+  if (hp <= 60)  return '225M4';
+  if (hp <= 75)  return '250M4';
+  return '280S4';
 }
 
-function cf2Key(fill) {
-  if (fill < 16) return "CF15_";
-  if (fill < 31) return "CF30_";
-  return "CF45_";
+const TROUGH_MAX_FT = {6:10,9:10,10:10,12:12,14:12,16:12,18:12,20:12,24:12};
+
+const TROUGH_DIMS = {
+  4: {inside:5,  clEnd:4.5, hCL:3.75},
+  6: {inside:7,  clEnd:6,   hCL:5},
+  9: {inside:10, clEnd:8,   hCL:7.125},
+  10:{inside:11, clEnd:9,   hCL:7.875},
+  12:{inside:13, clEnd:10.5,hCL:8.875},
+  14:{inside:15, clEnd:11.5,hCL:10.125},
+  16:{inside:17, clEnd:13.5,hCL:11.125},
+  18:{inside:19, clEnd:14.5,hCL:12.375},
+  20:{inside:21, clEnd:15.5,hCL:13.375},
+  24:{inside:25, clEnd:17.5,hCL:15.375},
+};
+
+const CEMA_SIZE_CODE    = {'Very Fine':'A','Fine':'B','Granular':'C','Lumpy':'D','Irregular':'E'};
+const CEMA_FLOW_CODE    = {'Very Free Flowing':'1','Free Flowing':'2','Average':'3','Sluggish':'4'};
+const CEMA_ABR_CODE     = {'Mild':'5','Moderate':'6','Extreme':'7'};
+const CEMA_OTHER_CODE   = {
+  'Build Up / Harden':'F','Generate Static Electricity':'G','Decomposes in Storage':'H',
+  'Flammability':'J','Becomes Plastic / Softens':'K','Very Dusty':'L','Aerates / Becomes Fluid':'M',
+  'Explosiveness':'N','Stickiness / Adhesive':'O','Harmful / Toxic Gas or Fumes':'R',
+  'Highly Corrosive':'S','Mildly Corrosive':'T','Packs Under Pressure':'X','Elevated Temperature':'Z','--':''
+};
+
+const MATERIAL_PROPS = {
+  '304 SS':      {E:29e6,Sy:30000,density:0.29},
+  '304L SS':     {E:29e6,Sy:25000,density:0.29},
+  '316 SS':      {E:29e6,Sy:30000,density:0.29},
+  '316L SS':     {E:29e6,Sy:25000,density:0.29},
+  '17-4 PH -A':  {E:28.5e6,Sy:115000,density:0.28},
+  'CARBON STEEL':{E:28e6,Sy:80000,density:0.283},
+  'Alloy 8620':  {E:28e6,Sy:80000,density:0.283},
+  '1045 CS':     {E:28e6,Sy:70000,density:0.283},
+  'T1':          {E:27e6,Sy:100000,density:0.283},
+  '1018 CS':     {E:28e6,Sy:80000,density:0.283},
+  '4140 Hardened':{E:28e6,Sy:125000,density:0.283},
+  'AR400':       {E:29e6,Sy:40000,density:0.283},
+  'A53-77a':     {E:29e6,Sy:30000,density:0.283},
+  'Carbon Steel':{E:28e6,Sy:58000,density:0.283},
+};
+
+// ============================================================
+// HELPER FUNCTIONS
+// ============================================================
+
+function vlookupTrue(val, table) {
+  // VLOOKUP TRUE: find largest shaft not greater than val
+  let result = null;
+  for (const row of table) {
+    if (row.shaft <= val) result = row.bolt;
+    else break;
+  }
+  return result;
 }
 
-function paddleCount(flightType) {
-  const m = {"Paddle 1x":1,"Paddle 2x":2,"Paddle 3x":3,"Paddle 4x":4};
-  return m[flightType] || 0;
+function getRi(inclineDeg, pitchType, isShaftless) {
+  const rounded = inclineDeg < 10 ? 0 : Math.round(inclineDeg / 5) * 5;
+  const clamped = Math.min(Math.max(rounded, 0), 45);
+  const row = RI_TABLE.find(r => r.deg === clamped) || RI_TABLE[0];
+  if (isShaftless) return row.Shaftless;
+  return row[pitchType] !== undefined ? row[pitchType] : 1;
 }
 
-function getVal(id) {
+function getC2Key(Ds, spiralType, duty) {
+  if (!Ds) return null;
+  const dutyMap = {Light:'1',Standard:'2',Heavy:'3'};
+  if (spiralType === 'Single Shaftless') return Ds + 'Single';
+  if (spiralType === 'Dual Shaftless') return Ds + 'Dual';
+  // All other types (Shafted, Ribbon, Cut, Cut & Folded, Paddle x) use shafted geometry
+  return Ds + 'Shafted' + (dutyMap[duty] || '2');
+}
+
+function getGeom(Ds, spiralType, duty) {
+  const key = getC2Key(Ds, spiralType, duty);
+  return key ? (SCREW_GEOM[key] || null) : null;
+}
+
+function getFillBucket(K) {
+  if (K < 16) return 'CF15_';
+  if (K < 31) return 'CF30_';
+  return 'CF45_';
+}
+
+function getPaddleCount(spiralType) {
+  const m = spiralType && spiralType.match(/Paddle (\d)x/);
+  return m ? parseInt(m[1]) : 'None';
+}
+
+function nextMotorSize(hp) {
+  return MOTOR_SIZES.find(m => m >= hp) || MOTOR_SIZES[MOTOR_SIZES.length - 1];
+}
+
+function fmt(v, dec=2) {
+  if (v === null || v === undefined || isNaN(v) || !isFinite(v)) return '—';
+  return v.toFixed(dec);
+}
+
+function badge(result, isNA) {
+  if (isNA) return '<span class="badge na">N/A</span>';
+  if (result === 'OK') return '<span class="badge ok">OK</span>';
+  if (result === 'WARN') return '<span class="badge warn">WARN</span>';
+  if (result === 'FAIL') return '<span class="badge fail">FAIL</span>';
+  return '<span class="badge na">—</span>';
+}
+
+function setEl(id, val) {
   const el = document.getElementById(id);
-  if (!el) return null;
-  if (el.type === "checkbox") return el.checked;
-  const v = el.value;
-  if (el.type === "number") return parseFloat(v) || 0;
-  return v;
+  if (el) el.innerHTML = val;
 }
 
-function safeDivide(num, den) {
-  if (!den || isNaN(den) || den === 0) return null;
-  return num / den;
+// ============================================================
+// OVERRIDE TRACKING
+// ============================================================
+const overrides = new Set();
+function markOverride(fieldId) {
+  overrides.add(fieldId);
+  const el = document.getElementById(fieldId);
+  if (el) el.classList.add('overridden');
 }
 
-// ===========================================================================
-// MAIN CALCULATION
-// ===========================================================================
-function calculate() {
-  // --- Read inputs ---
-  const proj_no    = getVal("project_no");
-  const location   = getVal("location");
-  const customer   = getVal("customer");
-  const engineer   = getVal("engineer");
-  const description= getVal("description");
-  const by         = getVal("by");
-  const date       = getVal("date");
-  const revision   = getVal("revision");
-
-  const length_ft  = getVal("length_ft");
-  const incline_deg= getVal("incline_deg");
-  const flow_dir   = getVal("flow_direction");
-  const svc_duty   = getVal("service_duty");
-  const live_bottom= getVal("live_bottom");
-  const area_class = getVal("area_classification");
-
-  const material   = getVal("material");
-  const density    = getVal("density_lb_ft3");
-  const solids_pct = getVal("solids_pct");
-  const size_class = getVal("size_class");
-  const flowability= getVal("flowability");
-  const abrasiveness=getVal("abrasiveness");
-  const temp_min   = getVal("temp_min_f");
-  const temp_max   = getVal("temp_max_f");
-
-  const screw_dia  = parseInt(getVal("screw_dia_in"));
-  const screw_type = getVal("screw_type");
-  const pitch_type = getVal("pitch_type");
-  const flight_type= getVal("flight_type");
-  const fill_pct   = getVal("trough_fill_pct");
-  const design_cap = getVal("design_capacity_ft3hr");
-
-  const drive_arr  = getVal("drive_arrangement");
-  const gb_model   = getVal("gearbox_model");
-  const motor_hp   = getVal("motor_hp");
-  const motor_rpm  = getVal("motor_rpm");
-  const gb_ratio   = getVal("gearbox_ratio");
-  const gb_sf      = getVal("gearbox_sf");
-
-  const shaft_dia  = getVal("shaft_dia_in");
-  const shaft_mat  = getVal("shaft_material");
-  const pipe_size  = getVal("pipe_size");
-  const pipe_mat   = getVal("pipe_material");
-  const coupling   = getVal("coupling_type");
-  const bolt_size  = getVal("bolt_size_in");
-  const bolt_mat   = getVal("bolt_material");
-  const num_bolts  = getVal("num_bolts");
-  const bolt_pad   = getVal("bolt_pad_in");
-
-  const flight_mat = getVal("flight_material");
-  const trough_type= getVal("trough_type");
-  const trough_mat = getVal("trough_material");
-  const trough_ga  = getVal("trough_gauge");
-  const cover_type = getVal("cover_type");
-  const cover_mat  = getVal("cover_material");
-  const cover_ga   = getVal("cover_gauge");
-  const liner      = getVal("liner");
-  const liner_mat  = getVal("liner_material");
-  const liner_thk  = getVal("liner_thickness");
-  const shaft_brg  = getVal("shaft_bearing_type");
-  const hanger_brg = getVal("hanger_bearing_type");
-  const tail_brg   = getVal("tail_bearing_type");
-  const num_hanger = getVal("num_hanger_bearings");
-  const de_seal    = getVal("drive_end_seal");
-  const te_seal    = getVal("tail_end_seal");
-  const inlet_type = getVal("inlet_type");
-  const outlet_type= getVal("outlet_type");
-  const holddown   = getVal("cover_holddown");
-  const zss        = getVal("zss");
-  const estop      = getVal("estop");
-  const gb_coupling= getVal("gb_to_shaft_coupling");
-  const trough_cte_mat = getVal("trough_cte_material");
-
-  // --- Geometry ---
-  const geom = SCREW_GEOM[screw_dia];
-  const Ds = geom[0];
-  const isShaftless = screw_type.includes("Shaftless");
-
-  let pipe_OD = 0, pipe_ID = 0, Dp = 0;
-  if (!isShaftless) {
-    const pipeData = PIPE_SIZES[pipe_size];
-    if (pipeData) { pipe_OD = pipeData[0]; pipe_ID = pipeData[1]; }
-    else { pipe_OD = geom[1]; pipe_ID = geom[2]; }
-    Dp = pipe_ID;
-  }
-
-  const pm = PITCH_MULT[pitch_type] || 1.0;
-  const P = Ds * pm;
-  const weight_per_ft = geom[3];
-
-  // --- Capacity factors ---
-  const CF1 = pm;
-  const key = cf2Key(fill_pct);
-  const CF2 = (CF2_TABLE[flight_type] || {})[key] || 1.0;
-  const paddles = paddleCount(flight_type);
-  const CF3 = CF3_TABLE[paddles] || 1.0;
-  const C1 = isShaftless ? 1.1 : 1.0;
-  const Ri = interpIncline(incline_deg, isShaftless ? INCLINE_SHAFTLESS : INCLINE_SHAFTED);
-  const K = fill_pct;
-
-  const Cr_per_N = (0.7854 * (Ds*Ds - Dp*Dp) * (K/100) * P * 60 * C1 * Ri) / 1728;
-  const Ceq = design_cap * CF2 * CF3;
-  const N = Cr_per_N > 0 ? Ceq / Cr_per_N : 0;
-  const CF2CF3 = CF2 * CF3;
-  const C_design = (CF2CF3 > 0 && Cr_per_N > 0) ? N * Cr_per_N / CF2CF3 : 0;
-
-  const K_max = Math.min(K * 1.5, 100);
-  const Cr_per_N_max = (0.7854 * (Ds*Ds - Dp*Dp) * (K_max/100) * P * 60 * C1 * Ri) / 1728;
-  const C_max = CF2CF3 > 0 ? N * Cr_per_N_max / CF2CF3 : 0;
-
-  // --- Power ---
-  const Fd = FD_TABLE[screw_dia] || 55;
-  const Fb = FB_TABLE[hanger_brg] !== undefined ? FB_TABLE[hanger_brg] : 1.0;
-  const Fm = FM_TABLE[material] || 1.5;
-  const Ff = FF_TABLE[flight_type] !== undefined ? FF_TABLE[flight_type] : 1.0;
-  const Fp = FP_TABLE[paddles] || 1.0;
-  const e  = DRIVE_EFF[drive_arr] || 0.95;
-  const L  = length_ft;
-
-  const HPf = (L * N * Fd * Fb) / 1e6;
-  const HPm = (Ceq * L * density * Fm * Ff * Fp) / 1e6;
-  const Ceq_max = C_max * CF2 * CF3;
-  const HPm_max = (Ceq_max * L * density * Fm * Ff * Fp) / 1e6;
-  const Lh = L * Math.sin(incline_deg * Math.PI / 180);
-  const HPl = 1.3 * ((C_design * density / 60) * Lh) / 33000;
-  const HPl_max = 1.3 * ((C_max * density / 60) * Lh) / 33000;
-
-  const HPt_sum = HPf + HPm + HPl;
-  const Fo = overloadFactor(HPt_sum);
-  const HPt_sum_max = HPf + HPm_max + HPl_max;
-  const FoMax = overloadFactor(HPt_sum_max);
-
-  const HPt  = e > 0 ? (HPt_sum * Fo) / e : null;
-  const HPtm = e > 0 ? (HPt_sum_max * FoMax) / e : null;
-
-  // --- Drive / Torque ---
-  const gb_rpm = gb_ratio > 0 ? motor_rpm / gb_ratio : motor_rpm;
-  const Tm  = gb_rpm > 0 ? (63025 * motor_hp) / gb_rpm : null;
-  const Tmf = gb_rpm > 0 ? 63025 * (gb_sf * motor_hp) / gb_rpm : null;
-
-  // --- Torsional (shafted only) ---
-  let tors = null;
-  if (!isShaftless && Tmf !== null) {
-    const bh = bolt_size + 1/32;
-    const Ab = Math.PI * Math.pow(bolt_size/2, 2);
-    const Zs = (Math.PI * Math.pow(shaft_dia,3) / 16) - ((bh * shaft_dia*shaft_dia / 6) + (bh*bh*bh / 6));
-    const Zp = pipe_OD > 0 ? Math.PI * (Math.pow(pipe_OD,4) - Math.pow(pipe_ID,4)) / (16 * pipe_OD) : 0;
-    const r_load = shaft_dia/2 + (pipe_OD - shaft_dia)/4;
-    const Ap = (pipe_OD - shaft_dia) * bolt_size;
-
-    const shaftProps = SHAFT_MATERIALS[shaft_mat] || {Sy:70000,E:28e6,CTE:6.33e-6};
-    const sigma_shaft_allow = shaftProps.Sy * 0.30;
-    const sigma_shaft = Zs > 0 ? Tmf / Zs : null;
-
-    const sigma_pipe_allow = 6700;
-    const sigma_pipe = Zp > 0 ? Tmf / Zp : null;
-
-    const boltProps = BOLT_MATERIALS[bolt_mat] || {Ss:6200};
-    const sigma_bolt_allow = boltProps.Ss;
-    const nb = num_bolts > 0 ? num_bolts : 1;
-    const denom_bolt = (shaft_dia/2) * Ab * 2 * nb;
-    const sigma_bolt = denom_bolt > 0 ? Tmf / denom_bolt : null;
-
-    const sigma_bearing_allow = 6000;
-    const denom_bearing = nb * Ap * r_load;
-    const sigma_bearing = denom_bearing > 0 ? Tmf / denom_bearing : null;
-
-    tors = {
-      Ab, Zs, Zp, r_load, Ap,
-      sigma_shaft, sigma_shaft_allow,
-      shaft_pass: sigma_shaft !== null ? sigma_shaft <= sigma_shaft_allow : false,
-      sigma_pipe, sigma_pipe_allow,
-      pipe_pass: sigma_pipe !== null ? sigma_pipe <= sigma_pipe_allow : false,
-      sigma_bolt, sigma_bolt_allow,
-      bolt_pass: sigma_bolt !== null ? sigma_bolt <= sigma_bolt_allow : false,
-      sigma_bearing, sigma_bearing_allow,
-      bearing_pass: sigma_bearing !== null ? sigma_bearing <= sigma_bearing_allow : false
-    };
-  }
-
-  // --- Deflection & Thermal ---
-  const total_len_in = L * 12;
-  const Ls = total_len_in / (num_hanger + 1);
-  const Ws = L * weight_per_ft;
-
-  let delta = null, theta = null, Is = null;
-  if (!isShaftless && pipe_OD > 0 && pipe_ID > 0) {
-    Is = Math.PI * (Math.pow(pipe_OD,4) - Math.pow(pipe_ID,4)) / 64;
-    const shaftProps = SHAFT_MATERIALS[shaft_mat] || {E:28e6};
-    const E_shaft = shaftProps.E;
-    const w = Ws / total_len_in;
-    const denom_delta = 384 * E_shaft * Is;
-    delta = denom_delta > 0 ? (5 * w * Math.pow(Ls,4)) / denom_delta : null;
-    theta = delta !== null ? (180/Math.PI) * (3.2 * delta) / total_len_in : null;
-  }
-
-  const dT = temp_max - temp_min;
-  const shaftProps = SHAFT_MATERIALS[shaft_mat] || {CTE:6.33e-6};
-  const CTE_screw = shaftProps.CTE;
-  const CTE_tr = CTE_TROUGH[trough_cte_mat] || 6.33e-6;
-  const exp_screw  = Ls * dT * CTE_screw;
-  const exp_trough = total_len_in * dT * CTE_tr;
-
-  const delta_allow   = 0.25;
-  const theta_allow   = 0.15;
-  const thermal_allow = 0.125;
-
-  // --- Shaftless spiral stress ---
-  let spiral = null;
-  if (isShaftless && Tmf !== null) {
-    const flightSy = FLIGHT_YIELD[flight_mat] || 58000;
-    const spiral_allow = flightSy * 0.30;
-    const tube_OD = Math.max(Ds * 0.05, 0.75);
-    const spiral_width = (Ds - tube_OD) / 2.0;
-    const spiral_t = Ds >= 12 ? 0.375 : 0.25;
-    const Fr = P > 0 ? Tmf / (P / 2.0) : 0;
-    const c = spiral_width > 0 ? Ds / spiral_width : 4.0;
-    const k_wahl = c > 1 ? (3*c - 1) / (3*c - 3) : 1.5;
-    const arm = spiral_width / 2.0;
-    const denom_spiral = spiral_t * spiral_width * spiral_width;
-    const stress = denom_spiral > 0 ? (Fr * 6 * arm * k_wahl) / denom_spiral : 0;
-    spiral = { stress, spiral_allow, pass: stress <= spiral_allow };
-  }
-
-  // ===========================================================================
-  // RENDER OUTPUT
-  // ===========================================================================
-  function passCell(pass, calc, allow) {
-    const cls = pass ? "pass" : "fail";
-    const lbl = pass ? "PASS" : "FAIL";
-    return `<td class="${cls}">${lbl}</td>`;
-  }
-
-  function checkRow(label, allowStr, calcStr, pass) {
-    const cls = pass ? "pass" : "fail";
-    const lbl = pass ? "PASS" : "FAIL";
-    return `<tr><td>${label}</td><td>${allowStr}</td><td>${calcStr}</td><td class="${cls}">${lbl}</td></tr>`;
-  }
-
-  let html = "";
-
-  // --- Header block ---
-  html += `<div class="project-header">
-    <h2>SCREW CONVEYOR DESIGN SHEET</h2>
-    <div class="project-meta">
-      <span><strong>Project No.:</strong> ${proj_no}</span>
-      <span><strong>By:</strong> ${by}</span>
-      <span><strong>Location:</strong> ${location}</span>
-      <span><strong>Date:</strong> ${date}</span>
-      <span><strong>Customer:</strong> ${customer}</span>
-      <span><strong>Revision:</strong> ${revision}</span>
-      <span><strong>Engineer:</strong> ${engineer}</span>
-    </div>
-    <div style="font-size:11px;margin-top:4px;"><strong>Description:</strong> ${description}</div>
-  </div>`;
-
-  // --- Conveyor Info Summary ---
-  html += `<div class="section-title">CONVEYOR PARAMETERS</div>
-  <table><thead><tr><th>Parameter</th><th>Value</th><th>Parameter</th><th>Value</th></tr></thead><tbody>
-    <tr><td>Length</td><td>${fmt(length_ft,1)} ft</td><td>Incline</td><td>${fmt(incline_deg,1)} deg</td></tr>
-    <tr><td>Screw Diameter</td><td>${Ds}" (${screw_type})</td><td>Pitch</td><td>${pitch_type} (P = ${fmt(P,3)}")</td></tr>
-    <tr><td>Material</td><td>${material}</td><td>Density</td><td>${fmt(density,1)} lb/ft³</td></tr>
-    <tr><td>Fill %</td><td>${fmt(fill_pct,1)}%</td><td>Design Cap.</td><td>${fmt(design_cap,1)} ft³/hr</td></tr>
-    <tr><td>Flight Type</td><td>${flight_type}</td><td>Drive</td><td>${drive_arr}</td></tr>
-  </tbody></table>`;
-
-  // --- 1. Capacity Results ---
-  html += `<div class="section-title">1. CAPACITY RESULTS</div>
-  <table><thead><tr><th>Variable</th><th>Description</th><th>Value</th><th>Unit</th></tr></thead><tbody>
-    <tr><td>Ds</td><td>Screw Outside Diameter</td><td>${fmt(Ds,3)}</td><td>IN</td></tr>
-    <tr><td>Dp</td><td>Screw Inside Diameter (Pipe ID)</td><td>${fmt(Dp,3)}</td><td>IN</td></tr>
-    <tr><td>P</td><td>Pitch</td><td>${fmt(P,3)}</td><td>IN</td></tr>
-    <tr><td>CF1</td><td>Pitch Factor</td><td>${fmt(CF1,4)}</td><td>—</td></tr>
-    <tr><td>CF2</td><td>Flight Modification Factor</td><td>${fmt(CF2,4)}</td><td>—</td></tr>
-    <tr><td>CF3</td><td>Mixing Paddle Factor</td><td>${fmt(CF3,4)}</td><td>—</td></tr>
-    <tr><td>C1</td><td>Mass Flow Factor</td><td>${fmt(C1,2)}</td><td>—</td></tr>
-    <tr><td>Ri</td><td>Incline Factor</td><td>${fmt(Ri,4)}</td><td>—</td></tr>
-    <tr><td>Cr/N</td><td>Capacity per RPM</td><td>${fmt(Cr_per_N,4)}</td><td>ft³/hr/rpm</td></tr>
-    <tr><td>Ceq</td><td>Equivalent Design Capacity</td><td>${fmt(Ceq,2)}</td><td>ft³/hr</td></tr>
-    <tr><td>N</td><td>Required Screw Speed</td><td>${fmt(N,2)}</td><td>RPM</td></tr>
-    <tr><td>C (design)</td><td>Actual Capacity at N</td><td>${fmt(C_design,2)}</td><td>ft³/hr</td></tr>
-    <tr><td>K_max</td><td>Max Fill Percentage</td><td>${fmt(K_max,1)}</td><td>%</td></tr>
-    <tr><td>C_max</td><td>Capacity at Max Fill</td><td>${fmt(C_max,2)}</td><td>ft³/hr</td></tr>
-  </tbody></table>`;
-
-  // --- 2. Power Results ---
-  html += `<div class="section-title">2. POWER RESULTS</div>
-  <table><thead><tr><th>Variable</th><th>Description</th><th>Value</th><th>Unit</th></tr></thead><tbody>
-    <tr><td>Fd</td><td>Diameter HP Factor</td><td>${fmt(Fd,1)}</td><td>—</td></tr>
-    <tr><td>Fb</td><td>Hanger Bearing Factor</td><td>${fmt(Fb,2)}</td><td>—</td></tr>
-    <tr><td>Fm</td><td>Material Factor</td><td>${fmt(Fm,2)}</td><td>—</td></tr>
-    <tr><td>Ff</td><td>Flight Modification Factor</td><td>${fmt(Ff,2)}</td><td>—</td></tr>
-    <tr><td>Fp</td><td>Paddle Factor</td><td>${fmt(Fp,2)}</td><td>—</td></tr>
-    <tr><td>e</td><td>Drive Efficiency</td><td>${fmt(e,2)}</td><td>—</td></tr>
-    <tr><td>HPf</td><td>Frictional HP</td><td>${fmt(HPf,4)}</td><td>HP</td></tr>
-    <tr><td>HPm (design)</td><td>Material HP — Design Fill</td><td>${fmt(HPm,4)}</td><td>HP</td></tr>
-    <tr><td>HPm (max fill)</td><td>Material HP — Max Fill</td><td>${fmt(HPm_max,4)}</td><td>HP</td></tr>
-    <tr><td>Lh</td><td>Lift Height</td><td>${fmt(Lh,3)}</td><td>ft</td></tr>
-    <tr><td>HPl (design)</td><td>Lift HP — Design</td><td>${fmt(HPl,4)}</td><td>HP</td></tr>
-    <tr><td>HPl (max fill)</td><td>Lift HP — Max Fill</td><td>${fmt(HPl_max,4)}</td><td>HP</td></tr>
-    <tr><td>Fo</td><td>Overload Factor (Design)</td><td>${fmt(Fo,4)}</td><td>—</td></tr>
-    <tr><td>FoMax</td><td>Overload Factor (Max Fill)</td><td>${fmt(FoMax,4)}</td><td>—</td></tr>
-    <tr><td>HPt (design)</td><td>Total HP Required — Design</td><td><strong>${fmt(HPt,1)}</strong></td><td>HP</td></tr>
-    <tr><td>HPtm (max fill)</td><td>Total HP Required — Max Fill</td><td><strong>${fmt(HPtm,1)}</strong></td><td>HP</td></tr>
-    <tr><td>Motor HP (selected)</td><td>Selected Motor HP</td><td><strong>${fmt(motor_hp,1)}</strong></td><td>HP</td></tr>
-  </tbody></table>`;
-
-  // --- 3. Drive & Torque ---
-  html += `<div class="section-title">3. DRIVE &amp; TORQUE</div>
-  <table><thead><tr><th>Variable</th><th>Description</th><th>Value</th><th>Unit</th></tr></thead><tbody>
-    <tr><td>Motor RPM</td><td>Motor Speed</td><td>${fmt(motor_rpm,1)}</td><td>RPM</td></tr>
-    <tr><td>GB Ratio</td><td>Gearbox Ratio</td><td>${fmt(gb_ratio,2)}</td><td>:1</td></tr>
-    <tr><td>gb_rpm</td><td>Gearbox Output RPM</td><td>${fmt(gb_rpm,2)}</td><td>RPM</td></tr>
-    <tr><td>GB SF</td><td>Gearbox Service Factor</td><td>${fmt(gb_sf,2)}</td><td>—</td></tr>
-    <tr><td>Tm</td><td>Torque at Output Shaft</td><td>${fmt(Tm,1)}</td><td>in-lb</td></tr>
-    <tr><td>Tmf</td><td>Torque with Safety Factor</td><td>${fmt(Tmf,1)}</td><td>in-lb</td></tr>
-  </tbody></table>`;
-
-  // --- 4. Torsional Checks ---
-  html += `<div class="section-title">4. TORSIONAL CHECKS</div>`;
-  if (isShaftless) {
-    html += `<p class="na" style="padding:8px 0;">N/A — Shaftless screw: no shaft torsional analysis required.</p>`;
-  } else if (!tors) {
-    html += `<p class="warn" style="padding:8px 0;">Cannot compute — check torque inputs.</p>`;
-  } else {
-    html += `<table><thead><tr><th>Intermediate</th><th>Value</th><th>Unit</th></tr></thead><tbody>
-      <tr><td>Ab — Bolt Area</td><td>${fmt(tors.Ab,5)}</td><td>in²</td></tr>
-      <tr><td>Zs — Polar Section Modulus of Shaft</td><td>${fmt(tors.Zs,5)}</td><td>in³</td></tr>
-      <tr><td>Zp — Polar Section Modulus of Pipe</td><td>${fmt(tors.Zp,5)}</td><td>in³</td></tr>
-      <tr><td>r — Load Radius</td><td>${fmt(tors.r_load,4)}</td><td>in</td></tr>
-      <tr><td>Ap — Projected Bearing Area per Bolt</td><td>${fmt(tors.Ap,5)}</td><td>in²</td></tr>
-    </tbody></table>
-    <table><thead><tr><th>Check</th><th>Allowable (PSI)</th><th>Calculated (PSI)</th><th>Result</th></tr></thead><tbody>
-      ${checkRow("Shaft Torsional Stress", fmt(tors.sigma_shaft_allow,0), tors.sigma_shaft !== null ? fmt(tors.sigma_shaft,1) : "—", tors.shaft_pass)}
-      ${checkRow("Pipe Torsional Stress", fmt(tors.sigma_pipe_allow,0), tors.sigma_pipe !== null ? fmt(tors.sigma_pipe,1) : "—", tors.pipe_pass)}
-      ${checkRow("Bolt Shear Stress", fmt(tors.sigma_bolt_allow,0), tors.sigma_bolt !== null ? fmt(tors.sigma_bolt,1) : "—", tors.bolt_pass)}
-      ${checkRow("Pipe Bearing Stress", fmt(tors.sigma_bearing_allow,0), tors.sigma_bearing !== null ? fmt(tors.sigma_bearing,1) : "—", tors.bearing_pass)}
-    </tbody></table>`;
-  }
-
-  // --- 5. Additional Checks ---
-  html += `<div class="section-title">5. ADDITIONAL CHECKS</div>
-  <table><thead><tr><th>Check</th><th>Limit</th><th>Calculated</th><th>Result</th></tr></thead><tbody>`;
-
-  if (!isShaftless && delta !== null) {
-    html += checkRow("Screw Deflection (IN)", fmt(delta_allow,3), fmt(delta,4), delta <= delta_allow);
-    html += checkRow("Shaft End Angle (DEG)", fmt(theta_allow,3), fmt(theta,4), theta <= theta_allow);
-  } else if (isShaftless) {
-    html += `<tr><td>Screw Deflection (IN)</td><td>${fmt(delta_allow,3)}</td><td class="na">N/A — Shaftless</td><td class="na">N/A</td></tr>`;
-    html += `<tr><td>Shaft End Angle (DEG)</td><td>${fmt(theta_allow,3)}</td><td class="na">N/A — Shaftless</td><td class="na">N/A</td></tr>`;
-  } else {
-    html += `<tr><td>Screw Deflection (IN)</td><td>${fmt(delta_allow,3)}</td><td class="na">—</td><td class="na">N/A</td></tr>`;
-    html += `<tr><td>Shaft End Angle (DEG)</td><td>${fmt(theta_allow,3)}</td><td class="na">—</td><td class="na">N/A</td></tr>`;
-  }
-
-  html += checkRow("Thermal Exp. — Screw (IN)", fmt(thermal_allow,4), fmt(exp_screw,4), exp_screw <= thermal_allow);
-  html += checkRow("Thermal Exp. — Trough (IN)", fmt(thermal_allow,4), fmt(exp_trough,4), exp_trough <= thermal_allow);
-
-  if (spiral) {
-    html += checkRow("Shaftless Spiral Stress (PSI)", fmt(spiral.spiral_allow,0), fmt(spiral.stress,1), spiral.pass);
-  } else if (!isShaftless) {
-    html += `<tr><td>Shaftless Spiral Stress (PSI)</td><td>—</td><td class="na">N/A — Shafted</td><td class="na">N/A</td></tr>`;
-  }
-
-  html += `</tbody></table>`;
-
-  // Additional info
-  html += `<div class="section-title">ADDITIONAL INFORMATION</div>
-  <table><thead><tr><th>Parameter</th><th>Value</th><th>Unit</th></tr></thead><tbody>
-    <tr><td>Span Between Bearings (Ls)</td><td>${fmt(Ls,2)}</td><td>in</td></tr>
-    <tr><td>Total Screw Weight (Ws)</td><td>${fmt(Ws,1)}</td><td>lb</td></tr>
-    <tr><td>Screw Tip Speed (STS)</td><td>${fmt((Ds * N * Math.PI) / 12, 1)}</td><td>ft/min</td></tr>
-    <tr><td>ΔT (Thermal)</td><td>${fmt(dT,1)}</td><td>°F</td></tr>
-  </tbody></table>`;
-
-  // --- 6. Component Selection ---
-  html += `<div class="section-title">6. COMPONENT SELECTION</div>
-  <table><thead><tr><th>Component</th><th>Detail</th><th>Size</th><th>Material</th></tr></thead><tbody>
-    <tr><td>Screw Flights</td><td>${flight_type}</td><td>${Ds}"</td><td>${flight_mat}</td></tr>
-    <tr><td>Trough</td><td>${trough_type}</td><td></td><td>${trough_mat} ${trough_ga}</td></tr>
-    <tr><td>Cover</td><td>${cover_type}</td><td></td><td>${cover_mat} ${cover_ga}</td></tr>
-    <tr><td>Liner</td><td>${liner ? "YES" : "NONE"}</td><td>${liner ? liner_thk : ""}</td><td>${liner ? liner_mat : ""}</td></tr>
-    <tr><td>Shaft Bearing</td><td>${shaft_brg}</td><td></td><td></td></tr>
-    <tr><td>Hanger Bearing</td><td>${hanger_brg}</td><td></td><td></td></tr>
-    <tr><td>Tail Bearing</td><td>${tail_brg}</td><td></td><td></td></tr>
-    <tr><td>Drive End Seal</td><td>${de_seal}</td><td></td><td></td></tr>
-    <tr><td>Tail End Seal</td><td>${te_seal}</td><td></td><td></td></tr>
-    <tr><td>Inlet</td><td>${inlet_type}</td><td></td><td></td></tr>
-    <tr><td>Outlet</td><td>${outlet_type}</td><td></td><td></td></tr>
-    <tr><td>Cover Holddown</td><td>${holddown}</td><td></td><td></td></tr>
-    <tr><td>Zero Speed Switch</td><td>${zss}</td><td></td><td></td></tr>
-    <tr><td>E-Stop</td><td>${estop}</td><td></td><td></td></tr>
-    <tr><td>GB-to-Shaft Coupling</td><td>${gb_coupling}</td><td></td><td></td></tr>
-    ${!isShaftless ? `<tr><td>Shaft &amp; Pipe</td><td>${coupling}</td><td>${shaft_dia}" shaft / ${pipe_size}</td><td>${shaft_mat} / ${pipe_mat}</td></tr>` : ""}
-  </tbody></table>`;
-
-  // --- Footer ---
-  html += `<div class="footer-bar">SCREW CONVEYOR DESIGN SHEET &nbsp;|&nbsp; REV. ${revision} &nbsp;|&nbsp; ${date}</div>`;
-
-  document.getElementById("output-panel").innerHTML = html;
-}
-
-// ===========================================================================
-// DOM SETUP
-// ===========================================================================
-function setField(id, val) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  if (el.type === "checkbox") {
-    el.checked = !!val;
-  } else {
-    el.value = val;
-  }
-}
-
-function resetToDefaults() {
-  for (const [key, val] of Object.entries(DEFAULTS)) {
-    setField(key, val);
-  }
-  // Auto trough CTE
-  autoTroughCTE();
-  calculate();
-}
-
-function autoTroughCTE() {
-  const mat = (getVal("trough_material") || "").toLowerCase();
-  const el = document.getElementById("trough_cte_material");
-  if (!el) return;
-  if (mat.includes("ss") || mat.includes("stainless")) {
-    el.value = "Stainless Steel";
-  } else {
-    el.value = "Carbon Steel";
-  }
-}
-
-function wireEvents() {
-  const ids = [
-    "project_no","location","customer","engineer","description","by","date","revision",
-    "length_ft","incline_deg","flow_direction","service_duty","live_bottom","area_classification",
-    "material","density_lb_ft3","solids_pct","size_class","flowability","abrasiveness","temp_min_f","temp_max_f",
-    "screw_dia_in","screw_type","pitch_type","flight_type","trough_fill_pct","design_capacity_ft3hr",
-    "drive_arrangement","gearbox_model","motor_hp","motor_rpm","gearbox_ratio","gearbox_sf",
-    "shaft_dia_in","shaft_material","pipe_size","pipe_material","coupling_type",
-    "bolt_size_in","bolt_material","num_bolts","bolt_pad_in",
-    "flight_material","trough_type","trough_material","trough_gauge",
-    "cover_type","cover_material","cover_gauge",
-    "liner","liner_material","liner_thickness",
-    "shaft_bearing_type","hanger_bearing_type","tail_bearing_type","num_hanger_bearings",
-    "drive_end_seal","tail_end_seal","inlet_type","outlet_type",
-    "cover_holddown","zss","estop","gb_to_shaft_coupling","trough_cte_material"
-  ];
-
-  ids.forEach(id => {
+function clearGbOverrides() {
+  overrides.delete('gbSpeed');
+  overrides.delete('motorHP');
+  ['gbSpeed','motorHP'].forEach(id => {
     const el = document.getElementById(id);
-    if (!el) return;
-    const evtType = (el.tagName === "SELECT" || el.type === "checkbox") ? "change" : "input";
-    el.addEventListener(evtType, () => {
-      // Auto-update trough CTE when trough_material changes
-      if (id === "trough_material") autoTroughCTE();
-      calculate();
-    });
+    if (el) el.classList.remove('overridden');
   });
+  document.getElementById('gb-auto-note').style.display = 'none';
+  recalc();
 }
 
-// On load: set defaults, wire events, run first calc
-document.addEventListener("DOMContentLoaded", () => {
-  resetToDefaults();
-  wireEvents();
-  calculate();
+// ============================================================
+// CALC ENGINE
+// ============================================================
+function calculate(inp) {
+  const r = {};
+  const Ds = parseFloat(inp.Ds);
+  const L = parseFloat(inp.length);
+  const incline = parseFloat(inp.incline) || 0;
+  const K = parseFloat(inp.K);
+  const Kmax = parseFloat(inp.Kmax);
+  const Cr = parseFloat(inp.Cr);
+  const spiralType = inp.spiralType;
+  const pitch = inp.pitch;
+  const density = parseFloat(inp.density);
+
+  if (!Ds || !L || !K || !Cr || !spiralType) return r;
+  const density_safe = isNaN(density) || density <= 0 ? 65 : density;
+
+  const spiralTypeTrimmed = (spiralType || '').trim();
+  const isShaftless = spiralTypeTrimmed === 'Single Shaftless' || spiralTypeTrimmed === 'Dual Shaftless';
+  const isShafted   = !isShaftless;
+
+  // Pitch in inches
+  const pitchMap = {Full:Ds, Short:Ds*(2/3), Half:Ds/2, Long:Ds*1.5};
+  const P = pitchMap[pitch] || Ds;
+  r.P = P;
+
+  // Pipe / inner bore dimensions
+  // Shaftless: Dp = inner bore of shaftless spiral (sid), not a pipe shaft
+  // Dual shaftless has an inner spiral element; Single shaftless is full bore (sid=0)
+  const geomForDp = getGeom(inp.Ds, spiralType, inp.duty);
+  const pipeData = PIPE_TABLE[inp.pipeSize] || {od:0, id:0};
+  // For shaftless: always use sid (inner bore from geometry table), never pipe table
+  // For shafted: use pipe OD/ID from PIPE_TABLE
+  const Dp = isShaftless ? (geomForDp ? (geomForDp.sid || 0) : 0) : (PIPE_TABLE[inp.pipeSize] || {od:0}).od;
+  const IDp = isShaftless ? 0 : (PIPE_TABLE[inp.pipeSize] || {id:0}).id;
+  r.Dp = Dp; r.IDp = IDp;
+
+  // C1
+  r.C1 = isShaftless ? 1.1 : 1.0;
+
+  // CF2
+  const fillBucket = getFillBucket(K);
+  const cf2Row = CF2[spiralType] || CF2['Shafted'];
+  r.CF2 = cf2Row[fillBucket] || 1;
+
+  // CF3
+  const paddleCount = getPaddleCount(spiralType);
+  r.CF3 = CF3[paddleCount] || 1;
+
+  // Ri
+  r.Ri = getRi(incline, pitch, isShaftless);
+
+  // Lh
+  r.Lh = Math.sin(incline * Math.PI / 180) * L;
+
+  // Ceq = Cr * CF1(=1) * CF2 * CF3
+  r.Ceq = Cr * 1 * r.CF2 * r.CF3;
+
+  // Cr/N = (pi/4 * (Ds^2 - Dp^2) * K/100 * P * 60 * C1 * Ri) / 1728
+  r.CrN = (0.7854 * (Ds*Ds - Dp*Dp) * (K/100) * P * 60 * r.C1 * r.Ri) / 1728;
+
+  if (r.CrN <= 0) return r;
+
+  // N = Ceq / CrN
+  r.N = r.Ceq / r.CrN;
+
+  // Actual capacity
+  r.C = r.N * r.CrN;
+
+  // Actual capacity at design fill
+  r.Cmax = r.C * (Kmax / K);
+
+  // HP safety basis: Kmax fill (user-set, default 45% → ~1.5× design)
+  // Per workbook: P44 = P43 * (O26/J26), CmaxEq = Cmax * CF2 * CF3
+  const CmaxEq = r.Cmax * r.CF2 * r.CF3;
+
+  // HP factors
+  r.Fd = FD[Ds] || 0;
+  r.Fb = FB[inp.hangerBearing] != null ? FB[inp.hangerBearing] : 1;
+  if (isShaftless) r.Fb = 1; // no hanger bearings on shaftless
+  r.Fm = FM[inp.material] || 1.5;
+  r.Ff = 1; r.Fp = 1;
+  r.e  = DRIVE_EFF[inp.driveArrangement] || 0.95;
+
+  // Screw tip speed
+  r.STS = (Ds * r.N * Math.PI / 12);
+
+  // HPf = L * N * Fd * Fb / 1e6
+  r.HPf = (L * r.N * r.Fd * r.Fb) / 1e6;
+
+  // HPm = Ceq * L * density * Fm * Ff * Fp / 1e6  (design fill)
+  // HPmMax = CmaxEq * L * density * Fm * Ff * Fp / 1e6  (max fill — HP safety basis)
+  r.HPm    = (r.Ceq  * L * density_safe * r.Fm * r.Ff * r.Fp) / 1e6;
+  r.HPmMax = (CmaxEq * L * density_safe * r.Fm * r.Ff * r.Fp) / 1e6;
+
+  // HPl = lift HP — workbook AO44: 1.3*(((W43/60)*AO32)/33000)
+  // Included in both HPt and HPtm per workbook AO45/AO46.
+  const Wlbhr    = r.C    * density_safe;
+  const WlbhrMax = r.Cmax * density_safe;
+  r.HPl    = 1.3 * ((Wlbhr    / 60) * r.Lh) / 33000;
+  r.HPlMax = 1.3 * ((WlbhrMax / 60) * r.Lh) / 33000;
+
+  // Fo: based on HPf + HPm only (no lift HP in Fo input per workbook AD39 = AO42+AO43)
+  const HPbase    = r.HPf + r.HPm;
+  const HPbaseMax = r.HPf + r.HPmMax;
+  // Fo per workbook: IF(HPbase<5.2, LN(HPbase)*-0.6115+2.024, 1). Guard ln(<=0) with fallback 1.
+  r.Fo    = (HPbase    > 0 && HPbase    < 5.2) ? Math.min(Math.log(HPbase)    * -0.6115 + 2.024, 2.5) : 1;
+  r.FoMax = (HPbaseMax > 0 && HPbaseMax < 5.2) ? Math.min(Math.log(HPbaseMax) * -0.6115 + 2.024, 2.5) : 1;
+
+  // HPt  = (HPf + HPm + HPl)    * Fo    / e  — workbook AO45: (AO42+AO43+AO44)*AO39/AO41
+  // HPtm = (HPf + HPmMax + HPlMax) * FoMax / e  — workbook AO46: (AO42+AV43+AV44)*AO40/AO41
+  // Fo input = HPf+HPm only (no HPl) — workbook AD39=AO42+AO43, AD40=AO42+AV43
+  r.HPt  = ((r.HPf + r.HPm    + r.HPl)    * r.Fo)    / r.e;
+  r.HPtm = ((r.HPf + r.HPmMax + r.HPlMax) * r.FoMax) / r.e;
+
+  r.motorSize = nextMotorSize(r.HPtm);
+  const convShaft = parseFloat(inp.shaftSize) || (geomForDp ? geomForDp.shaft : 0);
+  r.sew = sewFAZRecommendation(r.HPtm, r.N, r.motorSize, convShaft);
+  // Sync motorSize to SEW-recommended HP (which includes SF≥1.4 step-up)
+  if (r.sew) r.motorSize = r.sew.motorHP;
+
+  // ============ TORSIONAL ============
+  const gbSpeed  = parseFloat(inp.gbSpeed)  || 0;
+  const motorHPinp = parseFloat(inp.motorHP) || r.motorSize;
+  const isFlange = inp.connType === 'Flange';
+  const shaftSz  = parseFloat(inp.shaftSize) || 0;
+  const boltSz   = parseFloat(inp.boltSize)  || 0;
+  const boltQty  = parseFloat(inp.boltQty)   || 3;
+  const SFm      = 1.4;  // JMS practice: drive shaft designed for 1.4× rated motor torque (workbook T60=1.5 is used in AO46 motor selection, not shaft sizing — this 1.4 is a separate JMS shaft design factor)
+
+  if (gbSpeed > 0 && motorHPinp > 0 && shaftSz > 0) {
+    r.Tm  = (63025 * motorHPinp) / gbSpeed;
+    r.Tmf = (63025 * SFm * motorHPinp) / gbSpeed;
+
+    const Ab  = isFlange ? 0 : Math.PI * Math.pow(boltSz/2, 2);
+    const ah  = isFlange ? 0 : (boltSz + 1/32);
+    const Zs  = Math.PI * Math.pow(shaftSz, 3) / 16
+                - ((ah * shaftSz*shaftSz / 6) + (Math.pow(ah,3) / 6));
+
+    // For shaftless: always Flange, no pipe shaft in coupling — force pipe dims to 0
+    const Dp_c = isShaftless ? 0 : pipeData.od;  // coupling pipe OD
+    const IDp_c= isShaftless ? 0 : pipeData.id;
+    const Zp   = Dp_c > 0
+      ? (Math.PI * (Math.pow(Dp_c,4) - Math.pow(IDp_c,4))) / (16 * Dp_c)
+      : 0;
+    const Ap   = isFlange ? 0 : ((Dp_c - shaftSz) * boltSz);
+    const rLoad= (shaftSz/2) + ((Dp_c - shaftSz) / 4);
+
+    const allowDS = (SHAFT_STRESS[inp.shaftMat] || {shear:8750}).shear;
+    const allowPipe = isFlange ? null : 6700;  // workbook AK61: hardcoded 6700 PSI (A53 pipe shear allowable per JMS workbook)
+    const allowBolt = isFlange ? null : (BOLT_STRESS[inp.boltMat] || {shear:6200}).shear;
+    const allowPB   = isFlange ? null : 6000;  // workbook AK63: hardcoded 6000 PSI (bushing bearing allowable per JMS workbook)
+
+    const stressDS   = Zs > 0 ? r.Tmf / Zs : null;
+    const stressPipe = (!isFlange && Zp > 0) ? r.Tmf / Zp : null;
+    const stressBolt = (!isFlange && Ab > 0)
+      ? r.Tmf / ((shaftSz/2) * boltQty * 2 * Ab) : null;
+    const stressPB   = (!isFlange && Ap > 0 && rLoad > 0)
+      ? r.Tmf / (boltQty * Ap * rLoad) : null;
+
+    // Minimum shaft diameter required to pass (for FAIL hint)
+    // Must account for bolt hole reduction in Zs when cross-bolt coupling is used.
+    // For cross-bolt: Zs = π*d³/16 - (ah*d²/6 + ah³/6)  where ah = boltSz + 1/32
+    // Iterate over SHAFT_SIZES — find first size where reduced Zs passes.
+    const ahHint = isFlange ? 0 : (boltSz + 1/32);
+    function ZsForShaft(d) {
+      const full = Math.PI * Math.pow(d, 3) / 16;
+      return isFlange ? full : full - ((ahHint * d*d / 6) + (Math.pow(ahHint,3) / 6));
+    }
+    const minPassingShaft = SHAFT_SIZES.find(s => ZsForShaft(s) > 0 && r.Tmf / ZsForShaft(s) <= allowDS) || null;
+    // dMinShaft: theoretical minimum from solid-shaft formula (for display only)
+    const Zs_needed = r.Tmf / allowDS;
+    const dMinShaft = Math.pow((16 * Zs_needed) / Math.PI, 1/3);
+
+    // Build per-material shaft options matrix — also bolt-hole aware
+    const shaftMatOptions = Object.entries(SHAFT_STRESS).map(([mat, props]) => {
+      const minSz = SHAFT_SIZES.find(s => ZsForShaft(s) > 0 && r.Tmf / ZsForShaft(s) <= props.shear) || null;
+      const ZsNeed = r.Tmf / props.shear;
+      const dMin   = Math.pow((16 * ZsNeed) / Math.PI, 1/3);  // theoretical (no bolt hole), for display
+      return { mat, dMin, minSz };
+    });
+
+    r.tor = {
+      ds:   {stress:stressDS,   allow:allowDS,   ratio: stressDS   != null ? stressDS/allowDS   : null, isNA:false,
+             minShaft: dMinShaft, minPassingShaft: minPassingShaft || null,
+             shaftMatOptions},
+      pipe: {stress:stressPipe, allow:allowPipe, ratio: stressPipe != null ? stressPipe/allowPipe: null, isNA:isFlange},
+      bolt: {stress:stressBolt, allow:allowBolt, ratio: stressBolt != null ? stressBolt/allowBolt: null, isNA:isFlange},
+      pb:   {stress:stressPB,   allow:allowPB,   ratio: stressPB   != null ? stressPB/allowPB   : null, isNA:isFlange},
+    };
+
+    // weakest link check (coupling bolt should be weakest — only meaningful for cross-bolt, not flange/shaftless)
+    if (!isFlange) {
+      const ratios = [
+        {name:'Drive Shaft', r:r.tor.ds.ratio},
+        {name:'Pipe Shaft',  r:r.tor.pipe.ratio},
+        {name:'Coupling Bolt',r:r.tor.bolt.ratio},
+        {name:'Pipe & Bushing',r:r.tor.pb.ratio},
+      ].filter(x => x.r != null);
+      if (ratios.length > 1) {  // need at least 2 components to compare
+        const maxR = Math.max(...ratios.map(x => x.r));
+        const weakest = ratios.find(x => x.r === maxR);
+        r.weakestIsNotBolt = weakest && weakest.name !== 'Coupling Bolt';
+        r.weakestName = weakest ? weakest.name : null;
+      }
+    }
+  }
+
+  // ============ ADDITIONAL CHECKS ============
+  const geom = getGeom(inp.Ds, spiralType, inp.duty);
+  const wt_per_ft = geom ? geom.wt : 0;
+  const Ws = L * wt_per_ft;
+  const hangerQty = parseFloat(inp.hangerQty) || 0;
+  const Nbr = (inp.hangerBearing === 'None' || !inp.hangerBearing) ? 0 : hangerQty;
+  const Ls  = Nbr > 0 ? (L * 12) / (Nbr + 1) : L * 12;  // length between bearings (in)
+
+  const dt    = Math.max(0, (parseFloat(inp.tempMax)||0) - (parseFloat(inp.tempMin)||0));  // guard: negative dt (tempMax < tempMin) treated as zero
+  const CTE_screw  = CTE[inp.pipeMat] || CTE['Carbon Steel'];
+  const troughMatKey = inp.troughMat || '304 SS';
+  const CTE_trough = CTE[troughMatKey] || CTE['304/316 SS'] || CTE['Carbon Steel'];
+
+  const Es    = 28e6; // shaft material
+  // Is = moment of inertia of pipe shaft. For shafted: Dp=pipe OD, IDp=pipe ID.
+  // If no pipe (Dp=0 or IDp=0 for solid shaft), Is is not computable — skip deflection.
+  const Is    = (Dp > 0 && IDp > 0) ? Math.PI * (Math.pow(Dp,4) - Math.pow(IDp,4)) / 64 : 0;
+
+  const doShaftChecks = spiralTypeTrimmed === 'Shafted' || spiralTypeTrimmed === 'Ribbon';
+  const doShaftlessChecks = !doShaftChecks;
+
+  r.checks = {};
+
+  // Screw deflection
+  if (doShaftChecks && Is > 0 && Es > 0) {
+    r.checks.defl = (5 * Ws * Math.pow(Ls, 3)) / (384 * Es * Is);
+    r.checks.deflOK = r.checks.defl < 0.25 ? 'OK' : 'FAIL';
+  }
+
+  // Shaft end angle
+  if (doShaftChecks && r.checks.defl != null) {
+    const allow_angle = (boltQty === 3 || inp.boltQty === '3') ? 0.135 : 0.15;
+    r.checks.angle = (180/Math.PI) * (3.2 * r.checks.defl) / (L * 12);
+    r.checks.angleOK = r.checks.angle < allow_angle ? 'OK' : 'FAIL';
+    r.checks.allow_angle = allow_angle;
+  }
+
+  // Screw thermal expansion
+  if (doShaftChecks) {
+    r.checks.stherm = Ls * dt * CTE_screw;
+    r.checks.sthermOK = r.checks.stherm < 0.125 ? 'OK' : 'FAIL';
+  }
+
+  // Trough thermal expansion — use max single-section length, not total conveyor length
+  const Ls_trough = parseFloat(inp.Ds) <= 10 ? 10 : 12;  // ft, per TROUGH_MAX table
+  r.checks.ttherm = (Ls_trough * 12) * dt * CTE_trough;
+  r.checks.tthermOK = r.checks.ttherm < 0.125 ? 'OK' : 'FAIL';
+
+  // Abrasion scores
+  const AR_num = {'Mild':5,'Moderate':6,'Extreme':7}[inp.abrasiveness] || 5;
+  const Ft_str = geom ? geom.ft : '0.25';
+  const Ft_num = parseFloat(Ft_str) || 0.25;
+  const troughThkNum = GAUGE_THK[inp.troughT] || 0.135;
+  // TSS = Trough Surface Speed (workbook T110): pitch * N * (1-PL) / 12
+  // PL = 0.05 if inclined, else 0 (workbook T106)
+  const PL = incline > 0 ? 0.05 : 0;
+  const TSS = P > 0 && r.N > 0 ? (P * r.N * (1 - PL)) / 12 : 0;
+
+  if (r.N > 0 && AR_num > 4) {
+    r.checks.sabr = r.STS * (AR_num - 4) / Ft_num;           // STS for screw (workbook T124)
+    r.checks.sabrOK = r.checks.sabr > 2000 ? 'WARN' : 'OK';
+    r.checks.tabr = TSS * (AR_num - 4) * 2.5 / troughThkNum; // TSS for trough (workbook T125)
+    r.checks.tabrOK = r.checks.tabr > 2000 ? 'WARN' : 'OK';
+  } else {
+    r.checks.sabr = 0; r.checks.sabrOK = 'OK';
+    r.checks.tabr = 0; r.checks.tabrOK = 'OK';
+  }
+
+  // Shaftless checks
+  if (doShaftlessChecks && geom && gbSpeed > 0 && motorHPinp > 0) {
+    const Dbc = geom.bc || 0;
+    const bs_v = geom.bs || 0;
+    const hs_v = geom.hs || 0;
+    const Tm_v = r.Tm || 0;
+    const Fr  = Dbc > 0 ? Tm_v / (Dbc / 2) : 0;
+
+    // Diameter ratio c, Wahl's constant k
+    const c_val = hs_v > 0 ? (Dbc / hs_v) : 0;
+    const k_val = c_val > 1 ? (3*c_val - 1) / (3*c_val - 3) : 1;
+
+    const Np = P > 0 ? (L * 12) / P : 1;
+
+    if (Es > 0 && bs_v > 0 && hs_v > 0 && Dbc > 0) {
+      // Spiral compression: in/ft
+      r.checks.scomp = ((12 * Fr * (L*12) * Math.pow(Dbc/2, 2)) / (Es * bs_v * Math.pow(hs_v,3))) / L;
+      r.checks.scompOK = r.checks.scomp < 0.08 ? 'OK' : 'FAIL';
+
+      // Spiral stress
+      const flightYield = FLIGHT_YIELD[inp.flightMat] || 58000;
+      const allowSpiral = flightYield * 0.3;
+      r.checks.sstress = bs_v > 0 && hs_v > 0
+        ? (Fr * 6 * (Dbc/2) * k_val) / (bs_v * hs_v * hs_v)
+        : 0;
+      r.checks.sstressOK = r.checks.sstress < allowSpiral ? 'OK' : 'FAIL';
+      r.checks.allowSpiral = allowSpiral;
+    }
+  }
+
+  return r;
+}
+
+// ============================================================
+// CONSTRAINT ENGINE
+// ============================================================
+function constrain(inp) {
+  const warnings = {};
+  const spiralType = inp.spiralType;
+  const Ds = parseInt(inp.Ds) || 0;
+  const spiralTypeTrimmed = (spiralType || '').trim();
+  const isShaftless = spiralTypeTrimmed === 'Single Shaftless' || spiralTypeTrimmed === 'Dual Shaftless';
+
+  // Connection type
+  if (isShaftless) {
+    setSelectValue('connType', 'Flange');
+    document.getElementById('connType').disabled = true;
+    setEl('connTypeStd', '<span style="color:#c07000;font-size:10px">Forced: Flange (shaftless)</span>');
+  } else {
+    document.getElementById('connType').disabled = false;
+    // Reset to Cross-Bolt when returning from shaftless (Flange was forced, not user-chosen)
+    if (!overrides.has('connType')) setSelectValue('connType', 'Cross-Bolt');
+    setEl('connTypeStd', '<span style="color:#888;font-size:10px">Std: Cross-Bolt</span>');
+  }
+
+  // Pipe shaft
+  if (isShaftless) {
+    // Always force None and clear override — never let a stale pipe value bleed into calc
+    overrides.delete('pipeSize');
+    setSelectValue('pipeSize', 'None');
+    document.getElementById('pipeSize').disabled = true;
+    setEl('pipeSizeStd', '<span style="color:#888;font-size:10px">None (shaftless)</span>');
+  } else {
+    document.getElementById('pipeSize').disabled = false;
+    const geom = getGeom(inp.Ds, spiralType, inp.duty);
+    if (geom && geom.pipe && !overrides.has('pipeSize')) {
+      setSelectValue('pipeSize', geom.pipe);
+    }
+    const stdPipe = geom ? geom.pipe : '—';
+    setEl('pipeSizeStd', `<span style="color:#888;font-size:10px">Std: ${stdPipe}</span>`);
+  }
+
+  // Flight thickness
+  const geom = getGeom(inp.Ds, spiralType, inp.duty);
+  if (geom && geom.ft && !overrides.has('flightT')) {
+    setSelectValue('flightT', geom.ft);
+  }
+  const stdFT = geom ? geom.ft : '—';
+  setEl('flightTStd', `<span style="color:#888;font-size:10px">Std: ${stdFT || '—'}</span>`);
+
+  // Bolt / pipe fields — hide entirely when shaftless (forced Flange, no pipe shaft, no cross-bolt)
+  // Shaft size/material kept visible — shaftless still has a drive stub shaft for the coupling
+  const hideWhenShaftless = ['row-boltSize','row-boltMat','row-boltQty','row-boltPad','row-pipeMat'];
+  hideWhenShaftless.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = isShaftless ? 'none' : '';
+  });
+
+  // Shaft size auto-select (always active — drive stub shaft exists on both shafted and shaftless)
+  if (geom && !overrides.has('shaftSize')) {
+    const stdShaft = geom.shaft;
+    setSelectValue('shaftSize', String(stdShaft));
+    setEl('shaftSizeStd', `<span style="color:#888;font-size:10px">Std: ${stdShaft}"</span>`);
+  }
+
+  // Bolt size auto-select (shafted only)
+  // Read shaft directly from DOM — inp.shaftSize may be stale if constrain() just updated it above
+  if (!isShaftless) {
+    const shaftSz = parseFloat((document.getElementById('shaftSize') || {}).value) || 0;
+    if (!overrides.has('boltSize') && inp.connType !== 'Flange') {
+      const stdBolt = vlookupTrue(shaftSz, BOLT_BY_SHAFT);
+      if (stdBolt) setSelectValue('boltSize', String(stdBolt));
+      setEl('boltSizeStd', `<span style="color:#888;font-size:10px">Std: ${stdBolt || '—'}"</span>`);
+    } else if (inp.connType === 'Flange') {
+      setEl('boltSizeStd', '<span style="color:#888;font-size:10px">N/A (Flange)</span>');
+    }
+  }
+
+  // Hanger bearing
+  if (isShaftless) {
+    setSelectValue('hangerBearing', 'None');
+    document.getElementById('hangerBearing').disabled = true;
+    setEl('hangerStd', '<span style="color:#888;font-size:10px">None (shaftless)</span>');
+    document.getElementById('hangerQty').value = 0;
+    setEl('hangerQtyStd', '');
+  } else {
+    document.getElementById('hangerBearing').disabled = false;
+    const L = parseFloat(inp.length) || 0;
+    const autoHangerQty = L > 12 ? Math.round(L / 12) : 0;
+    if (!overrides.has('hangerQty')) {
+      document.getElementById('hangerQty').value = autoHangerQty;
+    }
+    if (!overrides.has('hangerBearing')) {
+      if (L > 12 && (inp.hangerBearing === 'None' || !inp.hangerBearing)) {
+        // suggest Bronze as default
+        setSelectValue('hangerBearing', 'Bronze');
+        warnings.hanger = 'Length > 12 ft: at least 1 hanger bearing required';
+      }
+    }
+    setEl('hangerStd', `<span style="color:#888;font-size:10px">Auto: ${autoHangerQty} @ L=${L}ft</span>`);
+    setEl('hangerQtyStd', `<span style="color:#888;font-size:10px">Auto: ${autoHangerQty}</span>`);
+  }
+
+  // Trough length warning
+  if (Ds > 0) {
+    const maxTrough = TROUGH_MAX_FT[Ds];
+    const L = parseFloat(inp.length) || 0;
+    if (maxTrough && L > maxTrough) {
+      warnings.troughLen = `${Ds}" max single-section length is ${maxTrough} ft — requires multi-section trough`;
+    }
+  }
+
+  // Dual 6" warning
+  if (spiralType === 'Dual Shaftless' && inp.Ds === '6') {
+    warnings.dual6 = '6" Dual Shaftless is not a standard configuration';
+  }
+
+  // Flight type suggestions for Build Up / Harden
+  if (inp.otherProp1 === 'Build Up / Harden' && spiralType === 'Shafted') {
+    warnings.flight = 'Material builds up/hardens: consider Cut & Folded or Ribbon flight';
+  }
+
+  // Paddle with lumpy
+  if (spiralType.startsWith('Paddle') && inp.sizeClass === 'Lumpy') {
+    warnings.paddle = 'Paddle flights are not recommended for Lumpy materials';
+  }
+
+  // Trough fill guidance
+  const K = parseFloat(inp.K) || 30;
+  const flow = inp.flowability;
+  const abr  = inp.abrasiveness;
+  let kWarn = '';
+  if (abr === 'Extreme' && K > 15) kWarn = 'Extreme abrasive: recommend K ≤ 15%';
+  else if (flow === 'Sluggish' && K > 30) kWarn = 'Sluggish material: recommend K ≤ 30%';
+  else if ((flow === 'Free Flowing' || flow === 'Very Free Flowing') && K < 15) kWarn = 'Free flowing material: can use K 30–45%';
+  document.getElementById('KwarnRow').style.display = kWarn ? '' : 'none';
+  document.getElementById('KwarnRow').textContent = kWarn;
+
+  // Screw warning display
+  const warnTexts = Object.values(warnings);
+  const screwWarnEl = document.getElementById('screwWarn');
+  if (warnTexts.length > 0) {
+    screwWarnEl.style.display = '';
+    screwWarnEl.textContent = warnTexts.join(' | ');
+  } else {
+    screwWarnEl.style.display = 'none';
+  }
+
+  return warnings;
+}
+
+function setSelectValue(id, val) {
+  const el = document.getElementById(id);
+  if (!el || el.tagName !== 'SELECT') return;
+  for (const opt of el.options) {
+    if (opt.value === val || opt.text === val) {
+      el.value = opt.value;
+      return;
+    }
+  }
+}
+
+// ============================================================
+// DIAMETER SUGGESTION
+// ============================================================
+function calcNforDiam(Ds_try, inp) {
+  const Ds = Ds_try;
+  const L = parseFloat(inp.length);
+  const incline = parseFloat(inp.incline) || 0;
+  const K = 30; // always target K=30%
+  const Cr = parseFloat(inp.Cr);
+  const spiralType = inp.spiralType;
+  const pitch = inp.pitch;
+  if (!Ds || !L || !Cr || !spiralType) return null;
+
+  const isShaftless = spiralType === 'Single Shaftless' || spiralType === 'Dual Shaftless';
+  const dutyMap = {Light:'1', Standard:'2', Heavy:'3'};
+  const geomKey = isShaftless
+    ? Ds + (spiralType === 'Dual Shaftless' ? 'Dual' : 'Single')
+    : Ds + 'Shafted' + (dutyMap[inp.duty] || '2');
+  const geom = SCREW_GEOM[geomKey];
+  if (!geom) return null;
+
+  const pipeKey = isShaftless ? 'None' : (geom.pipe || 'None');
+  const pipeData = PIPE_TABLE[pipeKey] || {od:0, id:0};
+  const Dp = isShaftless ? (geom.sid || 0) : pipeData.od;
+
+  const pitchMap = {Full:Ds, Short:Ds*(2/3), Half:Ds/2, Long:Ds*1.5};
+  const P = pitchMap[pitch] || Ds;
+  const C1 = isShaftless ? 1.1 : 1.0;
+  const Ri = getRi(incline, pitch, isShaftless);
+  const fillBucket = getFillBucket(K);
+  const cf2Row = CF2[spiralType] || CF2['Shafted'];
+  const cf2 = cf2Row[fillBucket] || 1;
+  const paddleCount = getPaddleCount(spiralType);
+  const cf3 = CF3[paddleCount] || 1;
+  const Ceq = Cr * cf2 * cf3;
+  const CrN = (0.7854 * (Ds*Ds - Dp*Dp) * (K/100) * P * 60 * C1 * Ri) / 1728;
+  if (CrN <= 0) return null;
+  return Ceq / CrN;
+}
+
+function updateDiamSuggest(r, inp) {
+  const el = document.getElementById('diamSuggest');
+  const incline = parseFloat(inp.incline) || 0;
+  const isInclined = incline > 0;
+  const targetLo = isInclined ? 28 : 18;
+  const targetHi = isInclined ? 33 : 23;
+
+  if (!inp.Cr || !inp.length || !inp.spiralType) { el.style.display = 'none'; return; }
+
+  const SIZES = [6,9,10,12,14,16,18,20,24];
+  const currentN = r.N;
+  const currentDs = parseFloat(inp.Ds);
+
+  // Check if current selection is already in band
+  if (currentN != null && currentN >= targetLo && currentN <= targetHi) {
+    el.style.display = '';
+    el.style.background = '#e8f4e8';
+    el.style.borderLeftColor = '#2a7a2a';
+    el.style.color = '#1a4a1a';
+    el.textContent = `✓ ${currentDs}" at ${fmt(currentN,1)} RPM — within target ${targetLo}–${targetHi} RPM band`;
+    return;
+  }
+
+  // Find best diameter that hits the band
+  const candidates = [];
+  for (const ds of SIZES) {
+    const N_try = calcNforDiam(ds, inp);
+    if (N_try == null) continue;
+    if (N_try >= targetLo && N_try <= targetHi) {
+      candidates.push({ds, N: N_try});
+    }
+  }
+
+  // If no exact match, find nearest
+  if (candidates.length === 0) {
+    let best = null, bestDelta = Infinity;
+    for (const ds of SIZES) {
+      const N_try = calcNforDiam(ds, inp);
+      if (N_try == null) continue;
+      const mid = (targetLo + targetHi) / 2;
+      const delta = Math.abs(N_try - mid);
+      if (delta < bestDelta) { bestDelta = delta; best = {ds, N: N_try}; }
+    }
+    if (best) {
+      const dir = best.N > targetHi ? 'too fast — go larger' : 'too slow — go smaller';
+      el.style.display = '';
+      el.style.background = '#fff3cd';
+      el.style.borderLeftColor = '#f0a800';
+      el.style.color = '#856404';
+      el.textContent = `No diameter hits ${targetLo}–${targetHi} RPM exactly. Closest: ${best.ds}" at ${fmt(best.N,1)} RPM (${dir})`;
+    } else {
+      el.style.display = 'none';
+    }
+    return;
+  }
+
+  // Show suggestion(s) — prefer closest to midpoint
+  const mid = (targetLo + targetHi) / 2;
+  candidates.sort((a,b) => Math.abs(a.N - mid) - Math.abs(b.N - mid));
+  const best = candidates[0];
+  const others = candidates.slice(1).map(c => `${c.ds}" (${fmt(c.N,1)} RPM)`).join(', ');
+
+  const isCurrent = best.ds === currentDs;
+  el.style.display = '';
+
+  if (isCurrent) {
+    el.style.background = '#e8f4e8';
+    el.style.borderLeftColor = '#2a7a2a';
+    el.style.color = '#1a4a1a';
+    el.textContent = `✓ ${best.ds}" at ${fmt(best.N,1)} RPM — within target ${targetLo}–${targetHi} RPM band`;
+  } else {
+    el.style.background = '#e8f0ff';
+    el.style.borderLeftColor = '#003366';
+    el.style.color = '#003366';
+    let msg = `→ Try ${best.ds}" → ${fmt(best.N,1)} RPM (target ${targetLo}–${targetHi} RPM`;
+    if (isInclined) msg += ', inclined +10 RPM band';
+    msg += ')';
+    if (others) msg += `  |  Also: ${others}`;
+    if (currentN != null) {
+      const issue = currentN > targetHi ? `current ${fmt(currentN,1)} RPM too fast` : `current ${fmt(currentN,1)} RPM too slow`;
+      msg += `  —  ${issue}`;
+    }
+    el.textContent = msg;
+  }
+}
+
+// ============================================================
+// MAIN RECALC
+// ============================================================
+function getInputs() {
+  const g = id => document.getElementById(id);
+  return {
+    Ds:            g('Ds').value,
+    spiralType:    g('spiralType').value,
+    duty:          g('duty').value,
+    pitch:         g('pitch').value,
+    pipeSize:      g('pipeSize').value,
+    flightT:       g('flightT').value,
+    K:             g('K').value,
+    Kmax:          g('Kmax').value,
+    Cr:            g('Cr').value,
+    length:        g('length').value,
+    incline:       g('incline').value,
+    material:      g('material').value,
+    density:       g('density').value,
+    pctDS:         g('pctDS').value,
+    sizeClass:     g('sizeClass').value,
+    flowability:   g('flowability').value,
+    abrasiveness:  g('abrasiveness').value,
+    otherProp1:    g('otherProp1').value,
+    tempMin:       g('tempMin').value,
+    tempMax:       g('tempMax').value,
+    driveArrangement: g('driveArrangement').value,
+    connType:      g('connType').value,
+    shaftSize:     g('shaftSize').value,
+    shaftMat:      g('shaftMat').value,
+    boltSize:      g('boltSize').value,
+    boltMat:       g('boltMat').value,
+    boltQty:       g('boltQty').value,
+    boltPad:       g('boltPad').value,
+    pipeMat:       g('pipeMat').value,
+    gbSpeed:       g('gbSpeed').value,
+    motorHP:       g('motorHP').value,
+    hangerBearing: g('hangerBearing').value,
+    hangerQty:     g('hangerQty').value,
+    flightMat:     g('flightMat').value,
+    troughT:       g('troughT').value,
+    troughMat:     g('troughMat').value,
+    troughStyle:   g('troughStyle').value,
+    flowDir:       g('flowDir').value,
+    explosion:     g('explosion').value,
+    coverStyle:    g('coverStyle').value,
+    inlet:         g('inlet').value,
+    outlet:        g('outlet').value,
+  };
+}
+
+function recalc() {
+  const inp = getInputs();
+  constrain(inp);
+  // Re-read after constrain may have changed values
+  const inp2 = getInputs();
+  const r = calculate(inp2);
+  updateOutputs(r, inp2);
+  updateDataSheet(r, inp2);
+  updateMemo(r, inp2);
+}
+
+// Build the drive-shaft FAIL hint — shows per-material minimum shaft size table
+function renderDsHint(hintEl, ds) {
+  if (!hintEl) return;
+  if (ds.ratio == null || ds.ratio < 1) { hintEl.style.display = 'none'; window._dsShaftFix = null; return; }
+  const opts = ds.shaftMatOptions || [];
+  // Sort: passing materials first (smallest minSz), then failing (null minSz)
+  const passing = opts.filter(o => o.minSz !== null).sort((a,b)=>a.minSz-b.minSz);
+  const failing  = opts.filter(o => o.minSz === null);
+
+  // Find cheapest fix using priority order
+  window._dsShaftFix = null;
+  for (const matName of SHAFT_MAT_PRIORITY) {
+    const found = passing.find(o => o.mat === matName);
+    if (found) { window._dsShaftFix = {mat: found.mat, sz: found.minSz}; break; }
+  }
+
+  let html = `<b>Drive shaft FAIL</b> — options to pass:<br>`;
+  if (passing.length === 0) {
+    html += `<span style="color:#c00">No shaft in the list is large enough for any material — redesign required.</span>`;
+    html += `<br><span style="color:#888;font-size:10px">No standard shaft passes — contact engineering</span>`;
+  } else {
+    html += `<table style="border-collapse:collapse;font-size:10px;margin-top:2px">`;
+    for (const o of passing) {
+      html += `<tr><td style="padding:0 8px 0 0;color:#555">${o.mat}</td><td style="font-weight:600">${o.minSz}"</td></tr>`;
+    }
+    if (failing.length > 0) {
+      for (const o of failing) {
+        html += `<tr><td style="padding:0 8px 0 0;color:#aaa">${o.mat}</td><td style="color:#aaa">exceeds 4.5"</td></tr>`;
+      }
+    }
+    html += `</table>`;
+    // If cheapest passing material is not 1045 CS or 4140 Alloy, suggest flange
+    const cheapMats = ['1045 CS','4140 Alloy'];
+    const cheapPasses = passing.some(o => cheapMats.includes(o.mat) && o.minSz !== null && o.minSz < 4.5);
+    if (!cheapPasses && !ds.isNA) {
+      html += `<div style="margin-top:4px;font-size:10px;color:#666;border-top:1px solid #fcc;padding-top:3px">
+        💡 Consider switching to <b>Flange coupling</b> — eliminates bolt hole stress concentration, allows smaller shaft with carbon steel.
+      </div>`;
+    }
+    if (window._dsShaftFix) {
+      html += `<button onclick="fixDriveShaft()" style="margin-top:4px;font-size:10px;padding:2px 8px;background:#003366;color:#fff;border:none;border-radius:3px;cursor:pointer">Fix It \u2192</button>`;
+    }
+  }
+  hintEl.innerHTML = html;
+  hintEl.style.display = '';
+}
+
+function fixDriveShaft() {
+  const fix = window._dsShaftFix;
+  if (!fix) return;
+  setSelectValue('shaftMat', fix.mat);
+  setSelectValue('shaftSize', String(fix.sz));
+  markOverride('shaftMat');
+  markOverride('shaftSize');
+  recalc();
+}
+
+function updateTorsional(r) {
+  if (r.Tm != null) {
+    setEl('o-Tm',  fmt(r.Tm, 0));
+    setEl('o-Tmf', fmt(r.Tmf, 0));
+    const t = r.tor;
+    const fmtRatio = (v) => v != null ? fmt(v, 3) : '—';
+    setEl('o-ds-ratio', fmtRatio(t.ds.ratio));
+    setEl('o-ds-badge', badge(t.ds.ratio != null ? (t.ds.ratio < 1 ? 'OK' : 'FAIL') : null, t.ds.isNA));
+    renderDsHint(document.getElementById('o-ds-hint'), t.ds);
+    setEl('o-ps-ratio', fmtRatio(t.pipe.ratio));
+    setEl('o-ps-badge', badge(t.pipe.ratio != null ? (t.pipe.ratio < 1 ? 'OK' : 'FAIL') : null, t.pipe.isNA));
+    setEl('o-cb-ratio', fmtRatio(t.bolt.ratio));
+    setEl('o-cb-badge', badge(t.bolt.ratio != null ? (t.bolt.ratio < 1 ? 'OK' : 'FAIL') : null, t.bolt.isNA));
+    setEl('o-pb-ratio', fmtRatio(t.pb.ratio));
+    setEl('o-pb-badge', badge(t.pb.ratio != null ? (t.pb.ratio < 1 ? 'OK' : 'FAIL') : null, t.pb.isNA));
+    if (r.weakestIsNotBolt && r.weakestName) {
+      setEl('o-weakest', `⚠ Weakest link is ${r.weakestName} — not the coupling bolt (CEMA 350-21)`);
+      document.getElementById('o-weakest').style.display = '';
+    } else {
+      document.getElementById('o-weakest').style.display = 'none';
+    }
+  } else {
+    ['o-Tm','o-Tmf','o-ds-ratio','o-ps-ratio','o-cb-ratio','o-pb-ratio'].forEach(id=>setEl(id,'—'));
+    ['o-ds-badge','o-ps-badge','o-cb-badge','o-pb-badge'].forEach(id=>setEl(id,''));
+    document.getElementById('o-weakest').style.display = 'none';
+  }
+}
+
+function updateOutputs(r, inp) {
+  // Diameter suggestion
+  updateDiamSuggest(r, inp);
+
+  // Capacity
+  setEl('o-Ceq', r.Ceq != null ? fmt(r.Ceq, 1) : '—');
+  setEl('o-CrN', r.CrN != null ? fmt(r.CrN, 3) : '—');
+  setEl('o-P',   r.P   != null ? fmt(r.P, 2)   : '—');
+  setEl('o-Lh',  r.Lh  != null ? fmt(r.Lh, 2)  : '—');
+
+  if (r.N != null) {
+    const incline = parseFloat(inp.incline) || 0;
+    const targetLo = incline > 0 ? 28 : 18;
+    const targetHi = incline > 0 ? 33 : 23;
+    const inBand = r.N >= targetLo && r.N <= targetHi;
+    const tooFast = r.N > targetHi;
+    const Nbadge = inBand ? badge('OK') : badge('WARN');
+    const hint = inBand ? '' : ` <span style="font-size:10px;color:#c07000">${tooFast ? 'too fast' : 'too slow'} (target ${targetLo}–${targetHi})</span>`;
+    setEl('o-N', fmt(r.N, 1));
+    setEl('o-N-badge', Nbadge + hint);
+
+    // Feature 2: Adjacent-diameter suggestion
+    const nSugEl = document.getElementById('o-N-suggest');
+    if (nSugEl) {
+      if (inBand) {
+        nSugEl.textContent = '';
+      } else {
+        const DIAM_ORDER = [6,9,10,12,14,16,18,20,24];
+        const curIdx = DIAM_ORDER.indexOf(parseFloat(inp.Ds));
+        // too fast (N > targetHi) → larger diameter → lower N; too slow → smaller diameter → higher N
+        let adjDs = null;
+        if (tooFast) adjDs = curIdx < DIAM_ORDER.length - 1 ? DIAM_ORDER[curIdx + 1] : null;
+        else adjDs = curIdx > 0 ? DIAM_ORDER[curIdx - 1] : null;
+        if (adjDs != null) {
+          const N_adj = calcNforDiam(adjDs, inp);
+          if (N_adj != null) {
+            nSugEl.textContent = `Try ${adjDs}" \u2192 N\u2248${fmt(N_adj,1)} RPM`;
+          } else {
+            nSugEl.textContent = '';
+          }
+        } else {
+          nSugEl.textContent = '';
+        }
+      }
+    }
+  } else {
+    setEl('o-N', '—'); setEl('o-N-badge', '');
+    const nSugEl2 = document.getElementById('o-N-suggest');
+    if (nSugEl2) nSugEl2.textContent = '';
+  }
+
+  setEl('o-C',    r.C    != null ? fmt(r.C, 1)    : '—');
+  setEl('o-Cmax', r.Cmax != null ? fmt(r.Cmax, 1) : '—');
+  setEl('o-STS',  r.STS  != null ? fmt(r.STS, 0)  : '—');
+
+  // HP
+  setEl('o-HPf',  r.HPf  != null ? fmt(r.HPf, 3)  : '—');
+  setEl('o-HPm',  r.HPm  != null ? fmt(r.HPm, 3)  : '—');
+  setEl('o-HPl',  r.HPl  != null ? fmt(r.HPl, 3)  : '—');
+  setEl('o-Fo',   r.Fo   != null ? fmt(r.Fo, 3)   : '—');
+  setEl('o-HPt',  r.HPt  != null ? fmt(r.HPt, 3)  : '—');
+  // Warn if Kmax < K — HPtm < HPt means motor is sized below design-fill requirement
+  const kmaxWarn = (r.HPtm != null && r.HPt != null && r.HPtm < r.HPt)
+    ? ' <span style="font-size:10px;color:#c07000">⚠ Kmax &lt; K — motor sized below design fill</span>' : '';
+  setEl('o-HPtm', (r.HPtm != null ? fmt(r.HPtm, 3) : '—') + kmaxWarn);
+  setEl('o-motor',r.motorSize != null ? r.motorSize : '—');
+  setEl('o-eff',  r.e    != null ? fmt(r.e, 2)    : '—');
+
+  // Factors
+  setEl('o-Pfact', r.P   != null ? fmt(r.P, 2)   : '—');
+  setEl('o-CF2',   r.CF2 != null ? fmt(r.CF2, 3) : '—');
+  setEl('o-CF3',   r.CF3 != null ? fmt(r.CF3, 3) : '—');
+  setEl('o-Ri',    r.Ri  != null ? fmt(r.Ri, 3)  : '—');
+  setEl('o-Fd',    r.Fd  != null ? r.Fd           : '—');
+  setEl('o-Fb',    r.Fb  != null ? fmt(r.Fb, 1)  : '—');
+  setEl('o-Fm',    r.Fm  != null ? fmt(r.Fm, 1)  : '—');
+  setEl('o-C1',    r.C1  != null ? r.C1           : '—');
+
+  // Torsional
+  if (r.Tm != null) {
+    setEl('o-Tm',  fmt(r.Tm, 0));
+    setEl('o-Tmf', fmt(r.Tmf, 0));
+
+    const t = r.tor;
+    const fmtRatio = (v) => v != null ? fmt(v, 3) : '—';
+    setEl('o-ds-ratio', fmtRatio(t.ds.ratio));
+    setEl('o-ds-badge', badge(t.ds.ratio != null ? (t.ds.ratio < 1 ? 'OK' : 'FAIL') : null, t.ds.isNA));
+    renderDsHint(document.getElementById('o-ds-hint'), t.ds);
+    setEl('o-ps-ratio', fmtRatio(t.pipe.ratio));
+    setEl('o-ps-badge', badge(t.pipe.ratio != null ? (t.pipe.ratio < 1 ? 'OK' : 'FAIL') : null, t.pipe.isNA));
+    setEl('o-cb-ratio', fmtRatio(t.bolt.ratio));
+    setEl('o-cb-badge', badge(t.bolt.ratio != null ? (t.bolt.ratio < 1 ? 'OK' : 'FAIL') : null, t.bolt.isNA));
+    setEl('o-pb-ratio', fmtRatio(t.pb.ratio));
+    setEl('o-pb-badge', badge(t.pb.ratio != null ? (t.pb.ratio < 1 ? 'OK' : 'FAIL') : null, t.pb.isNA));
+
+    if (r.weakestIsNotBolt && r.weakestName) {
+      setEl('o-weakest', `⚠ Weakest link is ${r.weakestName} — not the coupling bolt (CEMA 350-21)`);
+      document.getElementById('o-weakest').style.display = '';
+    } else {
+      document.getElementById('o-weakest').style.display = 'none';
+    }
+  } else {
+    ['o-Tm','o-Tmf','o-ds-ratio','o-ps-ratio','o-cb-ratio','o-pb-ratio'].forEach(id=>setEl(id,'—'));
+    ['o-ds-badge','o-ps-badge','o-cb-badge','o-pb-badge'].forEach(id=>setEl(id,''));
+    document.getElementById('o-weakest').style.display = 'none';
+    const dsHintEl2 = document.getElementById('o-ds-hint');
+    if (dsHintEl2) dsHintEl2.style.display = 'none';
+  }
+
+  // Additional checks
+  const ch = r.checks || {};
+  const isShaftless = inp.spiralType === 'Single Shaftless' || inp.spiralType === 'Dual Shaftless';
+  const doShaft = inp.spiralType === 'Shafted' || inp.spiralType === 'Ribbon';
+
+  setEl('o-defl',  doShaft && ch.defl  != null ? fmt(ch.defl, 4)+' in'  : '—');
+  setEl('o-defl-badge', doShaft && ch.deflOK ? badge(ch.deflOK) : badge(null,true));
+  setEl('o-angle', doShaft && ch.angle != null ? fmt(ch.angle, 4)+'°'   : '—');
+  setEl('o-angle-badge', doShaft && ch.angleOK ? badge(ch.angleOK) : badge(null,true));
+  setEl('o-stherm',doShaft && ch.stherm!= null ? fmt(ch.stherm,4)+' in' : '—');
+  setEl('o-stherm-badge', doShaft && ch.sthermOK ? badge(ch.sthermOK) : badge(null,true));
+  setEl('o-ttherm',ch.ttherm!= null ? fmt(ch.ttherm,4)+' in' : '—');
+  setEl('o-ttherm-badge', ch.tthermOK ? badge(ch.tthermOK) : badge(null,true));
+  setEl('o-sabr',  ch.sabr  != null ? fmt(ch.sabr, 0) : '—');
+  setEl('o-sabr-badge', ch.sabrOK ? badge(ch.sabrOK) : badge(null,true));
+  setEl('o-tabr',  ch.tabr  != null ? fmt(ch.tabr, 0) : '—');
+  setEl('o-tabr-badge', ch.tabrOK ? badge(ch.tabrOK) : badge(null,true));
+  setEl('o-scomp', isShaftless && ch.scomp != null ? fmt(ch.scomp,4)+' in/ft':'—');
+  setEl('o-scomp-badge', isShaftless && ch.scompOK ? badge(ch.scompOK) : badge(null,true));
+  setEl('o-sstress',isShaftless && ch.sstress!=null ? fmt(ch.sstress,0)+' psi':'—');
+  setEl('o-sstress-badge', isShaftless && ch.sstressOK ? badge(ch.sstressOK) : badge(null,true));
+  const sstressHintEl = document.getElementById('o-sstress-hint');
+  if (sstressHintEl) {
+    if (isShaftless && ch.sstress != null && ch.sstressOK === 'FAIL') {
+      const FLIGHT_YIELD_HINT = {'Carbon Steel':58000,'Alloy 8620':80000,'T1':100000,'AR400':40000,'304 SS':30000,'316 SS':30000};
+      const FLIGHT_MAT_ORDER = ['Carbon Steel','Alloy 8620','T1','AR400','304 SS','316 SS'];
+      let hintHtml = '<b>Spiral stress FAIL</b> — flight materials that pass:<br><table style="border-collapse:collapse;font-size:10px;margin-top:2px">';
+      let anyPass = false;
+      for (const fm of FLIGHT_MAT_ORDER) {
+        const allow = (FLIGHT_YIELD_HINT[fm] || 58000) * 0.3;
+        if (ch.sstress < allow) {
+          hintHtml += `<tr><td style="padding:0 8px 0 0;color:#555">${fm}</td><td style="font-weight:600">allow ${fmt(allow,0)} psi</td></tr>`;
+          anyPass = true;
+        }
+      }
+      if (!anyPass) hintHtml += '<tr><td style="color:#c00">No standard flight material passes — consult engineering</td></tr>';
+      hintHtml += '</table>';
+      sstressHintEl.innerHTML = hintHtml;
+      sstressHintEl.style.display = '';
+    } else {
+      sstressHintEl.style.display = 'none';
+    }
+  }
+
+  // CEMA code
+  const sc = CEMA_SIZE_CODE[inp.sizeClass] || '';
+  const fc = CEMA_FLOW_CODE[inp.flowability] || '';
+  const ac = CEMA_ABR_CODE[inp.abrasiveness] || '';
+  const oc = CEMA_OTHER_CODE[inp.otherProp1] || '';
+  const dens = inp.density || '—';
+  const cemaStr = `${dens}${sc}${fc}${ac}${oc}`;
+  setEl('o-cema-full', cemaStr ? `CEMA Code: <b>${cemaStr}</b>` : '—');
+  setEl('cemaCode', `CEMA: <b>${cemaStr}</b>`);
+
+  // SEW FAZ recommendation
+  const sew = r.sew;
+  if (sew) {
+    setEl('o-sew-model',       sew.model);
+    setEl('o-sew-ratio',       sew.ratio);
+    setEl('o-sew-speed',       sew.actualN);
+    setEl('o-sew-hp',          sew.motorHP);
+    setEl('o-sew-reqratio',    sew.reqRatio);
+    setEl('o-sew-shaft-size',  sew.shaftNote);
+    setEl('o-sew-shaft-badge', badge(sew.shaftOK ? 'OK' : 'WARN'));
+    setEl('o-sew-shaft-note',  sew.shaftOK ? '' : '⚠ Conveyor shaft exceeds SEW output shaft — step up frame or use adapter coupling');
+
+    // Feature 4: SEW frame step-up messaging
+    const frameNoteEl = document.getElementById('o-sew-frame-note');
+    if (frameNoteEl) {
+      frameNoteEl.textContent = sew.frameSteppedUp
+        ? `Frame stepped up from ${sew.originalFrame} to ${sew.frame} to accommodate conveyor shaft size`
+        : '';
+    }
+
+    // Flag shaft input field when it doesn't match SEW configuration
+    const shaftSewWarnEl = document.getElementById('shaft-sew-warn');
+    if (shaftSewWarnEl) shaftSewWarnEl.style.display = sew.shaftOK ? 'none' : '';
+
+    // Auto-populate torsional gearbox inputs from SEW recommendation if not overridden
+    const gbSpeedEl = document.getElementById('gbSpeed');
+    const motorHPEl = document.getElementById('motorHP');
+    const shaftSelEl2 = document.getElementById('shaftSize');
+    const noteEl    = document.getElementById('gb-auto-note');
+    const gbOver    = overrides.has('gbSpeed');
+    const hpOver    = overrides.has('motorHP');
+    const shaftOver = overrides.has('shaftSize');
+    let gbChanged = false;
+    if (!gbOver && gbSpeedEl) {
+      const newGb = parseFloat(sew.actualN).toFixed(1);
+      if (gbSpeedEl.value !== newGb) { gbSpeedEl.value = newGb; gbChanged = true; }
+      setEl('gbSpeedStd', `SEW: ${newGb}`);
+    }
+    let hpChanged = false;
+    if (!hpOver && motorHPEl) {
+      const newHP = String(sew.motorHP);
+      if (motorHPEl.value !== newHP) { motorHPEl.value = newHP; hpChanged = true; }
+      setEl('motorHPStd', `SEW: ${sew.motorHP} HP`);
+    }
+    // Auto-update conveyor shaft size to match SEW hollow shaft — always, not just when unoverridden.
+    // SEW hollow shaft is a hard constraint: conveyor shaft must fit inside it.
+    let shaftChanged = false;
+    if (sew.matchedShaft && shaftSelEl2) {
+      const newShaft = String(sew.matchedShaft);
+      if (shaftSelEl2.value !== newShaft) {
+        overrides.delete('shaftSize');   // clear override so setSelectValue can set it
+        setSelectValue('shaftSize', newShaft);
+        overrides.add('shaftSize');      // re-protect so constrain() doesn't reset it
+        setEl('shaftSizeStd', `<span style="color:#888;font-size:10px">SEW: ${newShaft}"</span>`);
+        shaftChanged = true;
+      }
+    }
+    // Show "auto-filled" note only when at least one field has been manually overridden
+    if (noteEl) noteEl.style.display = (gbOver || hpOver) ? '' : 'none';
+    // If SEW values changed, run one more calc pass so torsional section sees updated gb/HP/shaft
+    if (gbChanged || hpChanged || shaftChanged) {
+      const inp2b = getInputs();
+      const r2b = calculate(inp2b);
+      // Update only torsional section to avoid infinite loop
+      updateTorsional(r2b);
+    }
+  } else {
+    ['o-sew-model','o-sew-ratio','o-sew-speed','o-sew-hp','o-sew-reqratio','o-sew-shaft-size','o-sew-shaft-note'].forEach(id => setEl(id,'—'));
+    setEl('o-sew-shaft-badge','');
+    const shaftSewWarnEl2 = document.getElementById('shaft-sew-warn');
+    if (shaftSewWarnEl2) shaftSewWarnEl2.style.display = 'none';
+  }
+}
+
+function updateDataSheet(r, inp) {
+  const today = new Date().toLocaleDateString();
+  setEl('ds-projNo', document.getElementById('projNo').value);
+  setEl('ds-engr',   document.getElementById('engineer').value);
+  setEl('ds-date',   today);
+  setEl('ds-cust',   document.getElementById('customer').value);
+  setEl('ds-desc',   document.getElementById('desc').value);
+
+  const Ds = inp.Ds || '—';
+  const L  = inp.length || '—';
+  setEl('ds-id', `Ø${Ds}" × ${L}' ${inp.spiralType} Conveyor`);
+  setEl('ds-mat',  inp.material || '—');
+  setEl('ds-len',  L ? `${L} ft (${(parseFloat(L)*12)||0} in)` : '—');
+  setEl('ds-dens', inp.density ? `${inp.density} lb/ft³` : '—');
+  setEl('ds-drive',inp.driveArrangement || '—');
+  setEl('ds-flow', inp.flowability || '—');
+  setEl('ds-flowdir', inp.flowDir || '—');
+  setEl('ds-size', inp.sizeClass || '—');
+  setEl('ds-duty', inp.duty || '—');
+  setEl('ds-abr',  inp.abrasiveness || '—');
+  setEl('ds-cap',  r.C ? `${fmt(r.C,1)} ft³/hr (${fmt((r.C*(parseFloat(inp.density)||65)),0)} lb/hr)` : '—');
+  setEl('ds-Ds',   Ds ? `${Ds} in` : '—');
+  setEl('ds-N',    r.N ? `${fmt(r.N,1)} RPM` : '—');
+  setEl('ds-pitch',inp.pitch ? `${inp.pitch} (${fmt(r.P,2)||'—'} in)` : '—');
+  setEl('ds-type', inp.spiralType || '—');
+  setEl('ds-K',    inp.K ? `${inp.K}% (max ${inp.Kmax}%)` : '—');
+  setEl('ds-motor',r.motorSize ? `${r.motorSize} HP` : '—');
+  setEl('ds-HPt',  r.HPtm ? `${fmt(r.HPtm,2)} HP` : '—');
+  setEl('ds-sew-model', r.sew ? r.sew.model : '—');
+  setEl('ds-sew-ratio', r.sew ? `${r.sew.ratio}:1` : '—');
+  setEl('ds-sew-speed', r.sew ? `${r.sew.actualN} RPM` : '—');
+  setEl('ds-pipe', inp.pipeSize || '—');
+  setEl('ds-shaft',inp.shaftSize ? `${inp.shaftSize}"` : '—');
+  setEl('ds-conn', inp.connType || '—');
+  setEl('ds-bolt', inp.boltSize && inp.connType !== 'Flange' ? `${inp.boltSize}"` : 'N/A');
+}
+
+// ============================================================
+// EVENT HANDLERS
+// ============================================================
+function onMaterialChange() {
+  const mat = document.getElementById('material').value;
+  const chars = MATERIAL_CHARS[mat];
+  if (!chars) return;
+  document.getElementById('density').value    = chars.density;
+  document.getElementById('pctDS').value      = chars.pctDS;
+  setSelectValue('sizeClass',   chars.size);
+  setSelectValue('flowability', chars.flow);
+  setSelectValue('abrasiveness',chars.abr);
+  setSelectValue('otherProp1',  chars.p1 || '--');
+  // Clear overrides for these fields since we just reset to standard
+  overrides.delete('density');
+  // Reset styling
+  document.getElementById('density').classList.remove('overridden');
+  recalc();
+}
+
+function onScrewChange() {
+  overrides.delete('pipeSize');
+  overrides.delete('shaftSize');
+  overrides.delete('flightT');
+  overrides.delete('boltSize');
+  recalc();
+}
+
+function onTypeChange() {
+  overrides.delete('pipeSize');
+  overrides.delete('shaftSize');
+  overrides.delete('flightT');
+  overrides.delete('boltSize');
+  overrides.delete('hangerBearing');
+  overrides.delete('hangerQty');
+  overrides.delete('connType');  // allow constrain() to reset to Cross-Bolt when returning from shaftless
+  recalc();
+}
+
+function onInclineChange() {
+  const el = document.getElementById('incline');
+  let val = parseFloat(el.value) || 0;
+  const warnEl = document.getElementById('inclineWarn');
+  if (val > 45) {
+    el.value = 45;
+    warnEl.style.display = '';
+    warnEl.textContent = 'Maximum incline is 45° — clamped to 45°';
+  } else if (val > 0 && val < 10) {
+    warnEl.style.display = '';
+    warnEl.textContent = `Note: incline < 10° treated as horizontal (Ri = 1.0) — capacity and lift HP not reduced for ${val}° incline`;
+  } else {
+    warnEl.style.display = 'none';
+  }
+  recalc();
+}
+
+function onConnTypeChange() {
+  overrides.delete('boltSize');
+  recalc();
+}
+
+function onShaftChange() {
+  overrides.add('shaftSize');
+  document.getElementById('shaftSize').classList.add('overridden');
+  overrides.delete('boltSize');
+  recalc();
+}
+
+function toggleDatasheet() {
+  const ds = document.getElementById('datasheet');
+  ds.classList.toggle('visible');
+}
+
+// ============================================================
+// FEATURE 3: AUTO-CONFIG
+// ============================================================
+function autoConfig() {
+  const inp = getInputs();
+  const incline = parseFloat(inp.incline) || 0;
+  const targetLo = incline > 0 ? 28 : 18;
+  const targetHi = incline > 0 ? 33 : 23;
+  const targetMid = (targetLo + targetHi) / 2;
+
+  // ── 1. Pitch: driven by material abrasiveness / size ──────────────────
+  let newPitch = 'Full';
+  if (inp.abrasiveness === 'Extreme') newPitch = 'Short';
+  else if (inp.sizeClass === 'Lumpy') newPitch = 'Short';
+  setSelectValue('pitch', newPitch);
+  overrides.add('pitch');  // protect from constrain() reset
+  document.getElementById('pitch').classList.remove('overridden');
+
+  // ── 2. Flight type: only change if there's an engineering reason ──
+  // Never clear the override — always protect whatever type is currently selected
+  const hasBuildUp = inp.otherProp1 === 'Build Up / Harden';
+  if (hasBuildUp && inp.spiralType === 'Shafted') {
+    setSelectValue('spiralType', 'Cut & Folded');
+  } else if (incline > 15 && (inp.spiralType === 'Single Shaftless' || inp.spiralType === 'Dual Shaftless')) {
+    setSelectValue('spiralType', 'Shafted');
+  }
+  // Always protect current type from constrain() reset
+  overrides.add('spiralType');
+  document.getElementById('spiralType').classList.remove('overridden');
+
+  // Re-read after pitch/type change so downstream uses updated values
+  const inp2 = getInputs();
+
+  // ── 3. Diameter: sweep all sizes, pick best N accounting for gear ratio quantization ──
+  // SEW ratios quantize N downward — check actual gearbox output speed, not just screw N.
+  // Heavy penalty for slow (high torque = large shaft/gearbox); modest penalty for fast.
+  const SIZES = [6,9,10,12,14,16,18,20,24];
+  let bestDs = null, bestScore = Infinity;
+  for (const ds of SIZES) {
+    const N_try = calcNforDiam(ds, inp2);
+    if (N_try == null || N_try <= 0) continue;
+    // Check what actual gearbox output speed SEW would give (quantized to ratio steps)
+    const reqRatio = 1750 / N_try;
+    const actualRatio = SEW_FAZ_RATIOS.find(r => r >= reqRatio) || SEW_FAZ_RATIOS[SEW_FAZ_RATIOS.length-1];
+    const actualGbN = 1750 / actualRatio;
+    // Use actual gearbox N for scoring — this is what drives torque
+    let score;
+    if (actualGbN >= targetLo && actualGbN <= targetHi) {
+      score = Math.abs(actualGbN - targetMid);
+    } else if (actualGbN > targetHi) {
+      score = (actualGbN - targetHi) + 5;
+    } else {
+      score = (targetLo - actualGbN) * 3 + 10;      // slow = high torque = expensive
+    }
+    if (score < bestScore) { bestScore = score; bestDs = ds; }
+  }
+  if (bestDs != null) {
+    setSelectValue('Ds', String(bestDs));
+    overrides.add('Ds');  // protect from constrain() reset
+    document.getElementById('Ds').classList.remove('overridden');
+  }
+
+  // Re-read with new diameter
+  const inp3 = getInputs();
+
+  // ── 4. Shaft size + material: must pass torsionally AND fit SEW output shaft ──
+  // First pass: get SEW-recommended motor HP and gearbox speed
+  const rPass1 = calculate(inp3);
+  // Pre-populate gbSpeed and motorHP from SEW so second pass uses the right torque
+  if (rPass1 && rPass1.sew) {
+    const gbSpeedEl2 = document.getElementById('gbSpeed');
+    const motorHPEl2 = document.getElementById('motorHP');
+    if (gbSpeedEl2 && !overrides.has('gbSpeed')) gbSpeedEl2.value = parseFloat(rPass1.sew.actualN).toFixed(1);
+    if (motorHPEl2 && !overrides.has('motorHP')) motorHPEl2.value = String(rPass1.sew.motorHP);
+  }
+  // Second pass: now calculate with correct motor HP so shaftMatOptions uses right Tmf
+  const inp3b = getInputs();
+  const rTmp = calculate(inp3b);
+  if (rTmp && rTmp.tor && rTmp.tor.ds && rTmp.tor.ds.shaftMatOptions) {
+    const opts = rTmp.tor.ds.shaftMatOptions;
+
+    // Walk material priority; for each, find the minimum shaft size that BOTH:
+    //   (a) passes structural (minSz from torsional calc)
+    //   (b) is ≤ max SEW output shaft on the recommended frame for that HP+N+shaftSize combo
+    let fixMat = null, fixSz = null;
+    for (const matName of SHAFT_MAT_PRIORITY) {
+      const matEntry = opts.find(o => o.mat === matName);
+      if (!matEntry || matEntry.minSz === null) continue; // no structural pass for this mat
+
+      // Starting from the minimum structurally-passing size, walk up until SEW is happy too
+      const startSz = SHAFT_SIZES.find(s => s >= matEntry.dMin);
+      const startIdx = startSz != null ? SHAFT_SIZES.indexOf(startSz) : -1;
+      if (startIdx < 0) continue; // no shaft size in table large enough for this material
+      for (let si = startIdx; si < SHAFT_SIZES.length; si++) {
+        const sz = SHAFT_SIZES[si];
+        const sewCheck = sewFAZRecommendation(rTmp.HPtm, rTmp.N, rTmp.motorSize, sz);
+        if (!sewCheck || sewCheck.shaftOK) {
+          // SEW either has no frame data or confirms shaft fits
+          fixMat = matName; fixSz = sz; break;
+        }
+        // shaft too big for this SEW frame — the FAZ function bumps the frame automatically,
+        // so if shaftOK is still false after the frame bump, we try the next shaft size
+      }
+      if (fixMat) break;
+    }
+
+    if (fixMat && fixSz) {
+      setSelectValue('shaftMat', fixMat);
+      setSelectValue('shaftSize', String(fixSz));
+      // Add to overrides so constrain() doesn't reset them on next recalc
+      overrides.add('shaftMat');
+      overrides.add('shaftSize');
+      // Remove amber highlight — these are Auto-Config selections, not user overrides
+      document.getElementById('shaftMat').classList.remove('overridden');
+      document.getElementById('shaftSize').classList.remove('overridden');
+    }
+  }
+
+  // ── 4b. Flight material for shaftless: pick minimum yield that passes spiral stress ──
+  // Only for shaftless types — shafted doesn't have spiral stress check
+  const isShaftlessAC = inp3b.spiralType === 'Single Shaftless' || inp3b.spiralType === 'Dual Shaftless';
+  if (isShaftlessAC && rTmp && rTmp.checks && rTmp.checks.sstress != null) {
+    const FLIGHT_MAT_PRIORITY = ['Carbon Steel','Alloy 8620','T1','AR400','304 SS','316 SS'];
+    const FLIGHT_YIELD_LOCAL = {'Carbon Steel':58000,'Alloy 8620':80000,'T1':100000,'AR400':40000,'304 SS':30000,'316 SS':30000};
+    // Find current sstress (computed with current flightMat from rTmp)
+    // We need to find flightMat where sstress < FLIGHT_YIELD[mat] * 0.3
+    const sstress = rTmp.checks.sstress;
+    let bestFlightMat = null;
+    for (const fm of FLIGHT_MAT_PRIORITY) {
+      if (sstress < (FLIGHT_YIELD_LOCAL[fm] || 58000) * 0.3) {
+        bestFlightMat = fm; break;
+      }
+    }
+    if (bestFlightMat) {
+      setSelectValue('flightMat', bestFlightMat);
+      overrides.add('flightMat');  // protect from constrain() reset
+      document.getElementById('flightMat').classList.remove('overridden');
+    }
+  }
+
+  // ── 5. SEW gearbox is auto-populated by updateOutputs — just recalc ──
+  overrides.delete('gbSpeed');
+  overrides.delete('motorHP');
+  const gbSpeedEl = document.getElementById('gbSpeed');
+  const motorHPEl = document.getElementById('motorHP');
+  if (gbSpeedEl) gbSpeedEl.classList.remove('overridden');
+  if (motorHPEl) motorHPEl.classList.remove('overridden');
+
+  recalc();
+}
+
+// ============================================================
+// FEATURE 5: PRINT MEMO
+// ============================================================
+function updateMemo(r, inp) {
+  const today = new Date().toLocaleDateString();
+  const mEl = id => document.getElementById(id);
+  const sm = (id, v) => { const el = mEl(id); if (el) el.textContent = v != null ? v : '—'; };
+  const smH = (id, v) => { const el = mEl(id); if (el) el.innerHTML = v != null ? v : '—'; };
+
+  sm('m-proj', document.getElementById('projNo').value || '—');
+  sm('m-cust', document.getElementById('customer').value || '—');
+  sm('m-date', today);
+  sm('m-engr', document.getElementById('engineer').value || '—');
+  sm('m-desc', document.getElementById('desc').value || '—');
+
+  sm('m-conv-desc', inp.Ds && inp.length ? `${inp.Ds}" Ø × ${inp.length}' ${inp.spiralType} Screw Conveyor` : '—');
+  sm('m-incline', inp.incline != null ? `${inp.incline}°` : '0°');
+  sm('m-drive', inp.driveArrangement || '—');
+
+  sm('m-mat', inp.material || '—');
+  sm('m-dens', inp.density || '—');
+  const sc = CEMA_SIZE_CODE[inp.sizeClass] || '';
+  const fc = CEMA_FLOW_CODE[inp.flowability] || '';
+  const ac = CEMA_ABR_CODE[inp.abrasiveness] || '';
+  const oc = CEMA_OTHER_CODE[inp.otherProp1] || '';
+  sm('m-cema', `${inp.density||''}${sc}${fc}${ac}${oc}` || '—');
+  sm('m-flow', inp.flowability || '—');
+  sm('m-abr', inp.abrasiveness || '—');
+
+  sm('m-Cr', inp.Cr || '—');
+  sm('m-C', r.C != null ? fmt(r.C,1) : '—');
+  sm('m-Cmax', r.Cmax != null ? fmt(r.Cmax,1) : '—');
+  sm('m-N', r.N != null ? fmt(r.N,1) : '—');
+  sm('m-K', inp.K || '—');
+
+  sm('m-HPf', r.HPf != null ? fmt(r.HPf,3) : '—');
+  sm('m-HPm', r.HPm != null ? fmt(r.HPm,3) : '—');
+  sm('m-HPl', r.HPl != null ? fmt(r.HPl,3) : '—');
+  sm('m-Fo',  r.Fo  != null ? fmt(r.Fo,3)  : '—');
+  sm('m-HPt', r.HPtm != null ? fmt(r.HPtm,3) : '—');
+  sm('m-motor', r.motorSize != null ? r.motorSize : '—');
+
+  const t = r.tor;
+  const fmtR = (v, stat) => v != null ? `${fmt(v,3)} [${stat}]` : '—';
+  sm('m-Tm',  r.Tm  != null ? fmt(r.Tm,0)  : '—');
+  sm('m-Tmf', r.Tmf != null ? fmt(r.Tmf,0) : '—');
+  if (t) {
+    sm('m-ds-ratio', t.ds.ratio  != null ? `${fmt(t.ds.ratio,3)} [${t.ds.ratio<1?'OK':'FAIL'}]`   : '—');
+    sm('m-ps-ratio', t.pipe.ratio != null ? `${fmt(t.pipe.ratio,3)} [${t.pipe.ratio<1?'OK':'FAIL'}]` : (t.pipe.isNA ? 'N/A' : '—'));
+    sm('m-cb-ratio', t.bolt.ratio != null ? `${fmt(t.bolt.ratio,3)} [${t.bolt.ratio<1?'OK':'FAIL'}]` : (t.bolt.isNA ? 'N/A' : '—'));
+    sm('m-pb-ratio', t.pb.ratio   != null ? `${fmt(t.pb.ratio,3)} [${t.pb.ratio<1?'OK':'FAIL'}]`   : (t.pb.isNA ? 'N/A' : '—'));
+  } else {
+    ['m-ds-ratio','m-ps-ratio','m-cb-ratio','m-pb-ratio'].forEach(id => sm(id,'—'));
+  }
+
+  const ch = r.checks || {};
+  sm('m-defl',   ch.defl   != null ? `${fmt(ch.defl,4)} in [${ch.deflOK}]`   : '—');
+  sm('m-angle',  ch.angle  != null ? `${fmt(ch.angle,4)}° [${ch.angleOK}]`   : '—');
+  sm('m-stherm', ch.stherm != null ? `${fmt(ch.stherm,4)} in [${ch.sthermOK}]` : '—');
+  sm('m-ttherm', ch.ttherm != null ? `${fmt(ch.ttherm,4)} in [${ch.tthermOK}]` : '—');
+  sm('m-sabr',   ch.sabr   != null ? `${fmt(ch.sabr,0)} [${ch.sabrOK}]`    : '—');
+  sm('m-tabr',   ch.tabr   != null ? `${fmt(ch.tabr,0)} [${ch.tabrOK}]`    : '—');
+
+  const sew = r.sew;
+  sm('m-sew-model', sew ? sew.model   : '—');
+  sm('m-sew-ratio', sew ? sew.ratio   : '—');
+  sm('m-sew-speed', sew ? sew.actualN : '—');
+  sm('m-sew-hp',    sew ? sew.motorHP : '—');
+}
+
+function printMemo() {
+  updateMemo._lastR && updateMemo._lastR; // memo already up to date via recalc
+  document.body.classList.add('printing-memo');
+  const afterprint = () => {
+    document.body.classList.remove('printing-memo');
+    window.removeEventListener('afterprint', afterprint);
+  };
+  window.addEventListener('afterprint', afterprint);
+  window.print();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+// ============================================================
+// COLLAPSIBLE SECTIONS
+// ============================================================
+function toggleSec(id) {
+  const body = document.getElementById(id);
+  const secId = id.replace('sec-','');
+  const tog = document.getElementById('tog-' + secId);
+  const collapsed = body.classList.toggle('collapsed');
+  if (tog) tog.style.transform = collapsed ? '' : 'rotate(90deg)';
+}
+
+function toggleExtra(id, el) {
+  const extra = document.getElementById(id);
+  const hidden = extra.classList.toggle('hidden');
+  el.textContent = hidden ? '▸ More material properties' : '▴ Less';
+}
+
+window.addEventListener('load', () => {
+  recalc();
 });
 </script>
 </body>
