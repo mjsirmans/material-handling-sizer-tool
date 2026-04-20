@@ -287,7 +287,7 @@ button.primary:hover{background:#002244}
     </select>
   </div>
   <div class="field-row input-primary"><label>Motor HP<span class="req">*</span></label><input type="number" id="motor_hp" step="1" min="1" oninput="calculate()" onchange="calculate()"><span class="std">HP</span></div>
-  <div class="field-row input-secondary"><label>Head Pulley Dia.</label><input type="number" id="head_pulley_dia" step="2" min="6" placeholder="std: 16" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+  <div class="field-row input-secondary"><label>Head Pulley Dia.</label><input type="number" id="head_pulley_dia" step="2" min="6" placeholder="std: 12" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
   <div class="field-row input-secondary"><label>Shaft Diameter</label><input type="number" id="shaft_dia_in" step="0.0625" min="1" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
   <div class="field-row input-secondary"><label>Shaft Material</label>
     <select id="shaft_material" onchange="calculate()">
@@ -988,7 +988,7 @@ function calculate() {
   <h2>1. Geometry &amp; Capacity</h2>
   ${resultRow('L_total', fmt(L_total,1), 'ft', '')}
   ${resultRow('H (lift)', fmt(H,2), 'ft', '')}
-  ${resultRow('Cap/fpm (CEMA)', fmt(cap_per_fpm,3), 'ft³/hr/fpm', '')}
+  ${resultRow('Cap/fpm (CEMA)', fmt(cap_per_fpm,2), 'ft³/hr/fpm', '')}
   ${resultRow('Vol. Capacity', fmt(vol_cap_ft3hr,1), 'ft³/hr', '')}
   ${resultRow('Vol. Required', fmt(vol_required_ft3hr,1), 'ft³/hr', '')}
   ${resultRow('Utilization', fmt(cap_util*100,1)+'%', '', badge(cap_overload ? 'OVERLOAD' : 'OK', cap_overload ? 'fail' : 'ok'))}
@@ -996,14 +996,14 @@ function calculate() {
   </div>
   <div class="result-box">
   <h2>2. Belt Loading</h2>
-  ${resultRow('Wm', fmt(Wm,3), 'lb/ft', '')}
-  ${resultRow('Wb', fmt(Wb,3), 'lb/ft', '')}
-  ${resultRow('Wm+Wb', fmt(WmWb,3), 'lb/ft', '')}
+  ${resultRow('Wm', fmt(Wm,2), 'lb/ft', '')}
+  ${resultRow('Wb', fmt(Wb,2), 'lb/ft', '')}
+  ${resultRow('Wm+Wb', fmt(WmWb,2), 'lb/ft', '')}
   ${resultRow('KT', fmt(KT,2), '—', '')}
   ${resultRow('Ai', fmt(Ai,2), '—', '')}
   ${resultRow('Kx', fmt(Kx,5), 'lb/ft', '')}
   ${resultRow('Ky', fmt(Ky,4), '—', '')}
-  ${resultRow('Cw ('+takeup+', '+lagging+' lag)', fmt(Cw,3), '—', '')}
+  ${resultRow('Cw ('+takeup+', '+lagging+' lag)', fmt(Cw,2), '—', '')}
   </div>
   </div>`;
 
@@ -1039,7 +1039,7 @@ function calculate() {
   <div class="result-box" style="margin-bottom:0">
   <h2>5. Belt Sag</h2>
   ${resultRow('To', fmt(To,1), 'lb', '')}
-  ${resultRow('y (sag)', fmt(sag_in,3), 'in', '')}
+  ${resultRow('y (sag)', fmt(sag_in,2), 'in', '')}
   ${resultRow('Sag %', fmt(sag_pct,2), '%', badge(sag_pass ? 'PASS' : 'FAIL', sag_pass ? 'ok' : 'fail'))}
   <div style="font-size:11px;color:#888;margin-top:4px">Allowable: ≤ 2.0% of idler spacing</div>
   </div>
@@ -1050,13 +1050,13 @@ function calculate() {
   html += `<div class="two-col">
   <div class="result-box">
   <h2>4. Power</h2>
-  ${resultRow('HPb (belt)', fmt(HPb,3), 'HP', '')}
-  ${resultRow('Drive Eff. (ηm)', fmt(drive_eff,3), '—', '')}
-  <div class="result-row"><span class="label" style="font-weight:700">HPmin (required)</span><span class="val" style="color:#003366">${fmt(HPmin,3)}</span><span class="unit">HP</span><span></span></div>
+  ${resultRow('HPb (belt)', fmt(HPb,2), 'HP', '')}
+  ${resultRow('Drive Eff. (ηm)', fmt(drive_eff,2), '—', '')}
+  <div class="result-row"><span class="label" style="font-weight:700">HPmin (required)</span><span class="val" style="color:#003366">${fmt(HPmin,2)}</span><span class="unit">HP</span><span></span></div>
   ${resultRow('HP_std (next std)', fmt(HP_std,0), 'HP', '')}
   ${resultRow('Motor HP (sel.)', fmt(motor_hp,0), 'HP', badge(motor_pass ? 'PASS' : 'FAIL', motor_pass ? 'ok' : 'fail'))}
   ${resultRow('Safety Factor', motor_SF !== null ? fmt(motor_SF,2) : '—', '—', '')}
-  ${resultRow('Drum Dia (lagged)', fmt(drum_dia_lagged,3), 'in', '')}
+  ${resultRow('Drum Dia (lagged)', fmt(drum_dia_lagged,2), 'in', '')}
   ${resultRow('Drum RPM', fmt(drum_rpm,2), 'rpm', '')}
   ${resultRow('Req. Torque', fmt(req_torque,0), 'in-lb', '')}
   ${!motor_pass ? `<div class="fixit-table" style="margin-top:6px"><h4>Fix-It: Motor HP</h4>Min required: ${fmt(HPmin,1)} HP.<br>${fixit_hp.map(h=>`&nbsp;→ <strong>${h} HP</strong> (SF = ${fmt(h/HPmin,2)})`).join('<br>')}</div>` : ''}
@@ -1247,7 +1247,7 @@ function autoConfig() {
       const capPerFpm = CAPACITY_TABLE[trough]?.[w] || 0;
       if (capPerFpm <= 0) continue;
       const util = volRequired / (capPerFpm * spd);
-      if (util >= 0.20 && util <= 0.50) {
+      if (util >= 0.15 && util <= 0.75) {
         selWidth = w; speed = spd; found = true; break;
       }
     }

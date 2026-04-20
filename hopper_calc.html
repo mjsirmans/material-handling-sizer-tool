@@ -165,11 +165,11 @@ button.primary:hover{background:#002244}
 <div style="height:6px"></div>
 <div class="field-row input-primary"><label>Qty of Hoppers</label><input id="qty_hoppers" type="number" min="1" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
 <div class="field-row input-primary" data-ac-req><label>OAW (Overall Width)</label><input id="oaw_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
-<div class="field-row input-primary"><label>OAL (Overall Length)</label><input id="oal_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
-<div class="field-row input-primary"><label>OAH (Overall Height)</label><input id="oah_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+<div class="field-row input-primary" data-ac-req><label>OAL (Overall Length)</label><input id="oal_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+<div class="field-row input-primary" data-ac-req><label>OAH (Overall Height)</label><input id="oah_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
 <div class="field-row input-primary"><label>Side Slope</label><input id="side_slope_deg" type="number" step="0.5" min="60" max="90" oninput="calculate()" onchange="calculate()"><span class="std">deg</span></div>
 <div id="slope-warn" class="warn-inline" style="display:none">⚠ Slope must be &gt; 60°</div>
-<div class="field-row input-primary"><label>Required Volume</label><input id="req_volume_yds" type="number" step="1" min="0" oninput="calculate()" onchange="calculate()"><span class="std">yd³</span></div>
+<div class="field-row input-primary" data-ac-req><label>Required Volume</label><input id="req_volume_yds" type="number" step="1" min="0" oninput="calculate()" onchange="calculate()"><span class="std">yd³</span></div>
 <div class="field-row input-primary"><label>Discharge Length</label><input id="discharge_len_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
 <div class="field-row input-calculated"><label>Discharge Width</label><input id="discharge_wid_in" type="number" step="0.001" min="0" title="Auto-filled from LB screw qty × dia. Edit to override." oninput="this.dataset.manualOverride='1';calculate()" onchange="this.dataset.manualOverride='1';calculate()"><span class="std">in</span></div>
 <div style="font-size:10px;color:#888;margin:-2px 0 4px 154px">Auto-filled from LB table · edit to override</div>
@@ -639,23 +639,23 @@ function calculate() {
   <div class="result-box">
   <h2>3. LB Screw Sizing</h2>
   ${mixedNote}
-  ${resultRow('Pipe OD (d)', d ? fmt(d,3) : '—', 'in', '')}
-  ${resultRow('Incline Factor R', fmt(R,3), '—', '')}
-  ${resultRow('Cap. per Rev. (Grp A)', flowrate && N_rpm !== null ? fmt((flowrate*(mixed?X/X_total:1))/X/N_rpm,4) : '—', 'ft³/rev', '')}
+  ${resultRow('Pipe OD (d)', d ? fmt(d,2) : '—', 'in', '')}
+  ${resultRow('Incline Factor R', fmt(R,2), '—', '')}
+  ${resultRow('Cap. per Rev. (Grp A)', flowrate && N_rpm !== null ? fmt((flowrate*(mixed?X/X_total:1))/X/N_rpm,2) : '—', 'ft³/rev', '')}
   <div class="result-row"><span class="label" style="font-weight:700">Speed N (Grp A)</span><span class="val" style="color:#003366">${N_rpm !== null ? fmt(N_rpm,2) : '—'}</span><span class="unit">rpm</span><span>${N_rpm !== null && N_rpm < 20 ? badge('OK','ok') : N_rpm !== null ? badge('CHECK','warn') : ''}</span></div>
   ${grpB_result ? resultRow('Speed N (Grp B)', fmt(grpB_result.rpm,2), 'rpm', '') : ''}
-  ${resultRow('Diam. Factor Fd (Grp A)', Fd !== null ? fmt(Fd,3) : '—', '—', '')}
+  ${resultRow('Diam. Factor Fd (Grp A)', Fd !== null ? fmt(Fd,2) : '—', '—', '')}
   </div>
 
   <div class="result-box">
   <h2>4. HP &amp; Motor</h2>
-  ${resultRow('HPf (friction, total)', HPf !== null ? fmt(HPf,5) : '—', 'HP', '')}
-  ${resultRow('HPm (material, total)', HPm !== null ? fmt(HPm,5) : '—', 'HP', '')}
-  ${resultRow('HPi (inlet, total)', HPi !== null ? fmt(HPi,5) : '—', 'HP', '')}
-  ${resultRow('Overload Factor Fo', Fo !== null ? fmt(Fo,4) : '—', '—', '')}
+  ${resultRow('HPf (friction, total)', HPf !== null ? fmt(HPf,2) : '—', 'HP', '')}
+  ${resultRow('HPm (material, total)', HPm !== null ? fmt(HPm,2) : '—', 'HP', '')}
+  ${resultRow('HPi (inlet, total)', HPi !== null ? fmt(HPi,2) : '—', 'HP', '')}
+  ${resultRow('Overload Factor Fo', Fo !== null ? fmt(Fo,2) : '—', '—', '')}
   <hr style="border:none;border-top:1px solid #d0d4dc;margin:6px 0">
-  <div class="result-row"><span class="label" style="font-weight:700">HP / Screw (avg)</span><span class="val" style="color:#003366">${hp_per_screw !== null ? fmt(hp_per_screw,3) : '—'}</span><span class="unit">HP</span><span></span></div>
-  ${resultRow('Total HP (all screws)', hp_total !== null ? fmt(hp_total,3) : '—', 'HP', '')}
+  <div class="result-row"><span class="label" style="font-weight:700">HP / Screw (avg)</span><span class="val" style="color:#003366">${hp_per_screw !== null ? fmt(hp_per_screw,2) : '—'}</span><span class="unit">HP</span><span></span></div>
+  ${resultRow('Total HP (all screws)', hp_total !== null ? fmt(hp_total,2) : '—', 'HP', '')}
   <div class="result-row"><span class="label" style="font-weight:700">Selected Motor</span><span class="val" style="color:#003366;font-size:15px">${hp_selected ?? '—'}</span><span class="unit">HP</span><span>${hp_selected ? badge('STD','ok') : ''}</span></div>
   </div>
   </div>`;
@@ -767,11 +767,15 @@ function autoConfig() {
   const mat      = sv('material');
   const flowrate = nv('flowrate_lbhr');
   const oaw      = nv('oaw_in');
+  const oal      = nv('oal_in');
+  const oah      = nv('oah_in');
 
   const missing = [];
-  if (!mat)              missing.push('Material');
-  if (!flowrate)         missing.push('Flowrate (lb/hr)');
-  if (!oaw)              missing.push('OAW (Overall Width)');
+  if (!mat)      missing.push('Material');
+  if (!flowrate) missing.push('Flowrate (lb/hr)');
+  if (!oaw)      missing.push('OAW');
+  if (!oal)      missing.push('OAL');
+  if (!oah)      missing.push('OAH');
   if (missing.length) {
     alert('Auto-Config needs: ' + missing.join(', ') + '\nFill these fields first, then click Auto-Config.');
     return;
@@ -799,58 +803,77 @@ function autoConfig() {
   setField('angle_repose_deg', angRepos);
   setField('side_slope_deg',   slope);
 
-  // Find smallest screw qty+dia combo that fits within OAW
+  // ── Screw selection ──────────────────────────────────────────────────────────
+  // The hopper box (OAW × OAL × OAH) is given. The wall slope determines how
+  // much of the width transitions to the discharge trough. Select the screw
+  // config where discharge width best covers the trough bottom — ideally
+  // 15–30% of OAW — and RPM stays in feeder range [1–25].
+  //
+  // Prefer: fewer screws first, then closest discharge coverage to 20% of OAW.
+  // This matches JMS practice (Sanford: 2×14" in 20'W = 3.33ft dW / 20ft = 17%).
+
   const oaw_ft = oaw / 12;
-  // Candidates: qty 2,3,4 × dia 9–24, sorted by discharge width ascending
+  const targetCoverage = 0.20;  // 20% of OAW as discharge width target
+
   const candidates = [];
   for (const [key, entry] of Object.entries(LB_WIDTH_TABLE)) {
     const k   = parseInt(key);
     const qty = Math.floor(k / 100);
     const dia = k % 100;
-    const dischargeW_ft = entry[0];
-    if (dischargeW_ft <= oaw_ft * 0.95) {
-      candidates.push({ qty, dia, dischargeW_ft });
+    const dW_ft = entry[0];
+    if (dW_ft <= oaw_ft * 0.95) {
+      const coverage = dW_ft / oaw_ft;
+      candidates.push({ qty, dia, dW_ft, coverage });
     }
   }
-  // Sort: prefer fewer screws first, then larger dia
-  candidates.sort((a, b) => a.qty - b.qty || a.dia - b.dia);
+  // Sort: fewer screws first, then closest coverage to target
+  candidates.sort((a, b) =>
+    a.qty - b.qty ||
+    Math.abs(a.coverage - targetCoverage) - Math.abs(b.coverage - targetCoverage)
+  );
 
-  // Pick smallest combo where RPM stays ≤ 50 for biosolids, ≤ 60 otherwise
-  const maxRPM = mat.includes('Biosolids') ? 50 : 60;
-  const minRPM = 5;
-  const pipe_od_map = PIPE_OD;
+  const maxRPM = 25, minRPM = 1;
+  let chosen = null, bestFallback = null, bestFallbackDiff = Infinity;
 
-  let chosen = null;
   for (const c of candidates) {
-    const nps = pipeMap[c.dia] || 4;
-    const pipe_od = pipe_od_map[nps] || 0;
-    if (!pipe_od) continue;
-    const pitch = c.dia;
-    const cap_rev = 0.7854 * (c.dia * c.dia - pipe_od * pipe_od) * pitch * 1.0 * 1.0 * 60 / 1728;
+    const nps   = pipeMap[c.dia] || 4;
+    const pip_od = PIPE_OD[nps]  || 0;
+    if (!pip_od) continue;
+    const pitch   = c.dia;
+    const cap_rev = 0.7854 * (c.dia * c.dia - pip_od * pip_od) * pitch * 60 / 1728;
     if (cap_rev <= 0) continue;
     const v_per_screw = (flowrate / density) / c.qty;
     const rpm = v_per_screw / cap_rev;
-    if (rpm >= minRPM && rpm <= maxRPM) { chosen = { ...c, nps, pitch }; break; }
-    // Save as fallback if nothing meets RPM band
-    if (!chosen) chosen = { ...c, nps, pitch };
+    if (rpm >= minRPM && rpm <= maxRPM) {
+      chosen = { ...c, nps, pitch, rpm }; break;
+    }
+    const diff = rpm < minRPM ? minRPM - rpm : rpm - maxRPM;
+    if (diff < bestFallbackDiff) {
+      bestFallbackDiff = diff;
+      bestFallback = { ...c, nps, pitch, rpm };
+    }
   }
+  if (!chosen) chosen = bestFallback;
 
   if (!chosen) {
-    alert('Auto-Config could not find a valid screw configuration for the given inputs. Try adjusting OAW or flowrate.');
+    alert('Auto-Config could not find a screw configuration for the given inputs.');
     return;
   }
 
-  setField('qty_lb_screws',    chosen.qty);
-  setSelectVal('lb_screw_dia_in', String(chosen.dia));
-  setField('lb_screw_pitch_in', chosen.pitch);
-  setField('lb_pipe_nps',      chosen.nps);
-  setField('lb_pipe_sched',    '40');
-  setField('lb_drive_shaft_dia',  (chosen.dia <= 12 ? 1.9375 : chosen.dia <= 18 ? 2.9375 : 3.9375));
-  setField('lb_driven_shaft_dia', (chosen.dia <= 12 ? 1.9375 : chosen.dia <= 18 ? 2.9375 : 3.9375));
-  setField('qty_dist_screws',  1);
-  setField('inlets_per_screw', chosen.qty);
+  // Discharge length = full hopper length
+  const dLen_in = oal;
 
-  // Clear manual override so discharge width auto-fills
+  setField('qty_lb_screws',       chosen.qty);
+  setSelectVal('lb_screw_dia_in', String(chosen.dia));
+  setField('lb_screw_pitch_in',   chosen.pitch);
+  setField('lb_pipe_nps',         chosen.nps);
+  setField('lb_pipe_sched',       '40');
+  setField('lb_drive_shaft_dia',  chosen.dia <= 12 ? 1.9375 : chosen.dia <= 18 ? 2.9375 : 3.9375);
+  setField('lb_driven_shaft_dia', chosen.dia <= 12 ? 1.9375 : chosen.dia <= 18 ? 2.9375 : 3.9375);
+  setField('qty_dist_screws',     1);
+  setField('inlets_per_screw',    chosen.qty);
+  setField('discharge_len_in',    dLen_in);
+
   const dw = document.getElementById('discharge_wid_in');
   if (dw) delete dw.dataset.manualOverride;
   autoFillDischargeWidth();
