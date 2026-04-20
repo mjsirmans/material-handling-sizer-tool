@@ -78,6 +78,7 @@ button.primary:hover{background:#002244}
 
 .note{font-size:10px;color:#777;margin-top:4px;padding:3px 6px;background:#fffbe6;border-left:2px solid #f0a800;border-radius:0 2px 2px 0}
 .stub-note{font-size:11px;color:#555;background:#f8f9fc;border:1px dashed #bbb;border-radius:4px;padding:8px 10px;margin-bottom:8px}
+.subsection-label{font-size:10px;font-weight:700;color:#1a2744;margin:8px 0 2px 0;letter-spacing:.4px;border-top:1px solid #eef;padding-top:6px}
 
 @media print{
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -183,45 +184,42 @@ button.primary:hover{background:#002244}
 </div>
 <div class="sec-body" id="sec-screw">
 <div style="height:6px"></div>
-<div class="field-row" style="margin-bottom:4px">
-  <label style="font-size:11px;color:#495057">Mixed Diameters</label>
-  <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer">
-    <input type="checkbox" id="mixed_dia_enabled" onchange="toggleMixedDia();autoFillDischargeWidth();calculate()">
-    Two screw sizes (outer + inner/center)
-  </label>
-</div>
-<div style="font-size:10px;color:#888;margin:-2px 0 6px 154px">Enable for hoppers with different outer and center screw diameters</div>
 
-<div style="font-size:10px;font-weight:700;color:#1a2744;margin:4px 0 2px 0;letter-spacing:.4px" id="grp-a-label">Group A — Outer Screws</div>
-<div class="field-row input-primary"><label>Qty (Group A)</label><input id="qty_lb_screws" type="number" min="1" step="1" oninput="autoFillDischargeWidth();calculate()" onchange="autoFillDischargeWidth();calculate()"><span class="std">#</span></div>
-<div class="field-row input-primary"><label>Dia (Group A)</label>
+<div class="subsection-label" style="border-top:none;padding-top:0">Live Bottom Screws</div>
+<div class="field-row input-primary"><label>Qty LB Screws</label><input id="qty_lb_screws" type="number" min="1" step="1" oninput="autoFillDischargeWidth();calculate()" onchange="autoFillDischargeWidth();calculate()"><span class="std">#</span></div>
+<div class="field-row input-primary"><label>LB Screw Dia</label>
 <select id="lb_screw_dia_in" oninput="autoFillDischargeWidth();calculate()" onchange="autoFillDischargeWidth();calculate()">
 <option value="">— select —</option>
 <option value="9">9"</option><option value="12">12"</option><option value="14">14"</option>
 <option value="16">16"</option><option value="18">18"</option><option value="20">20"</option>
 <option value="22">22"</option><option value="24">24"</option>
 </select><span class="std">in</span></div>
-<div class="field-row input-primary"><label>Pitch (Group A)</label><input id="lb_screw_pitch_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
-<div class="field-row input-secondary"><label>Pipe NPS (Group A)</label><input id="lb_pipe_nps" type="number" step="0.5" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
-
-<div id="grp-b-block" style="display:none">
-<div style="font-size:10px;font-weight:700;color:#1a2744;margin:8px 0 2px 0;letter-spacing:.4px">Group B — Inner / Center Screws</div>
-<div class="field-row input-primary"><label>Qty (Group B)</label><input id="qty_lb_screws_b" type="number" min="1" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
-<div class="field-row input-primary"><label>Dia (Group B)</label>
-<select id="lb_screw_dia_in_b" oninput="calculate()" onchange="calculate()">
-<option value="">— select —</option>
-<option value="9">9"</option><option value="12">12"</option><option value="14">14"</option>
-<option value="16">16"</option><option value="18">18"</option><option value="20">20"</option>
-<option value="22">22"</option><option value="24">24"</option>
-</select><span class="std">in</span></div>
-<div class="field-row input-primary"><label>Pitch (Group B)</label><input id="lb_screw_pitch_in_b" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
-<div class="field-row input-secondary"><label>Pipe NPS (Group B)</label><input id="lb_pipe_nps_b" type="number" step="0.5" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
-</div>
+<div class="field-row input-primary"><label>LB Screw Pitch</label><input id="lb_screw_pitch_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+<div class="field-row input-secondary"><label>LB Pipe NPS</label><input id="lb_pipe_nps" type="number" step="0.5" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
 <div class="field-row input-secondary"><label>LB Pipe Schedule</label><input id="lb_pipe_sched" type="text" oninput="calculate()" onchange="calculate()"><span class="std"></span></div>
 <div class="field-row input-secondary"><label>Drive Shaft Ø</label><input id="lb_drive_shaft_dia" type="number" step="0.0625" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
 <div class="field-row input-secondary"><label>Driven Shaft Ø</label><input id="lb_driven_shaft_dia" type="number" step="0.0625" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+
+<div class="subsection-label">Distribution &amp; Leveling Screws</div>
 <div class="field-row input-secondary"><label>Qty Dist. Screws</label><input id="qty_dist_screws" type="number" min="1" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
 <div class="field-row input-secondary"><label>Inlets per Screw</label><input id="inlets_per_screw" type="number" min="1" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
+<div class="field-row input-secondary"><label>Leveling Screws</label>
+<select id="leveling_screws" onchange="toggleLevelingScrews();calculate()">
+<option value="No">No</option><option value="Yes">Yes</option>
+</select><span class="std"></span></div>
+<div id="leveling-block" style="display:none">
+<div class="field-row input-secondary"><label>Qty Leveling Screws</label><input id="qty_leveling_screws" type="number" min="1" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
+<div class="field-row input-secondary"><label>Leveling Screw Dia</label>
+<select id="leveling_screw_dia_in" oninput="calculate()" onchange="calculate()">
+<option value="">— select —</option>
+<option value="9">9"</option><option value="12">12"</option><option value="14">14"</option>
+<option value="16">16"</option><option value="18">18"</option><option value="20">20"</option>
+</select><span class="std">in</span></div>
+<div class="field-row input-secondary"><label>Leveling Screw Pitch</label><input id="leveling_screw_pitch_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+<div class="field-row input-secondary"><label>LS Pipe NPS</label><input id="leveling_pipe_nps" type="number" step="0.5" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+<div class="field-row input-secondary"><label>LS Pipe Schedule</label><input id="leveling_pipe_sched" type="text" oninput="calculate()" onchange="calculate()"><span class="std"></span></div>
+</div>
+
 </div>
 </div>
 
@@ -316,7 +314,7 @@ const PIPE_OD = {
 
 const STD_HP = [1, 1.5, 2, 3, 5, 7.5, 10, 15, 20, 25, 30, 40, 50, 60, 75, 100, 125, 150, 200];
 
-// LB screw discharge width lookup — from Hopper Volume Calculator Table sheet
+// LB screw discharge width lookup — from Bio-HOPPER Tool Tables sheet
 // Key: numScrews * 100 + screwDiaIn  →  [dischargeWidth_ft, troughHeight_ft]
 const LB_WIDTH_TABLE = {
   209:[1.500,1.667], 212:[2.833,1.917], 214:[3.333,2.083], 216:[3.750,2.250],
@@ -357,7 +355,6 @@ function nv(id, def=0) {
   return isNaN(v) ? def : v;
 }
 function sv(id) { return document.getElementById(id)?.value ?? ''; }
-function getVal(id) { return sv(id); }
 function esc(s) {
   if (s == null) return '';
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
@@ -398,27 +395,22 @@ function toggleSec(id) {
   if (tog) tog.style.transform = collapsed ? '' : 'rotate(90deg)';
 }
 
-function toggleMixedDia() {
-  const on = document.getElementById('mixed_dia_enabled')?.checked;
-  document.getElementById('grp-b-block').style.display = on ? 'block' : 'none';
-  document.getElementById('grp-a-label').style.display = on ? 'block' : 'none';
-  // Reset group-B fields when turning off
+function toggleLevelingScrews() {
+  const on = sv('leveling_screws') === 'Yes';
+  document.getElementById('leveling-block').style.display = on ? 'block' : 'none';
   if (!on) {
-    ['qty_lb_screws_b','lb_screw_dia_in_b','lb_screw_pitch_in_b','lb_pipe_nps_b'].forEach(id => {
+    ['qty_leveling_screws','leveling_screw_pitch_in','leveling_pipe_nps','leveling_pipe_sched'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
+    const diaEl = document.getElementById('leveling_screw_dia_in');
+    if (diaEl) diaEl.selectedIndex = 0;
   }
 }
 
 function autoFillDischargeWidth() {
-  const mixed   = document.getElementById('mixed_dia_enabled')?.checked;
-  const wField  = document.getElementById('discharge_wid_in');
+  const wField = document.getElementById('discharge_wid_in');
   if (!wField || wField.dataset.manualOverride) return;
-  if (mixed) {
-    // Can't auto-fill for mixed — too many combinations; leave as-is
-    return;
-  }
   const nScrews = parseInt(document.getElementById('qty_lb_screws')?.value) || 0;
   const dia     = parseInt(document.getElementById('lb_screw_dia_in')?.value) || 0;
   const key     = nScrews * 100 + dia;
@@ -462,13 +454,11 @@ function calculate() {
   const D       = nv('lb_screw_dia_in');
   const NPS     = nv('lb_pipe_nps');
   const P       = nv('lb_screw_pitch_in');
-  const mixed   = document.getElementById('mixed_dia_enabled')?.checked || false;
-  const X_b     = mixed ? (nv('qty_lb_screws_b') || 0) : 0;
-  const D_b     = mixed ? (nv('lb_screw_dia_in_b') || 0) : 0;
-  const NPS_b   = mixed ? (nv('lb_pipe_nps_b') || 0) : 0;
-  const P_b     = mixed ? (nv('lb_screw_pitch_in_b') || 0) : 0;
-  const X_total = X + X_b;
   const incline = 0;  // LB screws always horizontal
+
+  const hasLeveling = sv('leveling_screws') === 'Yes';
+  const qtyLS = hasLeveling ? nv('qty_leveling_screws') : 0;
+  const diaLS = hasLeveling ? nv('leveling_screw_dia_in') : 0;
 
   const OAL_ft  = OAL_in  / 12;
   const OAW_ft  = OAW_in  / 12;
@@ -484,8 +474,8 @@ function calculate() {
   // ── Volume check ──────────────────────────────────────────────────────────
   let v_usable_yds=null, v_total_yds=null, v_pct=null, v_pyr=null, v_rect=null;
   let H_out=null, I_out=null, Lv_out=null, M_out=null;
-
   let geomWarn = null;
+
   if (OAL_ft>0 && OAW_ft>0 && OAH_ft>0 && dLen_ft>=0 && dWid_ft>=0 && slope>0) {
     const H   = (OAL_ft - dLen_ft) / 2;
     const I   = (OAW_ft - dWid_ft) / 2;
@@ -512,58 +502,33 @@ function calculate() {
   const R = inlineR(incline);
   const C1=1.0, CF2=1.0, Fm=1.5, e=95, Fb=1.0, Fi=1.0;
 
-  // Compute one screw group's HP and RPM given qty, dia, NPS, pitch, share of flowrate
-  // Returns per-screw HP values (HPf, HPm); HPi=0 — LB screws are horizontal, no inlet lift HP
-  function calcScrewGroup(Xg, Dg, NPSg, Pg, flow_share) {
-    const dg = PIPE_OD[NPSg] ?? 0;
-    if (Xg<=0 || Dg<=0 || dg<=0 || Pg<=0 || flow_share<=0 || density<=0 || angRepos<=0) return null;
-    const v_per_screw = (flow_share / density) / Xg;  // ft³/hr per screw
-    const cap_rev = 0.7854 * (Dg*Dg - dg*dg) * Pg * C1 * R * 60 / 1728 / CF2;  // ft³/hr/rpm
-    if (cap_rev <= 0) return null;
-    const rpm = v_per_screw / cap_rev;
-    const L_hp = dLen_in / 12;
-    const Fd_g = 0.454707 * Dg*Dg - 1.34425 * Dg + 8.27145;
-    const HPf_g = L_hp * rpm * Fd_g * Fb / 1_000_000;         // CEMA HPf per screw
-    const HPm_g = (flow_share / density / Xg) * density * L_hp * Fm / 1_000_000;  // CEMA HPm per screw
-    return { rpm, HPf: HPf_g, HPm: HPm_g, HPi: 0, Fd: Fd_g };
-  }
-
-  const d = PIPE_OD[NPS] ?? 0;  // group A pipe OD for display
+  const d = PIPE_OD[NPS] ?? 0;
   let N_rpm=null, HPf=null, HPm=null, HPi=null, Fo=null, Fd=null;
   let hp_per_screw=null, hp_total=null, hp_selected=null;
-  let req_torque_inlb=null, sew_frame=null, sew_ratio=null;
-  let grpB_result=null;
+  let sew_frame=null, sew_ratio=null;
 
   const readyA = flowrate>0 && density>0 && X>0 && D>0 && NPS>0 && P>0 && angRepos>0;
-  const readyB = mixed && X_b>0 && D_b>0 && NPS_b>0 && P_b>0;
 
   if (readyA) {
-    // Split flowrate proportionally by screw count
-    const flow_a = readyB ? flowrate * X / X_total : flowrate;
-    const flow_b = readyB ? flowrate * X_b / X_total : 0;
+    const v_per_screw = (flowrate / density) / X;
+    const cap_rev = 0.7854 * (D*D - d*d) * P * C1 * R * 60 / 1728 / CF2;
+    if (cap_rev > 0) {
+      N_rpm = v_per_screw / cap_rev;
+      const L_hp = dLen_in / 12;
+      Fd = 0.454707 * D*D - 1.34425 * D + 8.27145;
+      HPf = L_hp * N_rpm * Fd * Fb / 1_000_000;
+      HPm = (flowrate / density / X) * density * L_hp * Fm / 1_000_000;
+      HPi = 0;
 
-    const gA = calcScrewGroup(X, D, NPS, P, flow_a);
-    const gB = readyB ? calcScrewGroup(X_b, D_b, NPS_b, P_b, flow_b) : null;
-
-    if (gA) {
-      N_rpm = gA.rpm;
-      HPf   = gA.HPf + (gB ? gB.HPf : 0);
-      HPm   = gA.HPm + (gB ? gB.HPm : 0);
-      HPi   = gA.HPi + (gB ? gB.HPi : 0);
-      Fd    = gA.Fd;
-      grpB_result = gB;
-
-      const HP_sum = HPf + HPm;  // HPi=0 for horizontal LB screws
+      const HP_sum = HPf + HPm;
       const Fo_raw = HP_sum > 0 ? 2.033 - 1.45 * Math.log10(HP_sum) : 2.033;
       Fo = Math.max(1.0, Fo_raw);
-      hp_per_screw = (HPf + HPm * Fi) * Fo / e * 100;  // HPf/HPm already per-screw
-      hp_total     = hp_per_screw * X_total;
+      hp_per_screw = (HPf + HPm * Fi) * Fo / e * 100;
+      hp_total     = hp_per_screw * X;
       hp_selected  = STD_HP.find(h => h >= hp_per_screw) ?? STD_HP[STD_HP.length-1];
       window._lastHopperHP = hp_per_screw;
 
-      // SEW FAZ recommendation — parallel shaft, B14 flange
       if (hp_selected && N_rpm) {
-        req_torque_inlb = N_rpm > 0 ? 63025 * hp_per_screw / N_rpm : null;
         sew_frame = SEW_FAZ_FRAME.find(f => f.maxHP >= hp_selected) || null;
         const req_ratio = N_rpm > 0 ? 1750 / N_rpm : null;
         if (req_ratio) {
@@ -578,7 +543,6 @@ function calculate() {
   // ── RENDER ────────────────────────────────────────────────────────────────
   let html = '';
 
-  // Project header
   html += `<div class="project-header">
     <h2>Hopper Design Sheet</h2>
     <div class="project-meta">
@@ -592,7 +556,6 @@ function calculate() {
     <div style="font-size:11px;margin-top:4px;"><strong>Description:</strong> ${esc(desc) || '—'}</div>
   </div>`;
 
-  // Row 1: Volume Check + Hopper Summary side by side
   html += `<div class="two-col">
   <div class="result-box">
   <h2>1. Volume Check</h2>
@@ -615,13 +578,14 @@ function calculate() {
   <div class="result-box">
   <h2>2. Hopper Config</h2>
   ${resultRow('Qty Hoppers', nv('qty_hoppers') || '—', '#', '')}
-  ${resultRow('Material', sv('mat_construction'), '', '')}
+  ${resultRow('Material of Construction', sv('mat_construction'), '', '')}
   ${resultRow('Qty LB Screws', X || '—', '#', '')}
   ${resultRow('LB Screw Dia', D ? D+'"' : '—', '', '')}
   ${resultRow('Discharge Length', dLen_in ? dLen_in+'"' : '—', '', '')}
   ${resultRow('Discharge Width', dWid_in ? fmt(dWid_in,2)+'"' : '—', '', '')}
   ${resultRow('Qty Dist. Screws', nv('qty_dist_screws') || '—', '#', '')}
   ${resultRow('Inlets per Screw', nv('inlets_per_screw') || '—', '#', '')}
+  ${resultRow('Leveling Screws', hasLeveling ? `${qtyLS} × ${diaLS || '—'}"` : 'None', '', '')}
   ${resultRow('Flowrate', flowrate ? fmt(flowrate,0) : '—', 'lb/hr', '')}
   ${resultRow('Density', density || '—', 'lb/ft³', '')}
   ${resultRow('Angle of Repose', angRepos ? angRepos+'°' : '—', '', '')}
@@ -629,44 +593,36 @@ function calculate() {
   </div>
   </div>`;
 
-  // Row 2: LB Screw Capacity + HP side by side
-  const mixedNote = mixed && grpB_result
-    ? `<div style="font-size:10px;color:#888;margin:4px 0 2px 0">Mixed config: Grp A (${X}×${D}") + Grp B (${X_b}×${D_b}") · Speed shown for Grp A</div>`
-    : '';
   html += `<div class="two-col">
   <div class="result-box">
   <h2>3. LB Screw Sizing</h2>
-  ${mixedNote}
   ${resultRow('Pipe OD (d)', d ? fmt(d,2) : '—', 'in', '')}
   ${resultRow('Incline Factor R', fmt(R,2), '—', '')}
-  ${resultRow('Cap. per Rev. (Grp A)', flowrate && N_rpm !== null ? fmt((flowrate*(mixed?X/X_total:1))/X/N_rpm,2) : '—', 'ft³/rev', '')}
-  <div class="result-row"><span class="label" style="font-weight:700">Speed N (Grp A)</span><span class="val" style="color:#003366">${N_rpm !== null ? fmt(N_rpm,2) : '—'}</span><span class="unit">rpm</span><span>${N_rpm !== null && N_rpm < 20 ? badge('OK','ok') : N_rpm !== null ? badge('CHECK','warn') : ''}</span></div>
-  ${grpB_result ? resultRow('Speed N (Grp B)', fmt(grpB_result.rpm,2), 'rpm', '') : ''}
-  ${resultRow('Diam. Factor Fd (Grp A)', Fd !== null ? fmt(Fd,2) : '—', '—', '')}
+  ${resultRow('Cap. per Rev.', readyA && N_rpm ? fmt((flowrate/density)/X/N_rpm,2) : '—', 'ft³/rev', '')}
+  <div class="result-row"><span class="label" style="font-weight:700">Speed N</span><span class="val" style="color:#003366">${N_rpm !== null ? fmt(N_rpm,2) : '—'}</span><span class="unit">rpm</span><span>${N_rpm !== null && N_rpm < 20 ? badge('OK','ok') : N_rpm !== null ? badge('CHECK','warn') : ''}</span></div>
+  ${resultRow('Diam. Factor Fd', Fd !== null ? fmt(Fd,2) : '—', '—', '')}
   </div>
 
   <div class="result-box">
   <h2>4. HP &amp; Motor</h2>
-  ${resultRow('HPf (friction, total)', HPf !== null ? fmt(HPf,2) : '—', 'HP', '')}
-  ${resultRow('HPm (material, total)', HPm !== null ? fmt(HPm,2) : '—', 'HP', '')}
-  ${resultRow('HPi (inlet, total)', HPi !== null ? fmt(HPi,2) : '—', 'HP', '')}
+  ${resultRow('HPf (friction)', HPf !== null ? fmt(HPf,2) : '—', 'HP', '')}
+  ${resultRow('HPm (material)', HPm !== null ? fmt(HPm,2) : '—', 'HP', '')}
+  ${resultRow('HPi (inlet)', '0.00', 'HP', badge('horizontal','na'))}
   ${resultRow('Overload Factor Fo', Fo !== null ? fmt(Fo,2) : '—', '—', '')}
   <hr style="border:none;border-top:1px solid #d0d4dc;margin:6px 0">
-  <div class="result-row"><span class="label" style="font-weight:700">HP / Screw (avg)</span><span class="val" style="color:#003366">${hp_per_screw !== null ? fmt(hp_per_screw,2) : '—'}</span><span class="unit">HP</span><span></span></div>
+  <div class="result-row"><span class="label" style="font-weight:700">HP / Screw</span><span class="val" style="color:#003366">${hp_per_screw !== null ? fmt(hp_per_screw,2) : '—'}</span><span class="unit">HP</span><span></span></div>
   ${resultRow('Total HP (all screws)', hp_total !== null ? fmt(hp_total,2) : '—', 'HP', '')}
   <div class="result-row"><span class="label" style="font-weight:700">Selected Motor</span><span class="val" style="color:#003366;font-size:15px">${hp_selected ?? '—'}</span><span class="unit">HP</span><span>${hp_selected ? badge('STD','ok') : ''}</span></div>
   </div>
   </div>`;
 
-  // Structural — Phase 3 stub
   html += `<div class="result-box">
   <h2>5. Structural — Shaft &amp; Torsional Ratings</h2>
-  <div class="stub-note">Phase 3 — Not yet implemented. Will calculate: min drive shaft diameter at rated and yield stress, pipe torque rating, drive shaft torque rating, full motor torque. Sources: Live Bottom Sizing (sheet17) and Torsion &amp; Bending (sheet14).</div>
+  <div class="stub-note">Phase 3 — Not yet implemented. Will calculate: min drive shaft diameter at rated and yield stress, pipe torque rating, drive shaft torque rating, full motor torque.</div>
   ${resultRow('Provided Drive Shaft Ø', fmt(nv('lb_drive_shaft_dia',3.4375),4), 'in', badge('pending','na'))}
   ${resultRow('Provided Driven Shaft Ø', fmt(nv('lb_driven_shaft_dia',3.4375),4), 'in', badge('pending','na'))}
   </div>`;
 
-  // SEW FAZ recommendation — full width
   html += `<div class="result-box" style="border-left:3px solid #003366">
   <h2>SEW-Eurodrive Gearmotor Recommendation (FA Series)</h2>`;
   if (sew_frame && sew_ratio && hp_selected) {
@@ -693,9 +649,8 @@ function calculate() {
   <a href="https://www.seweurodrive.com/os/ecs/?language=en_US" target="_blank" rel="noopener" style="color:#003366;font-style:normal;font-weight:600">→ SEW DriveSelect</a>
   </div></div>`;
 
-  // Footer
   html += `<div class="result-box" style="font-size:11px;color:#555">
-    <strong>Standards &amp; References:</strong> Volume calc per JMS Bio-Hopper worksheet. LB screw capacity per CEMA 350 Rev 20 (Ch. 2). HP per CEMA 350 (Ch. 3) — HPf/HPm/HPi method. Motor HP = next standard size ≥ HP/screw; no 1.4× multiplier (AGMA Class II SF = 1.4 is gearbox duty rating). SEW FA series per SEW-EURODRIVE catalog (60Hz US). Side slope &gt; 60° per JMS internal standard for biosolids flow. Structural (Phase 3) — shaft torsion per CEMA 350-21, bending per ASME shaft formula.
+    <strong>Standards &amp; References:</strong> Volume calc per JMS Bio-Hopper worksheet. LB screw capacity per CEMA 350 Rev 20 (Ch. 2). HP per CEMA 350 (Ch. 3) — HPf/HPm method; HPi = 0 for horizontal LB feeders. Motor HP = next standard size ≥ HP/screw. SEW FA series per SEW-EURODRIVE catalog (60Hz US). Side slope &gt; 60° per JMS internal standard for biosolids flow.
   </div>`;
   html += `<div class="footer-bar">HOPPER DESIGN SHEET &nbsp;|&nbsp; LIVE-BOTTOM BIOSOLIDS &nbsp;|&nbsp; REV. ${revision || '—'} &nbsp;|&nbsp; ${proj_date || '—'}</div>`;
 
@@ -727,20 +682,12 @@ function validateFields() {
 function onMaterialChange() {
   const mat = sv('material');
   const densityMap = {
-    'Biosolids (Wet Cake)': 60,
-    'Biosolids (Dry)':      45,
-    'Lime':                 60,
-    'Grit':                 80,
-    'Screenings':           45,
-    'Other':                60,
+    'Biosolids (Wet Cake)': 60, 'Biosolids (Dry)': 45,
+    'Lime': 60, 'Grit': 80, 'Screenings': 45, 'Other': 60,
   };
   const reposMap = {
-    'Biosolids (Wet Cake)': 38,
-    'Biosolids (Dry)':      38,
-    'Lime':                 40,
-    'Grit':                 35,
-    'Screenings':           40,
-    'Other':                38,
+    'Biosolids (Wet Cake)': 38, 'Biosolids (Dry)': 38,
+    'Lime': 40, 'Grit': 35, 'Screenings': 40, 'Other': 38,
   };
   const d = densityMap[mat];
   const r = reposMap[mat];
@@ -801,17 +748,8 @@ function autoConfig() {
   setField('angle_repose_deg', angRepos);
   setField('side_slope_deg',   slope);
 
-  // ── Screw selection ──────────────────────────────────────────────────────────
-  // The hopper box (OAW × OAL × OAH) is given. The wall slope determines how
-  // much of the width transitions to the discharge trough. Select the screw
-  // config where discharge width best covers the trough bottom — ideally
-  // 15–30% of OAW — and RPM stays in feeder range [1–25].
-  //
-  // Prefer: fewer screws first, then closest discharge coverage to 20% of OAW.
-  // This matches JMS practice (Sanford: 2×14" in 20'W = 3.33ft dW / 20ft = 17%).
-
   const oaw_ft = oaw / 12;
-  const targetCoverage = 0.20;  // 20% of OAW as discharge width target
+  const targetCoverage = 0.20;
 
   const candidates = [];
   for (const [key, entry] of Object.entries(LB_WIDTH_TABLE)) {
@@ -824,7 +762,6 @@ function autoConfig() {
       candidates.push({ qty, dia, dW_ft, coverage });
     }
   }
-  // Sort: fewer screws first, then closest coverage to target
   candidates.sort((a, b) =>
     a.qty - b.qty ||
     Math.abs(a.coverage - targetCoverage) - Math.abs(b.coverage - targetCoverage)
@@ -834,22 +771,17 @@ function autoConfig() {
   let chosen = null, bestFallback = null, bestFallbackDiff = Infinity;
 
   for (const c of candidates) {
-    const nps   = pipeMap[c.dia] || 4;
-    const pip_od = PIPE_OD[nps]  || 0;
+    const nps    = pipeMap[c.dia] || 4;
+    const pip_od = PIPE_OD[nps]   || 0;
     if (!pip_od) continue;
     const pitch   = c.dia;
     const cap_rev = 0.7854 * (c.dia * c.dia - pip_od * pip_od) * pitch * 60 / 1728;
     if (cap_rev <= 0) continue;
     const v_per_screw = (flowrate / density) / c.qty;
     const rpm = v_per_screw / cap_rev;
-    if (rpm >= minRPM && rpm <= maxRPM) {
-      chosen = { ...c, nps, pitch, rpm }; break;
-    }
+    if (rpm >= minRPM && rpm <= maxRPM) { chosen = { ...c, nps, pitch, rpm }; break; }
     const diff = rpm < minRPM ? minRPM - rpm : rpm - maxRPM;
-    if (diff < bestFallbackDiff) {
-      bestFallbackDiff = diff;
-      bestFallback = { ...c, nps, pitch, rpm };
-    }
+    if (diff < bestFallbackDiff) { bestFallbackDiff = diff; bestFallback = { ...c, nps, pitch, rpm }; }
   }
   if (!chosen) chosen = bestFallback;
 
@@ -857,9 +789,6 @@ function autoConfig() {
     alert('Auto-Config could not find a screw configuration for the given inputs.');
     return;
   }
-
-  // Discharge length = full hopper length
-  const dLen_in = oal;
 
   setField('qty_lb_screws',       chosen.qty);
   setSelectVal('lb_screw_dia_in', String(chosen.dia));
@@ -870,17 +799,15 @@ function autoConfig() {
   setField('lb_driven_shaft_dia', chosen.dia <= 12 ? 1.9375 : chosen.dia <= 18 ? 2.9375 : 3.9375);
   setField('qty_dist_screws',     1);
   setField('inlets_per_screw',    chosen.qty);
-  setField('discharge_len_in',    dLen_in);
+  setField('discharge_len_in',    oal);
 
   const dw = document.getElementById('discharge_wid_in');
   if (dw) delete dw.dataset.manualOverride;
   autoFillDischargeWidth();
 
   setSelectVal('drive_arrangement', 'Parallel Shaft Gearbox (FA)');
-
   calculate();
 
-  // Pick standard motor HP
   const hpMin = window._lastHopperHP || 0;
   if (hpMin > 0) {
     const stdHP = STD_HP.find(h => h >= hpMin * 1.15) || STD_HP[STD_HP.length - 1];
@@ -890,26 +817,25 @@ function autoConfig() {
 }
 
 function resetToDefaults() {
-  // Clear all numeric inputs
   const numericIds = [
     'qty_hoppers','oal_in','oaw_in','oah_in','side_slope_deg','req_volume_yds',
     'discharge_len_in','discharge_wid_in','density_lbft3','angle_repose_deg',
     'flowrate_lbhr','qty_lb_screws','lb_screw_pitch_in','lb_pipe_nps',
     'lb_pipe_sched','lb_drive_shaft_dia','lb_driven_shaft_dia','qty_dist_screws',
-    'inlets_per_screw','stiff_spacing_straight','stiff_spacing_angled','qty_legs',
-    'motor_hp','gate_width_in','gate_length_in','qty_zss','qty_estop',
-    'qty_level_sensor','qty_gates','qty_manways','qty_foul_air',
+    'inlets_per_screw','qty_leveling_screws','leveling_screw_pitch_in',
+    'leveling_pipe_nps','leveling_pipe_sched','stiff_spacing_straight',
+    'stiff_spacing_angled','qty_legs','motor_hp','gate_width_in','gate_length_in',
+    'qty_zss','qty_estop','qty_level_sensor','qty_gates','qty_manways','qty_foul_air',
   ];
-  numericIds.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
-  // Reset selects to first option
-  ['material','lb_screw_dia_in','mat_construction','upper_thickness','lower_thickness',
-   'roof_thickness','drive_arrangement','area_class','actuator_type'].forEach(id => {
+  numericIds.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['material','lb_screw_dia_in','leveling_screw_dia_in','mat_construction',
+   'upper_thickness','lower_thickness','roof_thickness','drive_arrangement',
+   'area_class','actuator_type'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.selectedIndex = 0;
   });
+  setSelectVal('leveling_screws', 'No');
+  toggleLevelingScrews();
   const dw = document.getElementById('discharge_wid_in');
   if (dw) { dw.value = ''; delete dw.dataset.manualOverride; }
   calculate();
@@ -920,7 +846,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const iso = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   const dateEl = document.getElementById('proj_date');
   if (dateEl) dateEl.value = iso;
-
   calculate();
 });
 </script>
