@@ -153,7 +153,7 @@ button.primary:hover{background:#002244}
 </select><span class="std"></span></div>
 <div class="field-row input-secondary"><label>Density</label><input id="density_lbft3" type="number" step="1" min="1" oninput="calculate()" onchange="calculate()"><span class="std">lb/ft³</span></div>
 <div class="field-row input-secondary"><label>Angle of Repose</label><input id="angle_repose_deg" type="number" step="1" min="0" max="90" oninput="calculate()" onchange="calculate()"><span class="std">deg</span></div>
-<div class="field-row input-primary" data-ac-req><label>Flowrate</label><input id="flowrate_lbhr" type="number" step="100" min="0" oninput="calculate()" onchange="calculate()"><span class="std">lb/hr</span></div>
+<div class="field-row input-primary" data-ac-req><label>Flowrate</label><input id="flowrate_ft3hr" type="number" step="10" min="0" oninput="calculate()" onchange="calculate()"><span class="std">ft³/hr</span></div>
 </div>
 </div>
 
@@ -165,14 +165,14 @@ button.primary:hover{background:#002244}
 <div class="sec-body" id="sec-dims">
 <div style="height:6px"></div>
 <div class="field-row input-primary"><label>Qty of Hoppers</label><input id="qty_hoppers" type="number" min="1" step="1" oninput="calculate()" onchange="calculate()"><span class="std">#</span></div>
-<div class="field-row input-primary" data-ac-req><label>OAW (Overall Width)</label><input id="oaw_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
-<div class="field-row input-primary" data-ac-req><label>OAL (Overall Length)</label><input id="oal_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
-<div class="field-row input-primary" data-ac-req><label>OAH (Overall Height)</label><input id="oah_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
+<div class="field-row input-primary" data-ac-req><label>OAW (Overall Width)</label><input id="oaw_ft" type="number" step="0.5" min="0" oninput="calculate()" onchange="calculate()"><span class="std">ft</span></div>
+<div class="field-row input-primary" data-ac-req><label>OAL (Overall Length)</label><input id="oal_ft" type="number" step="0.5" min="0" oninput="calculate()" onchange="calculate()"><span class="std">ft</span></div>
+<div class="field-row input-primary" data-ac-req><label>OAH (Overall Height)</label><input id="oah_ft" type="number" step="0.5" min="0" oninput="calculate()" onchange="calculate()"><span class="std">ft</span></div>
 <div class="field-row input-primary"><label>Side Slope</label><input id="side_slope_deg" type="number" step="0.5" min="60" max="90" oninput="calculate()" onchange="calculate()"><span class="std">deg</span></div>
 <div id="slope-warn" class="warn-inline" style="display:none">⚠ Slope must be &gt; 60°</div>
 <div class="field-row input-primary" data-ac-req><label>Required Volume</label><input id="req_volume_yds" type="number" step="1" min="0" oninput="calculate()" onchange="calculate()"><span class="std">yd³</span></div>
-<div class="field-row input-primary"><label>Discharge Length</label><input id="discharge_len_in" type="number" step="0.25" min="0" oninput="calculate()" onchange="calculate()"><span class="std">in</span></div>
-<div class="field-row input-calculated"><label>Discharge Width</label><input id="discharge_wid_in" type="number" step="0.001" min="0" title="Auto-filled from LB screw qty × dia. Edit to override." oninput="this.dataset.manualOverride='1';calculate()" onchange="this.dataset.manualOverride='1';calculate()"><span class="std">in</span></div>
+<div class="field-row input-primary"><label>Discharge Length</label><input id="discharge_len_ft" type="number" step="0.5" min="0" oninput="calculate()" onchange="calculate()"><span class="std">ft</span></div>
+<div class="field-row input-calculated"><label>Discharge Width</label><input id="discharge_wid_ft" type="number" step="0.001" min="0" title="Auto-filled from LB screw qty × dia. Edit to override." oninput="this.dataset.manualOverride='1';calculate()" onchange="this.dataset.manualOverride='1';calculate()"><span class="std">ft</span></div>
 <div style="font-size:10px;color:#888;margin:-2px 0 4px 154px">Auto-filled from LB table · edit to override</div>
 </div>
 </div>
@@ -409,13 +409,13 @@ function toggleLevelingScrews() {
 }
 
 function autoFillDischargeWidth() {
-  const wField = document.getElementById('discharge_wid_in');
+  const wField = document.getElementById('discharge_wid_ft');
   if (!wField || wField.dataset.manualOverride) return;
   const nScrews = parseInt(document.getElementById('qty_lb_screws')?.value) || 0;
   const dia     = parseInt(document.getElementById('lb_screw_dia_in')?.value) || 0;
   const key     = nScrews * 100 + dia;
   const entry   = LB_WIDTH_TABLE[key];
-  if (entry) wField.value = (entry[0] * 12).toFixed(3);
+  if (entry) wField.value = entry[0].toFixed(3);
 }
 
 // Incline factor R — interpolated from CEMA table
@@ -440,15 +440,15 @@ function calculate() {
   const proj_date = sv('proj_date');
   const revision  = sv('revision');
 
-  const OAL_in  = nv('oal_in');
-  const OAW_in  = nv('oaw_in');
-  const OAH_in  = nv('oah_in');
+  const OAL_ft  = nv('oal_ft');
+  const OAW_ft  = nv('oaw_ft');
+  const OAH_ft  = nv('oah_ft');
   const slope   = nv('side_slope_deg');
   const reqVol  = nv('req_volume_yds');
-  const dLen_in = nv('discharge_len_in');
-  const dWid_in = nv('discharge_wid_in');
+  const dLen_ft = nv('discharge_len_ft');
+  const dWid_ft = nv('discharge_wid_ft');
   const density = nv('density_lbft3');
-  const flowrate= nv('flowrate_lbhr');
+  const flowrate= nv('flowrate_ft3hr');   // ft³/hr
   const angRepos= nv('angle_repose_deg');
   const X       = nv('qty_lb_screws');
   const D       = nv('lb_screw_dia_in');
@@ -459,12 +459,6 @@ function calculate() {
   const hasLeveling = sv('leveling_screws') === 'Yes';
   const qtyLS = hasLeveling ? nv('qty_leveling_screws') : 0;
   const diaLS = hasLeveling ? nv('leveling_screw_dia_in') : 0;
-
-  const OAL_ft  = OAL_in  / 12;
-  const OAW_ft  = OAW_in  / 12;
-  const OAH_ft  = OAH_in  / 12;
-  const dLen_ft = dLen_in / 12;
-  const dWid_ft = dWid_in / 12;
 
   // ── Slope warning ──────────────────────────────────────────────────────────
   const slopeOK = slope > 60;
@@ -483,7 +477,7 @@ function calculate() {
     const Lv  = I * Math.tan(sRad);
     const M   = OAH_ft - Lv;
     if (M < 0) {
-      geomWarn = `OAH too short for slope: slope requires ${fmt(Lv,2)}ft vertical, OAH = ${fmt(OAH_ft,2)}ft. Increase OAH to ≥ ${Math.ceil(Lv*12)}" or reduce slope angle.`;
+      geomWarn = `OAH too short for slope: slope requires ${fmt(Lv,2)} ft vertical, OAH = ${fmt(OAH_ft,2)} ft. Increase OAH to ≥ ${fmt(Math.ceil(Lv*2)/2,1)} ft or reduce slope angle.`;
     }
     const A1  = OAL_ft * OAW_ft;
     const A2  = dLen_ft * dWid_ft;
@@ -510,14 +504,14 @@ function calculate() {
   const readyA = flowrate>0 && density>0 && X>0 && D>0 && NPS>0 && P>0 && angRepos>0;
 
   if (readyA) {
-    const v_per_screw = (flowrate / density) / X;
+    const v_per_screw = flowrate / X;           // ft³/hr per screw
     const cap_rev = 0.7854 * (D*D - d*d) * P * C1 * R * 60 / 1728 / CF2;
     if (cap_rev > 0) {
       N_rpm = v_per_screw / cap_rev;
-      const L_hp = dLen_in / 12;
+      const L_hp = dLen_ft;
       Fd = 0.454707 * D*D - 1.34425 * D + 8.27145;
       HPf = L_hp * N_rpm * Fd * Fb / 1_000_000;
-      HPm = (flowrate / density / X) * density * L_hp * Fm / 1_000_000;
+      HPm = (flowrate / X) * density * L_hp * Fm / 1_000_000;
       HPi = 0;
 
       const HP_sum = HPf + HPm;
@@ -559,7 +553,7 @@ function calculate() {
   html += `<div class="two-col">
   <div class="result-box">
   <h2>1. Volume Check</h2>
-  ${resultRow('OAL × OAW × OAH', OAL_in && OAW_in && OAH_in ? `${OAL_in}" × ${OAW_in}" × ${OAH_in}"` : '—', '', '')}
+  ${resultRow('OAL × OAW × OAH', OAL_ft && OAW_ft && OAH_ft ? `${OAL_ft}′ × ${OAW_ft}′ × ${OAH_ft}′` : '—', '', '')}
   ${resultRow('H (front bend dist)', H_out !== null ? fmt(H_out,3) : '—', 'ft', '')}
   ${resultRow('I (side bend dist)', I_out !== null ? fmt(I_out,3) : '—', 'ft', '')}
   ${resultRow('L (sloped height)', Lv_out !== null ? fmt(Lv_out,3) : '—', 'ft', '')}
@@ -581,12 +575,12 @@ function calculate() {
   ${resultRow('Material of Construction', sv('mat_construction'), '', '')}
   ${resultRow('Qty LB Screws', X || '—', '#', '')}
   ${resultRow('LB Screw Dia', D ? D+'"' : '—', '', '')}
-  ${resultRow('Discharge Length', dLen_in ? dLen_in+'"' : '—', '', '')}
-  ${resultRow('Discharge Width', dWid_in ? fmt(dWid_in,2)+'"' : '—', '', '')}
+  ${resultRow('Discharge Length', dLen_ft ? fmt(dLen_ft,2)+' ft' : '—', '', '')}
+  ${resultRow('Discharge Width', dWid_ft ? fmt(dWid_ft,3)+' ft' : '—', '', '')}
   ${resultRow('Qty Dist. Screws', nv('qty_dist_screws') || '—', '#', '')}
   ${resultRow('Inlets per Screw', nv('inlets_per_screw') || '—', '#', '')}
   ${resultRow('Leveling Screws', hasLeveling ? `${qtyLS} × ${diaLS || '—'}"` : 'None', '', '')}
-  ${resultRow('Flowrate', flowrate ? fmt(flowrate,0) : '—', 'lb/hr', '')}
+  ${resultRow('Flowrate', flowrate ? fmt(flowrate,0) : '—', 'ft³/hr', '')}
   ${resultRow('Density', density || '—', 'lb/ft³', '')}
   ${resultRow('Angle of Repose', angRepos ? angRepos+'°' : '—', '', '')}
   ${resultRow('Area Class', sv('area_class') || '—', '', '')}
@@ -598,7 +592,7 @@ function calculate() {
   <h2>3. LB Screw Sizing</h2>
   ${resultRow('Pipe OD (d)', d ? fmt(d,2) : '—', 'in', '')}
   ${resultRow('Incline Factor R', fmt(R,2), '—', '')}
-  ${resultRow('Cap. per Rev.', readyA && N_rpm ? fmt((flowrate/density)/X/N_rpm,2) : '—', 'ft³/rev', '')}
+  ${resultRow('Cap. per Rev.', readyA && N_rpm ? fmt(flowrate/X/N_rpm,2) : '—', 'ft³/rev', '')}
   <div class="result-row"><span class="label" style="font-weight:700">Speed N</span><span class="val" style="color:#003366">${N_rpm !== null ? fmt(N_rpm,2) : '—'}</span><span class="unit">rpm</span><span>${N_rpm !== null && N_rpm < 20 ? badge('OK','ok') : N_rpm !== null ? badge('CHECK','warn') : ''}</span></div>
   ${resultRow('Diam. Factor Fd', Fd !== null ? fmt(Fd,2) : '—', '—', '')}
   </div>
@@ -710,17 +704,17 @@ function setField(id, val) {
 
 function autoConfig() {
   const mat      = sv('material');
-  const flowrate = nv('flowrate_lbhr');
-  const oaw      = nv('oaw_in');
-  const oal      = nv('oal_in');
-  const oah      = nv('oah_in');
+  const flowrate = nv('flowrate_ft3hr');
+  const oaw_ft   = nv('oaw_ft');
+  const oal_ft   = nv('oal_ft');
+  const oah_ft   = nv('oah_ft');
 
   const missing = [];
   if (!mat)      missing.push('Material');
-  if (!flowrate) missing.push('Flowrate (lb/hr)');
-  if (!oaw)      missing.push('OAW');
-  if (!oal)      missing.push('OAL');
-  if (!oah)      missing.push('OAH');
+  if (!flowrate) missing.push('Flowrate (ft³/hr)');
+  if (!oaw_ft)   missing.push('OAW');
+  if (!oal_ft)   missing.push('OAL');
+  if (!oah_ft)   missing.push('OAH');
   if (missing.length) {
     alert('Auto-Config needs: ' + missing.join(', ') + '\nFill these fields first, then click Auto-Config.');
     return;
@@ -748,36 +742,44 @@ function autoConfig() {
   setField('angle_repose_deg', angRepos);
   setField('side_slope_deg',   slope);
 
-  const oaw_ft = oaw / 12;
-  const targetCoverage = 0.20;
+  // Width-driven selection: target ~5 ft discharge width (JMS standard bottom opening)
+  // 1. Determine min screw diameter proportional to OAW
+  //    OAW ≥ 14 ft → large (2 dist screws); 10–14 ft → medium; < 10 ft → small
+  // 2. Pick combo from LB_WIDTH_TABLE where discharge width is closest to 5.0 ft
+  //    and discharge width ≤ OAW × 0.95
+  const TARGET_DW = 5.0;
+  const pipeMapFn = d => pipeMap[d] || 4;
 
+  // Determine distribution screw count and inlets from OAW bracket
+  let qtyDist, inletsPerScrew;
+  if (oaw_ft >= 14) { qtyDist = 2; inletsPerScrew = 4; }
+  else if (oaw_ft >= 10) { qtyDist = 1; inletsPerScrew = 4; }
+  else { qtyDist = 1; inletsPerScrew = 2; }
+
+  // Build candidates filtered by OAW constraint, sorted by closeness to target DW
   const candidates = [];
   for (const [key, entry] of Object.entries(LB_WIDTH_TABLE)) {
-    const k   = parseInt(key);
-    const qty = Math.floor(k / 100);
-    const dia = k % 100;
+    const k     = parseInt(key);
+    const qty   = Math.floor(k / 100);
+    const dia   = k % 100;
     const dW_ft = entry[0];
-    if (dW_ft <= oaw_ft * 0.95) {
-      const coverage = dW_ft / oaw_ft;
-      candidates.push({ qty, dia, dW_ft, coverage });
-    }
+    if (dW_ft > oaw_ft * 0.95) continue;
+    candidates.push({ qty, dia, dW_ft, diff: Math.abs(dW_ft - TARGET_DW) });
   }
-  candidates.sort((a, b) =>
-    a.qty - b.qty ||
-    Math.abs(a.coverage - targetCoverage) - Math.abs(b.coverage - targetCoverage)
-  );
+  // Sort: closest to 5 ft first; tie-break by fewer screws
+  candidates.sort((a, b) => a.diff - b.diff || a.qty - b.qty);
 
   const maxRPM = 25, minRPM = 1;
   let chosen = null, bestFallback = null, bestFallbackDiff = Infinity;
 
   for (const c of candidates) {
-    const nps    = pipeMap[c.dia] || 4;
-    const pip_od = PIPE_OD[nps]   || 0;
+    const nps    = pipeMapFn(c.dia);
+    const pip_od = PIPE_OD[nps] || 0;
     if (!pip_od) continue;
     const pitch   = c.dia;
     const cap_rev = 0.7854 * (c.dia * c.dia - pip_od * pip_od) * pitch * 60 / 1728;
     if (cap_rev <= 0) continue;
-    const v_per_screw = (flowrate / density) / c.qty;
+    const v_per_screw = flowrate / c.qty;   // ft³/hr per screw (flowrate already in ft³/hr)
     const rpm = v_per_screw / cap_rev;
     if (rpm >= minRPM && rpm <= maxRPM) { chosen = { ...c, nps, pitch, rpm }; break; }
     const diff = rpm < minRPM ? minRPM - rpm : rpm - maxRPM;
@@ -797,11 +799,11 @@ function autoConfig() {
   setField('lb_pipe_sched',       '40');
   setField('lb_drive_shaft_dia',  chosen.dia <= 12 ? 1.9375 : chosen.dia <= 18 ? 2.9375 : 3.9375);
   setField('lb_driven_shaft_dia', chosen.dia <= 12 ? 1.9375 : chosen.dia <= 18 ? 2.9375 : 3.9375);
-  setField('qty_dist_screws',     1);
-  setField('inlets_per_screw',    chosen.qty);
-  setField('discharge_len_in',    oal);
+  setField('qty_dist_screws',     qtyDist);
+  setField('inlets_per_screw',    inletsPerScrew);
+  setField('discharge_len_ft',    oal_ft);
 
-  const dw = document.getElementById('discharge_wid_in');
+  const dw = document.getElementById('discharge_wid_ft');
   if (dw) delete dw.dataset.manualOverride;
   autoFillDischargeWidth();
 
@@ -818,9 +820,9 @@ function autoConfig() {
 
 function resetToDefaults() {
   const numericIds = [
-    'qty_hoppers','oal_in','oaw_in','oah_in','side_slope_deg','req_volume_yds',
-    'discharge_len_in','discharge_wid_in','density_lbft3','angle_repose_deg',
-    'flowrate_lbhr','qty_lb_screws','lb_screw_pitch_in','lb_pipe_nps',
+    'qty_hoppers','oal_ft','oaw_ft','oah_ft','side_slope_deg','req_volume_yds',
+    'discharge_len_ft','discharge_wid_ft','density_lbft3','angle_repose_deg',
+    'flowrate_ft3hr','qty_lb_screws','lb_screw_pitch_in','lb_pipe_nps',
     'lb_pipe_sched','lb_drive_shaft_dia','lb_driven_shaft_dia','qty_dist_screws',
     'inlets_per_screw','qty_leveling_screws','leveling_screw_pitch_in',
     'leveling_pipe_nps','leveling_pipe_sched','stiff_spacing_straight',
@@ -836,7 +838,7 @@ function resetToDefaults() {
   });
   setSelectVal('leveling_screws', 'No');
   toggleLevelingScrews();
-  const dw = document.getElementById('discharge_wid_in');
+  const dw = document.getElementById('discharge_wid_ft');
   if (dw) { dw.value = ''; delete dw.dataset.manualOverride; }
   calculate();
 }
