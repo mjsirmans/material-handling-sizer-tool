@@ -756,7 +756,6 @@ function autoConfig(silent) {
   //    OAW ≥ 14 ft → large (2 dist screws); 10–14 ft → medium; < 10 ft → small
   // 2. Pick combo from LB_WIDTH_TABLE where discharge width is closest to 5.0 ft
   //    and discharge width ≤ OAW × 0.95
-  const TARGET_DW = 5.0;
   const pipeMapFn = d => pipeMap[d] || 4;
 
   // Determine distribution screw count and inlets from OAW bracket
@@ -765,21 +764,22 @@ function autoConfig(silent) {
   else if (oaw_ft >= 10) { qtyDist = 1; inletsPerScrew = 4; }
   else { qtyDist = 1; inletsPerScrew = 2; }
 
-  // Build candidates filtered by OAW constraint, sorted by closeness to target DW
+  // Build candidates: discharge width must fit within OAW (90% clearance)
+  // Sort: fewest screws first, then largest diameter (larger dia → slower RPM)
+  // Pick first combo where RPM lands 1–25; fallback = closest to midpoint 10 RPM
   const candidates = [];
   for (const [key, entry] of Object.entries(LB_WIDTH_TABLE)) {
     const k     = parseInt(key);
     const qty   = Math.floor(k / 100);
     const dia   = k % 100;
     const dW_ft = entry[0];
-    if (dW_ft > oaw_ft * 0.95) continue;
-    candidates.push({ qty, dia, dW_ft, diff: Math.abs(dW_ft - TARGET_DW) });
+    if (dW_ft > oaw_ft * 0.90) continue;
+    candidates.push({ qty, dia, dW_ft });
   }
-  // Sort: closest to 5 ft first; tie-break by fewer screws
-  candidates.sort((a, b) => a.diff - b.diff || a.qty - b.qty);
+  candidates.sort((a, b) => a.qty - b.qty || b.dia - a.dia);
 
   const maxRPM = 25, minRPM = 1;
-  let chosen = null, bestFallback = null, bestFallbackDiff = Infinity;
+  let chosen = null, bestFallback = null, bestFallbackScore = Infinity;
 
   for (const c of candidates) {
     const nps    = pipeMapFn(c.dia);
@@ -788,11 +788,10 @@ function autoConfig(silent) {
     const pitch   = c.dia;
     const cap_rev = 0.7854 * (c.dia * c.dia - pip_od * pip_od) * pitch * 60 / 1728;
     if (cap_rev <= 0) continue;
-    const v_per_screw = flowrate / c.qty;   // ft³/hr per screw (flowrate already in ft³/hr)
-    const rpm = v_per_screw / cap_rev;
+    const rpm = (flowrate / c.qty) / cap_rev;
     if (rpm >= minRPM && rpm <= maxRPM) { chosen = { ...c, nps, pitch, rpm }; break; }
-    const diff = rpm < minRPM ? minRPM - rpm : rpm - maxRPM;
-    if (diff < bestFallbackDiff) { bestFallbackDiff = diff; bestFallback = { ...c, nps, pitch, rpm }; }
+    const score = Math.abs(rpm - 10);
+    if (score < bestFallbackScore) { bestFallbackScore = score; bestFallback = { ...c, nps, pitch, rpm }; }
   }
   if (!chosen) chosen = bestFallback;
 
