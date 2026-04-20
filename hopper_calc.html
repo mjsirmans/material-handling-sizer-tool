@@ -699,7 +699,10 @@ function setSelectVal(id, val) {
 
 function setField(id, val) {
   const el = document.getElementById(id);
-  if (el) el.value = val;
+  if (!el) return;
+  const changed = el.value !== String(val);
+  el.value = val;
+  if (changed) { el.style.transition='background .1s'; el.style.background='#b3ffd9'; setTimeout(()=>el.style.background='',600); }
 }
 
 function autoConfig(silent) {
