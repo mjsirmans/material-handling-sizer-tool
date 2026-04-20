@@ -485,16 +485,20 @@ function calculate() {
   let v_usable_yds=null, v_total_yds=null, v_pct=null, v_pyr=null, v_rect=null;
   let H_out=null, I_out=null, Lv_out=null, M_out=null;
 
+  let geomWarn = null;
   if (OAL_ft>0 && OAW_ft>0 && OAH_ft>0 && dLen_ft>=0 && dWid_ft>=0 && slope>0) {
     const H   = (OAL_ft - dLen_ft) / 2;
     const I   = (OAW_ft - dWid_ft) / 2;
     const sRad= slope * Math.PI / 180;
     const Lv  = I * Math.tan(sRad);
     const M   = OAH_ft - Lv;
+    if (M < 0) {
+      geomWarn = `OAH too short for slope: slope requires ${fmt(Lv,2)}ft vertical, OAH = ${fmt(OAH_ft,2)}ft. Increase OAH to ≥ ${Math.ceil(Lv*12)}" or reduce slope angle.`;
+    }
     const A1  = OAL_ft * OAW_ft;
     const A2  = dLen_ft * dWid_ft;
     v_pyr  = (Lv / 3) * (A1 + A2 + Math.sqrt(A1 * A2));
-    v_rect = OAL_ft * OAW_ft * M;
+    v_rect = OAL_ft * OAW_ft * Math.max(M, 0);
     const v_usable_ft3 = v_pyr + v_rect;
     v_usable_yds = v_usable_ft3 / 27;
     v_total_yds  = (OAL_ft * OAW_ft * OAH_ft) / 27;
@@ -509,26 +513,19 @@ function calculate() {
   const C1=1.0, CF2=1.0, Fm=1.5, e=95, Fb=1.0, Fi=1.0;
 
   // Compute one screw group's HP and RPM given qty, dia, NPS, pitch, share of flowrate
+  // Returns per-screw HP values (HPf, HPm); HPi=0 — LB screws are horizontal, no inlet lift HP
   function calcScrewGroup(Xg, Dg, NPSg, Pg, flow_share) {
     const dg = PIPE_OD[NPSg] ?? 0;
     if (Xg<=0 || Dg<=0 || dg<=0 || Pg<=0 || flow_share<=0 || density<=0 || angRepos<=0) return null;
-    const v_per_screw = (flow_share / density) / Xg;
-    const cap_rev = 0.7854 * (Dg*Dg - dg*dg) * Pg * C1 * R * 60 / 1728 / CF2;
+    const v_per_screw = (flow_share / density) / Xg;  // ft³/hr per screw
+    const cap_rev = 0.7854 * (Dg*Dg - dg*dg) * Pg * C1 * R * 60 / 1728 / CF2;  // ft³/hr/rpm
     if (cap_rev <= 0) return null;
     const rpm = v_per_screw / cap_rev;
     const L_hp = dLen_in / 12;
-    const Cv_g = (flow_share / density) / 1;  // ft³/min for whole group
     const Fd_g = 0.454707 * Dg*Dg - 1.34425 * Dg + 8.27145;
-    const HPf_g = L_hp * rpm * Fd_g * Fb / 1_000_000;
-    const HPm_g = (Cv_g / Xg) * density * L_hp * Fm / 1_000_000;
-    const AE10 = ((Dg+1)*Xg + (Dg+1)*Xg*(1/3)) / 12;
-    const AE13 = density * AE10 * 1.7;
-    const AE15 = AE10 * Pg;
-    const AE17 = AE13 * AE15;
-    const Cv_check = (flow_share / density);
-    const P20  = Cv_check > 0 ? (AE17 / Cv_check) / AE15 : 0;
-    const HPi_g = Math.tan(angRepos * Math.PI / 180) * P20 * density * Dg * L_hp * Pg * rpm / 12 / 12 / 33000;
-    return { rpm, HPf: HPf_g, HPm: HPm_g, HPi: HPi_g, Fd: Fd_g };
+    const HPf_g = L_hp * rpm * Fd_g * Fb / 1_000_000;         // CEMA HPf per screw
+    const HPm_g = (flow_share / density / Xg) * density * L_hp * Fm / 1_000_000;  // CEMA HPm per screw
+    return { rpm, HPf: HPf_g, HPm: HPm_g, HPi: 0, Fd: Fd_g };
   }
 
   const d = PIPE_OD[NPS] ?? 0;  // group A pipe OD for display
@@ -556,10 +553,10 @@ function calculate() {
       Fd    = gA.Fd;
       grpB_result = gB;
 
-      const HP_sum = HPf + HPm + HPi;
+      const HP_sum = HPf + HPm;  // HPi=0 for horizontal LB screws
       const Fo_raw = HP_sum > 0 ? 2.033 - 1.45 * Math.log10(HP_sum) : 2.033;
       Fo = Math.max(1.0, Fo_raw);
-      hp_per_screw = (HPf + HPm * Fi + HPi) * Fo / e * 100 / X_total;
+      hp_per_screw = (HPf + HPm * Fi) * Fo / e * 100;  // HPf/HPm already per-screw
       hp_total     = hp_per_screw * X_total;
       hp_selected  = STD_HP.find(h => h >= hp_per_screw) ?? STD_HP[STD_HP.length-1];
       window._lastHopperHP = hp_per_screw;
@@ -612,6 +609,7 @@ function calculate() {
   <hr style="border:none;border-top:1px solid #d0d4dc;margin:6px 0">
   ${checkRow('Side Slope &gt; 60°', '', fmt(slope,1)+'°', slopeOK)}
   ${volOK !== null ? checkRow('Volume ≥ Required', fmt(reqVol,0)+' yd³ req.', fmt(v_usable_yds,1)+' yd³', volOK) : resultRow('Volume Check', '—', '', '')}
+  ${geomWarn ? `<div class="note" style="background:#fff0f0;border-color:#e57373;color:#c00;margin-top:4px">⚠ ${geomWarn}</div>` : ''}
   </div>
 
   <div class="result-box">
